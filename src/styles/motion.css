@@ -7,4 +7,21 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+
+  .area-card[data-enhanced] .area-card__faces,
+  .area-card[data-enhanced] .card-front,
+  .area-card[data-enhanced] .card-back {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .area-card[data-enhanced] .card-front,
+  .area-card[data-enhanced].is-flipped .card-back {
+    opacity: 1;
+  }
+
+  .area-card[data-enhanced] .card-back,
+  .area-card[data-enhanced].is-flipped .card-front {
+    opacity: 0;
+  }
 }

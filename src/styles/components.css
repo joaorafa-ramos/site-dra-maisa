@@ -451,3 +451,126 @@
   border-radius: 50%;
   background: var(--color-peach);
 }
+
+.areas {
+  background: var(--color-pale-blue);
+}
+
+.areas__intro {
+  max-width: 800px;
+}
+
+.areas__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 48px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.area-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid rgb(48 86 106 / 0.12);
+  border-radius: var(--radius-card);
+  background: #fff;
+  perspective: 1200px;
+}
+
+.area-card__faces {
+  flex: 1;
+}
+
+.card-front,
+.card-back {
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: #fff;
+}
+
+.card-back {
+  background: #f0e1d6;
+}
+
+.area-card p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.area-card .area-card__category {
+  margin-bottom: 24px;
+  color: var(--color-navy);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+
+.area-card h3 {
+  margin: 0 0 20px;
+  color: var(--color-navy);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.area-card[data-enhanced] .area-card__faces {
+  display: grid;
+  min-height: 340px;
+  transform-style: preserve-3d;
+  transition: transform 560ms var(--ease-calm);
+}
+
+.area-card[data-enhanced] .card-front,
+.area-card[data-enhanced] .card-back {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+}
+
+.area-card[data-enhanced] .card-back {
+  transform: rotateY(180deg);
+}
+
+.area-card[data-enhanced].is-flipped .area-card__faces {
+  transform: rotateY(180deg);
+}
+
+.card-toggle {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 16px 28px;
+  border: 0;
+  border-top: 1px solid rgb(48 86 106 / 0.12);
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  background: #fff;
+  color: var(--color-navy);
+  font: 600 14px / 1.5 var(--font-body);
+  cursor: pointer;
+}
+
+.card-toggle[hidden],
+.card-toggle__close,
+.is-flipped .card-toggle__open {
+  display: none;
+}
+
+.is-flipped .card-toggle__close {
+  display: inline;
+}
+
+.areas__action {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.areas__action .button {
+  min-height: 56px;
+  padding-inline: 32px;
+}

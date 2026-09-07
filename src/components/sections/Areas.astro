@@ -1,0 +1,50 @@
+---
+import Button from '../ui/Button.astro';
+import { getWhatsAppUrl } from '../../config/site';
+import { areas, content } from '../../data/content';
+
+const whatsappUrl = getWhatsAppUrl();
+---
+
+<section class="section areas" id="areas" aria-labelledby="areas-title">
+  <div class="container">
+    <div class="areas__intro">
+      <p class="section-eyebrow">{content.areas.eyebrow}</p>
+      <h2 class="section-heading" id="areas-title">{content.areas.title}</h2>
+      <p class="section-description">{content.areas.description}</p>
+    </div>
+    <ul class="areas__grid" role="list">
+      {areas.map(area => (
+        <li class="area-card" data-flip-card data-area={area.title}>
+          <div class="area-card__faces">
+            <div class="card-front">
+              <p class="area-card__category">{area.category}</p>
+              <h3>{area.title}</h3>
+              <p>{area.front}</p>
+            </div>
+            <div class="card-back" id={`area-${area.slug}-details`}>
+              <p class="area-card__category">NA AVALIAÇÃO</p>
+              <h3>{area.title}</h3>
+              <p>{area.back}</p>
+            </div>
+          </div>
+          <button
+            class="card-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls={`area-${area.slug}-details`}
+            aria-label={`Saiba mais sobre ${area.title}`}
+            hidden
+          >
+            <span class="card-toggle__open">Saiba mais</span>
+            <span class="card-toggle__close">Voltar</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+    <div class="areas__action">
+      <Button href={whatsappUrl} label={content.areas.cta} external={whatsappUrl.startsWith('https://')} />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,10 @@
+---
+interface Props {
+  as?: 'h2' | 'h3';
+  class?: string;
+}
+
+const { as: Tag = 'h2', class: className } = Astro.props as Props;
+---
+
+<Tag class:list={['section-heading', className]}><slot /></Tag>

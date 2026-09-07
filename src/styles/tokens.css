@@ -1,0 +1,17 @@
+:root {
+  --color-cream: #f7f2ee;
+  --color-pale-blue: #e3f0f2;
+  --color-navy: #30566a;
+  --color-graphite: #4a4541;
+  --color-olive: #8d805f;
+  --color-peach: #d7a98d;
+  --color-button-text: #453f3b;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Manrope', Arial, sans-serif;
+  --container: 1120px;
+  --radius-card: 24px;
+  --radius-button: 999px;
+  --shadow-soft: 0 16px 40px rgb(74 69 65 / 0.10);
+  --section-space: clamp(96px, 9vw, 144px);
+  --ease-calm: cubic-bezier(.2, .7, .2, 1);
+}

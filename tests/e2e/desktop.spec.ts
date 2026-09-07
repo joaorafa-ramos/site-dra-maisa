@@ -15,7 +15,7 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
 test('uses the Maisa type scale and accessible desktop CTA size', async ({ page }) => {
   await page.goto('/');
 
-  const heading = page.locator('.section-heading');
+  const heading = page.locator('.section-heading').first();
   await expect(heading).toBeVisible();
   await expect(heading).toHaveCSS('font-family', /Newsreader/);
   await expect(page.locator('body')).toHaveCSS('font-family', /Manrope/);
@@ -102,3 +102,61 @@ test('hero message and CTA remain available when the photograph cannot load', as
   await expect(page.getByRole('heading', { level: 1, name: 'Cada pequena voz merece ser ouvida.' })).toBeVisible();
   await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });
 });
+
+for (const width of [1024, 1280, 1440, 1920]) {
+  test(`signals and introduction preserve readable desktop geometry at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    const signals = page.locator('section.signals');
+    const about = page.locator('section.about#sobre');
+    await expect(signals).toBeVisible();
+    await expect(about).toBeVisible();
+    await expect(page.locator('#sobre')).toHaveCount(1);
+
+    const cards = signals.locator('.signal-card');
+    await expect(cards).toHaveCount(6);
+    const boxes = await cards.evaluateAll(elements => elements.map(element => {
+      const box = element.getBoundingClientRect();
+      return { x: box.x, y: box.y, width: box.width, bottom: box.bottom };
+    }));
+    for (let column = 0; column < 3; column++) {
+      expect(Math.abs(boxes[column]!.y - boxes[0]!.y)).toBeLessThan(1);
+      expect(Math.abs(boxes[column + 3]!.y - boxes[3]!.y)).toBeLessThan(1);
+      expect(Math.abs(boxes[column]!.x - boxes[column + 3]!.x)).toBeLessThan(1);
+      expect(Math.abs(boxes[column]!.width - boxes[0]!.width)).toBeLessThan(1);
+      if (column > 0) expect(boxes[column]!.x).toBeGreaterThan(boxes[column - 1]!.x + boxes[column - 1]!.width);
+    }
+    expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
+
+    for (const section of [signals, about]) {
+      const portrait = section.locator('.picture-frame img');
+      await portrait.scrollIntoViewIfNeeded();
+      await expect(portrait).toBeVisible();
+      await expect(portrait).toHaveCSS('object-fit', 'cover');
+      await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+      const bounds = (await portrait.boundingBox())!;
+      expect(bounds.width / bounds.height).toBeCloseTo(4 / 5, 2);
+      const cta = section.getByRole('link');
+      await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+    }
+
+    const textBlocks = page.locator('.signals h2, .signals h3, .signal-card p, .about h2');
+    for (const block of await textBlocks.all()) {
+      await expect(block).toBeVisible();
+      const geometry = await block.evaluate(element => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const text = range.getBoundingClientRect();
+        const box = element.getBoundingClientRect();
+        return {
+          textFits: text.left >= box.left - 1 && text.right <= box.right + 1 && text.bottom <= box.bottom + 2,
+          widthFits: element.scrollWidth <= element.clientWidth + 1,
+          heightFits: element.scrollHeight <= element.clientHeight + 1,
+        };
+      });
+      expect(geometry).toEqual({ textFits: true, widthFits: true, heightFits: true });
+    }
+    const pageWidth = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
+    expect(pageWidth.content).toBe(pageWidth.viewport);
+  });
+}

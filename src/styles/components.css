@@ -186,3 +186,128 @@
 .hero :focus-visible {
   outline-color: var(--color-cream);
 }
+
+.section-eyebrow {
+  margin: 0 0 20px;
+  color: var(--color-navy);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+.section-description {
+  margin: 28px 0;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.signals__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+  align-items: center;
+  gap: 64px;
+}
+
+.signals__copy,
+.about__copy {
+  min-width: 0;
+}
+
+.signals__reassurance {
+  margin: 0 0 24px;
+  padding: 20px 24px;
+  border: 1px solid rgb(48 86 106 / 0.12);
+  border-radius: var(--radius-card);
+  background: var(--color-pale-blue);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.signals__portrait,
+.about__portrait {
+  width: 100%;
+  box-shadow: var(--shadow-soft);
+}
+
+.signals__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 56px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signal-card {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid rgb(48 86 106 / 0.08);
+  border-radius: var(--radius-card);
+  background: #fff;
+}
+
+.signal-card__marker {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: var(--color-peach);
+}
+
+.signal-card h3 {
+  margin: 0 0 12px;
+  color: var(--color-navy);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.signal-card p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.about {
+  background: rgb(227 240 242 / 0.35);
+}
+
+.about__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
+  align-items: center;
+  gap: 64px;
+}
+
+.about .section-heading {
+  font-size: clamp(40px, 3.6vw, 52px);
+}
+
+.about__description {
+  margin: 28px 0 32px;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.about__description p {
+  margin: 0;
+}
+
+.about__description p + p {
+  margin-top: 20px;
+}
+
+.about__credential {
+  margin: 0 0 24px;
+  color: var(--color-navy);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.signals .button,
+.about .button {
+  min-height: 56px;
+  padding-inline: 32px;
+}

@@ -1,0 +1,39 @@
+---
+import Button from '../ui/Button.astro';
+import PictureFrame from '../ui/PictureFrame.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import { getWhatsAppUrl } from '../../config/site';
+import { content, signals } from '../../data/content';
+
+const whatsappUrl = getWhatsAppUrl();
+---
+
+<section class="section signals" id="sinais">
+  <div class="container">
+    <div class="signals__intro">
+      <div class="signals__copy">
+        <p class="section-eyebrow">{content.signals.eyebrow}</p>
+        <SectionHeading>{content.signals.title}</SectionHeading>
+        <p class="section-description">{content.signals.description}</p>
+        <p class="signals__reassurance">{content.signals.reassurance}</p>
+        <Button href={whatsappUrl} label={content.signals.cta} external={whatsappUrl.startsWith('https://')} />
+      </div>
+      <PictureFrame
+        class="signals__portrait"
+        src="/images/sinais-maisa.webp"
+        alt="Maisa Palma segurando um brinquedo de dinossauro no consultório."
+        width={800}
+        height={1000}
+      />
+    </div>
+    <ul class="signals__grid" role="list">
+      {signals.map(signal => (
+        <li class="signal-card">
+          <span class="signal-card__marker" aria-hidden="true"></span>
+          <h3>{signal.title}</h3>
+          <p>{signal.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

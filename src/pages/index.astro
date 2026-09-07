@@ -2,14 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Hero from '../components/sections/Hero.astro';
+import Signals from '../components/sections/Signals.astro';
+import About from '../components/sections/About.astro';
 ---
 
 <BaseLayout>
   <Header />
   <main id="conteudo">
     <Hero />
+    <Signals />
+    <About />
     <!-- These empty navigation targets are replaced by the sections in later tasks. -->
-    <section id="sobre"></section>
     <section id="avaliacao"></section>
     <section id="areas"></section>
     <section id="duvidas"></section>

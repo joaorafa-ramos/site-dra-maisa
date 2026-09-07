@@ -1,0 +1,32 @@
+---
+import Button from '../ui/Button.astro';
+import PictureFrame from '../ui/PictureFrame.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import { getWhatsAppUrl, siteConfig } from '../../config/site';
+import { content } from '../../data/content';
+
+const whatsappUrl = getWhatsAppUrl();
+const credential = siteConfig.crfa?.trim();
+---
+
+<section class="section about" id="sobre">
+  <div class="container about__layout">
+    <PictureFrame
+      class="about__portrait"
+      src="/images/apresentacao-maisa.webp"
+      alt="Retrato de Maisa Palma, sorrindo e com a mão apoiada sob o queixo."
+      width={960}
+      height={1200}
+    />
+    <div class="about__copy">
+      <p class="section-eyebrow">{content.about.eyebrow}</p>
+      <SectionHeading>{content.about.title}</SectionHeading>
+      <div class="about__description">
+        <p>{content.about.introduction}</p>
+        <p>{content.about.description}</p>
+      </div>
+      {credential && <p class="about__credential">CRFa {credential}</p>}
+      <Button href={whatsappUrl} label={content.about.cta} external={whatsappUrl.startsWith('https://')} />
+    </div>
+  </div>
+</section>

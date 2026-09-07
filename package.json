@@ -1,0 +1,24 @@
+{
+  "name": "site-dra-maisa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@fontsource/manrope": "^5.2.5",
+    "@fontsource/newsreader": "^5.2.5",
+    "astro": "^5.13.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@playwright/test": "^1.55.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

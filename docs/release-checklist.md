@@ -7,4 +7,5 @@
 - [ ] Confirmar horários de atendimento antes de exibi-los.
 - [ ] Confirmar CNPJ, se aplicável, antes de exibi-lo.
 - [ ] Confirmar as áreas de atuação apresentadas, especialmente fluência, leitura e escrita, e comunicação na deficiência auditiva.
+- [ ] Obter aprovação clínica/editorial para as seis respostas do FAQ antes da publicação; as cinco respostas montadas a partir de copy aprovada (além da única resposta literal do Figma) dependem de validação profissional explícita.
 - [ ] Confirmar que não há promessa de serviço, disponibilidade, valor, convênio ou duração de atendimento não documentada.

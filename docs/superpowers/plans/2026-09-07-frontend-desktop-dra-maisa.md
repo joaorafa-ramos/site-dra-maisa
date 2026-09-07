@@ -498,15 +498,19 @@ Use the six revised questions and answers from the Figma page. Only the first it
 
 Modern browsers use the shared `name="faq"`. JavaScript listens to `toggle` and closes sibling details for browsers without details grouping.
 
-- [ ] **Step 3: Match the Figma desktop composition**
+- [ ] **Step 3: Add the approved FAQ answer reveal**
+
+Exception to the global motion constraint: only an FAQ answer that has just opened may reveal its existing text character-by-character, from `opacity: 0; filter: blur(10px)` to `opacity: 1; filter: blur(0)`, with `300ms` per character and `15ms` stagger. Implement it with native CSS and progressive JavaScript; do not add React, Framer Motion, Tailwind, or a new dependency. The original response text must remain in the server HTML and readable with JavaScript disabled. Under `prefers-reduced-motion: reduce`, show the complete answer immediately with no blur, delay, or transition. Preserve the existing Maisa palette; this change imports animation behavior only, not the JSON component's copy or styling.
+
+- [ ] **Step 4: Match the Figma desktop composition**
 
 Place heading and closing CTA in the left column; accordion in the wider right column. Keep plus/minus as visual state indicators with `aria-hidden="true"`; the summary text is the accessible name.
 
-- [ ] **Step 4: Test the full content and keyboard flow**
+- [ ] **Step 5: Test the full content, keyboard flow, and reveal**
 
-Assert six summaries, six answers in the DOM, at most one open item, Space/Enter activation and a visible focus ring.
+Assert six summaries, six answers in the DOM, at most one open item, Space/Enter activation and a visible focus ring. Verify that opening an item applies the character reveal without changing its text; emulate reduced motion and verify the answer is immediately visible with no blur or transition.
 
-- [ ] **Step 5: Run and commit**
+- [ ] **Step 6: Run and commit**
 
 Run: `npm run check && npm run test:e2e`
 
@@ -750,4 +754,3 @@ This order is binding for the desktop implementation. It reflects the revised Fi
 - Unknown facts: no phone, address, CRFa, CNPJ or schedule was invented. Conditional rendering and release gates are specified.
 - Interaction consistency: signal/benefit cards remain readable; only area cards flip; FAQ uses native details; all effects have reduced-motion behavior.
 - Placeholder scan: remaining missing business facts are modeled as optional production inputs with defined fallback behavior, not visitor-facing placeholder strings.
-

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#F7F2EE">
+  <title>Prévia de movimento — Dra. Maisa Palma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="motion.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <aside class="review-banner" aria-label="Informações da demonstração">
+    <span><strong>Prévia para revisão</strong> · Avaliação, cards e microinterações. Os botões de contato são simulados.</span>
+    <button type="button" class="motion-toggle" aria-pressed="false" hidden>Reduzir movimento</button>
+  </aside>
+  <header class="preview-header container">
+    <a class="wordmark" href="#conteudo" aria-label="Maisa Palma — início da prévia">Maisa Palma<span>Fonoaudiologia infantil</span></a>
+    <nav aria-label="Navegação da prévia"><a href="#avaliacao">Avaliação</a><a href="#areas">Áreas de atuação</a></nav>
+  </header>
+  <main id="conteudo">
+    <section class="section evaluation container" id="avaliacao" aria-labelledby="evaluation-title">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Como funciona a avaliação</p>
+        <h1 id="evaluation-title">Um primeiro passo leve, claro e pensado para o seu filho.</h1>
+        <p class="intro">A avaliação fonoaudiológica acontece com escuta, brincadeiras e respeito ao ritmo da criança — para que ela se sinta segura e você saiba o que esperar.</p>
+      </div>
+      <ol class="steps">
+        <li class="step" data-reveal>
+          <span class="step-number" aria-hidden="true">1</span>
+          <h2>Conversa com a família</h2>
+          <p>Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.</p>
+        </li>
+        <li class="step" data-reveal>
+          <span class="step-number" aria-hidden="true">2</span>
+          <h2>Avaliação lúdica</h2>
+          <p>Por meio de recursos e protocolos adequados à idade e à queixa, a Dra. Maisa observa como a criança compreende, interage e se comunica.</p>
+        </li>
+        <li class="step" data-reveal>
+          <span class="step-number" aria-hidden="true">3</span>
+          <h2>Devolutiva e próximos passos</h2>
+          <p>Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.</p>
+        </li>
+      </ol>
+      <div class="evaluation-bottom" data-reveal>
+        <aside class="reassurance"><p class="eyebrow">Um momento sem pressa</p><p>A criança não precisa “acertar” nada. A avaliação é um momento de observação, vínculo e compreensão.</p></aside>
+        <div class="cta-wrap"><button class="button" type="button" data-preview-contact>Quero agendar uma avaliação<span aria-hidden="true">↗</span></button><p class="microcopy">Converse diretamente com a Dra. Maisa pelo WhatsApp.</p></div>
+      </div>
+    </section>
+
+    <section class="section areas" id="areas" aria-labelledby="areas-title">
+      <div class="container">
+        <div class="section-heading" data-reveal>
+          <p class="eyebrow">Como a fonoaudiologia pode ajudar</p>
+          <h2 id="areas-title">Diferentes dificuldades, um cuidado atento para cada criança.</h2>
+          <p class="intro">A Dra. Maisa atua em diferentes aspectos da comunicação e do desenvolvimento infantil. Conheça as principais situações que podem ser avaliadas e acompanhadas.</p>
+        </div>
+        <p class="interaction-hint" hidden>Toque em “Conhecer o cuidado” para virar o card e ler mais.</p>
+        <div class="area-grid">
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="linguagem-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M9 10h24a6 6 0 0 1 6 6v15a6 6 0 0 1-6 6H21l-10 6v-6H9a6 6 0 0 1-6-6V16a6 6 0 0 1 6-6Z"/><path d="M13 20h16M13 27h10"/></svg>
+                <h3>Linguagem</h3><p>Desenvolvimento da fala e da linguagem</p>
+              </div>
+              <div class="card-face card-back" id="linguagem-back"><p class="card-label">Linguagem</p><p>Para crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="linguagem-back" aria-expanded="false" data-area="Linguagem" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="fala-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M8 19v10m8-17v24m8-29v34m8-29v24m8-17v10"/></svg>
+                <h3>Fala</h3><p>Trocas e dificuldades nos sons da fala</p>
+              </div>
+              <div class="card-face card-back" id="fala-back"><p class="card-label">Fala</p><p>Avaliação e terapia para omissões, substituições ou produção imprecisa de sons que dificultam entender a fala.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="fala-back" aria-expanded="false" data-area="Fala" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="fluencia-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M4 25c5 0 5-11 10-11s5 22 10 22 5-22 10-22 5 11 10 11"/></svg>
+                <h3>Fluência</h3><p>Gagueira e taquifemia</p>
+              </div>
+              <div class="card-face card-back" id="fluencia-back"><p class="card-label">Fluência</p><p>Cuidado com repetições, bloqueios ou fala acelerada, favorecendo uma comunicação mais confortável e segura.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="fluencia-back" aria-expanded="false" data-area="Fluência" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="aprendizagem-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 13c-6-5-12-5-19-3v28c7-2 13-2 19 3m0-28c6-5 12-5 19-3v28c-7-2-13-2-19 3V13Z"/></svg>
+                <h3>Aprendizagem</h3><p>Dificuldades de leitura e escrita</p>
+              </div>
+              <div class="card-face card-back" id="aprendizagem-back"><p class="card-label">Aprendizagem</p><p>Suporte para dificuldades na alfabetização, leitura, compreensão e escrita, incluindo sinais relacionados à dislexia.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="aprendizagem-back" aria-expanded="false" data-area="Aprendizagem" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="orofaciais-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M8 25c0-11 5-18 16-18s16 7 16 18c0 9-7 17-16 17S8 34 8 25Z"/><path d="M16 19h1m14 0h1M17 29c4 5 10 5 14 0"/></svg>
+                <h3>Funções orofaciais</h3><p>Motricidade orofacial</p>
+              </div>
+              <div class="card-face card-back" id="orofaciais-back"><p class="card-label">Funções orofaciais</p><p>Avaliação das estruturas e funções de lábios, língua e bochechas, além de mastigação, deglutição e respiração.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="orofaciais-back" aria-expanded="false" data-area="Funções orofaciais" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+          <article class="area-card" data-flip-card data-reveal>
+            <div class="card-turn">
+              <div class="card-face card-front" id="audicao-front">
+                <svg class="area-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M13 20C13 2 39 2 39 20c0 9-9 10-11 17-2 7-12 7-14 0m7-16c-2-8 9-10 10-2 1 5-6 7-8 12"/></svg>
+                <h3>Audição</h3><p>Comunicação na deficiência auditiva</p>
+              </div>
+              <div class="card-face card-back" id="audicao-back"><p class="card-label">Audição</p><p>Estimulação da fala e da linguagem para crianças com perda auditiva ou usuárias de dispositivos, como implante auditivo.</p></div>
+            </div>
+            <button class="card-toggle" type="button" aria-controls="audicao-back" aria-expanded="false" data-area="Audição" hidden><span>Conhecer o cuidado</span><span class="turn-symbol" aria-hidden="true">↻</span></button>
+          </article>
+        </div>
+        <div class="areas-cta" data-reveal><button class="button" type="button" data-preview-contact>Conversar com a Dra. Maisa<span aria-hidden="true">↗</span></button><p class="microcopy">Conte o que você observa no seu filho e tire suas dúvidas pelo WhatsApp.</p></div>
+      </div>
+    </section>
+
+    <section class="section faq container" aria-labelledby="faq-title">
+      <div data-reveal><p class="eyebrow">Dúvidas frequentes</p><h2 id="faq-title">É natural ter dúvidas.</h2></div>
+      <div class="faq-list" data-reveal>
+        <details name="faq"><summary>Quando devo procurar uma fonoaudióloga para o meu filho?<span aria-hidden="true"></span></summary><div class="faq-answer"><p>Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.</p></div></details>
+        <details name="faq"><summary>Como funciona a avaliação fonoaudiológica infantil?<span aria-hidden="true"></span></summary><div class="faq-answer"><p>A avaliação começa com uma conversa com a família. Com recursos e protocolos adequados à idade e à queixa, a Dra. Maisa observa como a criança compreende, interage e se comunica. Depois, explica o que foi observado e orienta os próximos passos.</p></div></details>
+      </div>
+    </section>
+  </main>
+  <footer class="demo-footer container"><p>Prévia de interação · Não é a versão final do site.</p><p>Newsreader + Manrope · Paleta aprovada · Sem envio de mensagens</p></footer>
+  <div class="preview-notice" role="status" aria-live="polite" hidden><p>Este botão é uma demonstração. Na versão final, abrirá o WhatsApp da Dra. Maisa após a confirmação do contato.</p><button type="button" aria-label="Fechar aviso da demonstração">Fechar</button></div>
+</body>
+</html>

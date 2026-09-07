@@ -1,0 +1,773 @@
+{
+  "samples": [
+    {
+      "id": "5:12",
+      "text": "Agendar avaliação pelo WhatsApp",
+      "fontSize": 15,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.11800000071525574,
+            "g": 0.24699999392032623,
+            "b": 0.3140000104904175
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "5:9",
+        "name": "CTA / WhatsApp / Desktop",
+        "fills": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.8429999947547913,
+              "g": 0.6629999876022339,
+              "b": 0.5529999732971191
+            },
+            "boundVariables": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "30:5",
+      "text": "O QUE VOCÊ NOTA EM CASA?",
+      "fontSize": 13,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.8429999947547913,
+            "g": 0.6629999876022339,
+            "b": 0.5529999732971191
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "30:4",
+        "name": "Content / Intro and reassurance",
+        "fills": []
+      }
+    },
+    {
+      "id": "30:12",
+      "text": "Conversar sobre meu filho",
+      "fontSize": 15,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.18799999356269836,
+            "g": 0.3370000123977661,
+            "b": 0.41600000858306885
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "30:11",
+        "name": "CTA / Conversar sobre meu filho",
+        "fills": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.8429999947547913,
+              "g": 0.6629999876022339,
+              "b": 0.5529999732971191
+            },
+            "boundVariables": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "61:7",
+      "text": "Fonoaudiologia infantil • Atendimento individualizado • CRFa da profissional",
+      "fontSize": 13,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.18799999356269836,
+            "g": 0.3370000123977661,
+            "b": 0.41600000858306885
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "61:6",
+        "name": "Credentials / Fonoaudiologia infantil",
+        "fills": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.9100000262260437,
+              "g": 0.9399999976158142,
+              "b": 0.949999988079071
+            },
+            "boundVariables": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "129:13",
+      "text": "Quando devo procurar uma fonoaudióloga para o meu filho?",
+      "fontSize": 17,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.18799999356269836,
+            "g": 0.3370000123977661,
+            "b": 0.41600000858306885
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "129:12",
+        "name": "FAQ / Item 01 / Aberto",
+        "fills": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.8899999856948853,
+              "g": 0.9399999976158142,
+              "b": 0.949999988079071
+            },
+            "boundVariables": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "130:9",
+      "text": "Quando devo procurar uma fonoaudióloga para o meu filho?",
+      "fontSize": 15,
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 1,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 0.18799999356269836,
+            "g": 0.3370000123977661,
+            "b": 0.41600000858306885
+          },
+          "boundVariables": {}
+        }
+      ],
+      "parent": {
+        "id": "130:8",
+        "name": "FAQ / Item 01 / Aberto / Mobile",
+        "fills": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.8899999856948853,
+              "g": 0.9399999976158142,
+              "b": 0.949999988079071
+            },
+            "boundVariables": {}
+          }
+        ]
+      }
+    }
+  ],
+  "summary": [
+    {
+      "id": "2:2",
+      "name": "Desktop / Hero / 1440",
+      "hidden": [],
+      "texts": 13,
+      "smallBody": [
+        {
+          "id": "5:13",
+          "text": "Maisa Palma  •  PUC-Campinas  •  Motricidade Orofacial",
+          "size": 11
+        }
+      ]
+    },
+    {
+      "id": "6:2",
+      "name": "Mobile / Hero / 390",
+      "hidden": [],
+      "texts": 9,
+      "smallBody": [
+        {
+          "id": "8:2",
+          "text": "Acolhimento e cuidado especializado para ajudar seu filho a se comunicar com mais segurança.",
+          "size": 15
+        }
+      ]
+    },
+    {
+      "id": "30:2",
+      "name": "Desktop / Seção 02 / Sinais / 65-35 / 1440",
+      "hidden": [],
+      "texts": 31,
+      "smallBody": [
+        {
+          "id": "30:10",
+          "text": "Perceber um desses sinais não significa necessariamente que exista um problema. A avaliação ajuda a compreender o momento da criança.",
+          "size": 15
+        },
+        {
+          "id": "30:23",
+          "text": "Usa poucas palavras ou encontra dificuldade para formar frases.",
+          "size": 14
+        },
+        {
+          "id": "30:30",
+          "text": "Algumas palavras ficam difíceis de entender no dia a dia.",
+          "size": 14
+        },
+        {
+          "id": "30:37",
+          "text": "Pessoas próximas pedem para repetir com frequência.",
+          "size": 14
+        },
+        {
+          "id": "30:44",
+          "text": "Chora, se irrita ou desiste quando não consegue se expressar.",
+          "size": 14
+        },
+        {
+          "id": "30:51",
+          "text": "Parece compreender, porém encontra dificuldade para organizar a fala.",
+          "size": 14
+        },
+        {
+          "id": "30:58",
+          "text": "Prefere apontar, gesticular ou se afastar das interações.",
+          "size": 14
+        }
+      ]
+    },
+    {
+      "id": "32:2",
+      "name": "Mobile / Seção 02 / Sinais / Foto + Cards / 390",
+      "hidden": [],
+      "texts": 31,
+      "smallBody": [
+        {
+          "id": "32:53",
+          "text": "Perceber um desses sinais não significa necessariamente que exista um problema. A avaliação ajuda a compreender o momento da criança.",
+          "size": 14
+        },
+        {
+          "id": "32:15",
+          "text": "Usa poucas palavras ou encontra dificuldade para formar frases.",
+          "size": 14
+        },
+        {
+          "id": "32:22",
+          "text": "Algumas palavras ficam difíceis de entender no dia a dia.",
+          "size": 14
+        },
+        {
+          "id": "32:29",
+          "text": "Pessoas próximas pedem para repetir com frequência.",
+          "size": 14
+        },
+        {
+          "id": "32:36",
+          "text": "Chora, se irrita ou desiste quando não consegue se expressar.",
+          "size": 14
+        },
+        {
+          "id": "32:43",
+          "text": "Parece compreender, porém encontra dificuldade para organizar a fala.",
+          "size": 14
+        },
+        {
+          "id": "32:50",
+          "text": "Prefere apontar, gesticular ou se afastar das interações.",
+          "size": 14
+        }
+      ]
+    },
+    {
+      "id": "60:3",
+      "name": "Desktop / Seção 03 / Apresentação / 1440",
+      "hidden": [],
+      "texts": 6,
+      "smallBody": [
+        {
+          "id": "61:7",
+          "text": "Fonoaudiologia infantil • Atendimento individualizado • CRFa da profissional",
+          "size": 13
+        }
+      ]
+    },
+    {
+      "id": "62:2",
+      "name": "Mobile / Seção 03 / Apresentação / 390",
+      "hidden": [],
+      "texts": 6,
+      "smallBody": [
+        {
+          "id": "63:4",
+          "text": "Sou Maisa Palma, fonoaudióloga especializada no público infantil. Sei que, quando a fala não acontece como esperado, surgem dúvidas, comparações e muita preocupação.",
+          "size": 15
+        },
+        {
+          "id": "63:5",
+          "text": "Por isso, cada acompanhamento começa com uma avaliação fonoaudiológica: Uma escuta atenta à família e um olhar individual para a criança. Com brincadeiras, vínculo e objetivos terapêuticos claros, construímos um caminho para que ela possa se comunicar com mais segurança.",
+          "size": 15
+        },
+        {
+          "id": "63:7",
+          "text": "Fonoaudiologia infantil • Atendimento individualizado • CRFa da profissional",
+          "size": 11
+        }
+      ]
+    },
+    {
+      "id": "72:2",
+      "name": "Desktop / Seção 04 / Avaliação inicial / 1440",
+      "hidden": [],
+      "texts": 19,
+      "smallBody": [
+        {
+          "id": "73:25",
+          "text": "Converse diretamente com a Dra. Maisa pelo WhatsApp.",
+          "size": 12
+        }
+      ]
+    },
+    {
+      "id": "74:2",
+      "name": "Mobile / Seção 04 / Avaliação inicial / 390",
+      "hidden": [],
+      "texts": 19,
+      "smallBody": [
+        {
+          "id": "74:6",
+          "text": "A avaliação fonoaudiológica acontece com escuta, brincadeiras e respeito ao ritmo da criança — para que ela se sinta segura e você saiba o que esperar.",
+          "size": 15
+        },
+        {
+          "id": "75:7",
+          "text": "Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.",
+          "size": 14
+        },
+        {
+          "id": "75:13",
+          "text": "Por meio de recursos e protocolos adequados à idade e à queixa, a Dra. Maisa observa como a criança compreende, interage e se comunica.",
+          "size": 14
+        },
+        {
+          "id": "75:19",
+          "text": "Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.",
+          "size": 14
+        },
+        {
+          "id": "75:22",
+          "text": "A criança não precisa “acertar” nada. A avaliação é um momento de observação, vínculo e compreensão.",
+          "size": 14
+        },
+        {
+          "id": "75:25",
+          "text": "Converse diretamente com a Dra. Maisa pelo WhatsApp.",
+          "size": 11
+        }
+      ]
+    },
+    {
+      "id": "83:2",
+      "name": "Desktop / Seção 05 / Benefícios e diferenciais / 1440",
+      "hidden": [],
+      "texts": 13,
+      "smallBody": [
+        {
+          "id": "85:7",
+          "text": "Um olhar atento para compreender a criança além da queixa inicial.",
+          "size": 14
+        },
+        {
+          "id": "85:11",
+          "text": "Brincadeiras e recursos adequados à idade tornam a sessão mais natural.",
+          "size": 14
+        },
+        {
+          "id": "85:15",
+          "text": "Cada avanço é construído sem comparações e com objetivos possíveis.",
+          "size": 14
+        },
+        {
+          "id": "85:19",
+          "text": "Você entende o que está sendo trabalhado e como apoiar no dia a dia.",
+          "size": 14
+        },
+        {
+          "id": "85:23",
+          "text": "Conhecimento atualizado para unir cuidado, técnica e decisões responsáveis.",
+          "size": 14
+        }
+      ]
+    },
+    {
+      "id": "83:3",
+      "name": "Mobile / Seção 05 / Benefícios e diferenciais / 390",
+      "hidden": [],
+      "texts": 13,
+      "smallBody": [
+        {
+          "id": "86:16",
+          "text": "Um olhar atento para compreender a criança além da queixa inicial.",
+          "size": 13
+        },
+        {
+          "id": "86:20",
+          "text": "Brincadeiras e recursos adequados à idade tornam a sessão mais natural.",
+          "size": 13
+        },
+        {
+          "id": "86:24",
+          "text": "Cada avanço é construído sem comparações e com objetivos possíveis.",
+          "size": 13
+        },
+        {
+          "id": "86:28",
+          "text": "Você entende o que está sendo trabalhado e como apoiar no dia a dia.",
+          "size": 13
+        },
+        {
+          "id": "86:32",
+          "text": "Conhecimento atualizado para unir cuidado, técnica e decisões responsáveis.",
+          "size": 13
+        }
+      ]
+    },
+    {
+      "id": "83:4",
+      "name": "Desktop / Seção 06 / Áreas de atuação / 1440",
+      "hidden": [],
+      "texts": 23,
+      "smallBody": [
+        {
+          "id": "88:6",
+          "text": "Para crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.",
+          "size": 14
+        },
+        {
+          "id": "88:11",
+          "text": "Avaliação e terapia para omissões, substituições ou produção imprecisa de sons que dificultam entender a fala.",
+          "size": 14
+        },
+        {
+          "id": "88:16",
+          "text": "Cuidado com repetições, bloqueios ou fala acelerada, favorecendo uma comunicação mais confortável e segura.",
+          "size": 14
+        },
+        {
+          "id": "88:21",
+          "text": "Suporte para dificuldades na alfabetização, leitura, compreensão e escrita, incluindo sinais relacionados à dislexia.",
+          "size": 14
+        },
+        {
+          "id": "88:26",
+          "text": "Avaliação das estruturas e funções de lábios, língua e bochechas, além de mastigação, deglutição e respiração.",
+          "size": 14
+        },
+        {
+          "id": "88:31",
+          "text": "Estimulação da fala e da linguagem para crianças com perda auditiva ou usuárias de dispositivos, como implante auditivo.",
+          "size": 14
+        },
+        {
+          "id": "88:34",
+          "text": "Conte o que você observa no seu filho e tire suas dúvidas pelo WhatsApp.",
+          "size": 13
+        }
+      ]
+    },
+    {
+      "id": "83:5",
+      "name": "Mobile / Seção 06 / Áreas de atuação / 390",
+      "hidden": [],
+      "texts": 23,
+      "smallBody": [
+        {
+          "id": "89:6",
+          "text": "A Dra. Maisa atua em diferentes aspectos da comunicação e do desenvolvimento infantil. Conheça as principais situações que podem ser avaliadas e acompanhadas.",
+          "size": 15
+        },
+        {
+          "id": "89:18",
+          "text": "Para crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.",
+          "size": 13
+        },
+        {
+          "id": "89:23",
+          "text": "Avaliação e terapia para omissões, substituições ou produção imprecisa de sons que dificultam entender a fala.",
+          "size": 13
+        },
+        {
+          "id": "89:28",
+          "text": "Cuidado com repetições, bloqueios ou fala acelerada, favorecendo uma comunicação mais confortável e segura.",
+          "size": 13
+        },
+        {
+          "id": "89:33",
+          "text": "Suporte para dificuldades na alfabetização, leitura, compreensão e escrita, incluindo sinais relacionados à dislexia.",
+          "size": 13
+        },
+        {
+          "id": "89:38",
+          "text": "Avaliação das estruturas e funções de lábios, língua e bochechas, além de mastigação, deglutição e respiração.",
+          "size": 13
+        },
+        {
+          "id": "89:43",
+          "text": "Estimulação da fala e da linguagem para crianças com perda auditiva ou usuárias de dispositivos, como implante auditivo.",
+          "size": 13
+        },
+        {
+          "id": "89:46",
+          "text": "Conte o que você observa no seu filho e tire suas dúvidas pelo WhatsApp.",
+          "size": 12
+        }
+      ]
+    },
+    {
+      "id": "114:2",
+      "name": "Desktop / Seção 07 / Conversão final / 1440",
+      "hidden": [],
+      "texts": 6,
+      "smallBody": [
+        {
+          "id": "115:13",
+          "text": "Atendimento infantil em Itapeva–SP • Contato direto pelo WhatsApp",
+          "size": 12
+        }
+      ]
+    },
+    {
+      "id": "114:3",
+      "name": "Mobile / Seção 07 / Conversão final / 390",
+      "hidden": [],
+      "texts": 6,
+      "smallBody": [
+        {
+          "id": "121:7",
+          "text": "Conte à Dra. Maisa o que você tem observado. Pelo WhatsApp, você recebe uma orientação inicial e pode entender se é o momento de agendar uma avaliação fonoaudiológica.",
+          "size": 15
+        },
+        {
+          "id": "121:12",
+          "text": "Atendimento infantil em Itapeva–SP • Contato direto pelo WhatsApp",
+          "size": 11
+        }
+      ]
+    },
+    {
+      "id": "129:2",
+      "name": "Desktop / Seção 08 / FAQ / 1440",
+      "hidden": [],
+      "texts": 18,
+      "smallBody": [
+        {
+          "id": "129:15",
+          "text": "Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.",
+          "size": 15
+        }
+      ]
+    },
+    {
+      "id": "130:2",
+      "name": "Mobile / Seção 08 / FAQ / 390",
+      "hidden": [],
+      "texts": 19,
+      "smallBody": [
+        {
+          "id": "130:6",
+          "text": "Cada criança tem seu próprio ritmo. A avaliação fonoaudiológica ajuda a compreender o que está acontecendo e quais são os próximos passos.",
+          "size": 15
+        },
+        {
+          "id": "130:9",
+          "text": "Quando devo procurar uma fonoaudióloga para o meu filho?",
+          "size": 15
+        },
+        {
+          "id": "130:11",
+          "text": "Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.",
+          "size": 14
+        },
+        {
+          "id": "130:13",
+          "text": "Existe uma idade certa para fazer uma avaliação fonoaudiológica?",
+          "size": 15
+        },
+        {
+          "id": "130:16",
+          "text": "Como funciona a avaliação fonoaudiológica infantil?",
+          "size": 15
+        }
+      ]
+    },
+    {
+      "id": "134:2",
+      "name": "Desktop / Seção 09 / Contato / 1440",
+      "hidden": [],
+      "texts": 12,
+      "smallBody": [
+        {
+          "id": "134:20",
+          "text": "O primeiro contato é simples, acolhedor e sem compromisso.",
+          "size": 12
+        }
+      ]
+    },
+    {
+      "id": "135:2",
+      "name": "Mobile / Seção 09 / Contato / 390",
+      "hidden": [],
+      "texts": 11,
+      "smallBody": [
+        {
+          "id": "135:6",
+          "text": "Conte brevemente o que tem chamado sua atenção na comunicação do seu filho. A Dra. Maisa poderá orientar você sobre os próximos passos e sobre o agendamento da avaliação.",
+          "size": 15
+        },
+        {
+          "id": "135:19",
+          "text": "O primeiro contato é simples, acolhedor e sem compromisso.",
+          "size": 12
+        }
+      ]
+    },
+    {
+      "id": "136:2",
+      "name": "Desktop / Rodapé / 1440",
+      "hidden": [],
+      "texts": 7,
+      "smallBody": [
+        {
+          "id": "136:7",
+          "text": "Sobre a Dra. Maisa\nAvaliação fonoaudiológica\nÁreas de atuação\nDúvidas frequentes\nContato",
+          "size": 15
+        },
+        {
+          "id": "136:9",
+          "text": "WhatsApp\nInstagram @fonomaisapalma\nAtendimento em Itapeva–SP",
+          "size": 15
+        }
+      ]
+    },
+    {
+      "id": "137:2",
+      "name": "Mobile / Rodapé / 390",
+      "hidden": [],
+      "texts": 7,
+      "smallBody": [
+        {
+          "id": "137:9",
+          "text": "WhatsApp • @fonomaisapalma\nAtendimento em Itapeva–SP",
+          "size": 14
+        }
+      ]
+    }
+  ],
+  "conversionMobile": [
+    {
+      "id": "121:5",
+      "text": "VOCÊ NÃO PRECISA TER TODAS AS RESPOSTAS",
+      "bounds": {
+        "x": 1828,
+        "y": 10566,
+        "width": 334,
+        "height": 14
+      }
+    },
+    {
+      "id": "121:6",
+      "text": "Se algo na comunicação do seu filho preocupa você, o primeiro passo pode ser uma conversa.",
+      "bounds": {
+        "x": 1828,
+        "y": 10596,
+        "width": 334,
+        "height": 308
+      }
+    },
+    {
+      "id": "121:7",
+      "text": "Conte à Dra. Maisa o que você tem observado. Pelo WhatsApp, você recebe uma orientação inicial e pode entender se é o momento de agendar uma avaliação fonoaudiológica.",
+      "bounds": {
+        "x": 1828,
+        "y": 10920,
+        "width": 326,
+        "height": 96
+      }
+    },
+    {
+      "id": "121:9",
+      "text": "Conversar com a Dra. Maisa",
+      "bounds": {
+        "x": 1882.5,
+        "y": 11050,
+        "width": 193,
+        "height": 20
+      }
+    },
+    {
+      "id": "121:12",
+      "text": "Atendimento infantil em Itapeva–SP • Contato direto pelo WhatsApp",
+      "bounds": {
+        "x": 1828,
+        "y": 11104,
+        "width": 322,
+        "height": 34
+      }
+    },
+    {
+      "id": "121:13",
+      "text": "OUVIR\nCOMPREENDER\nEXPRESSAR",
+      "bounds": {
+        "x": 2004,
+        "y": 11095,
+        "width": 150,
+        "height": 57
+      }
+    }
+  ],
+  "faqAnswerCount": 1
+}

@@ -1,0 +1,33 @@
+---
+import Button from '../ui/Button.astro';
+import { getWhatsAppUrl } from '../../config/site';
+
+const whatsappUrl = getWhatsAppUrl();
+const navigation = [
+  { href: '#sobre', label: 'Sobre' },
+  { href: '#avaliacao', label: 'Avaliação' },
+  { href: '#areas', label: 'Áreas de atuação' },
+  { href: '#duvidas', label: 'Dúvidas' },
+];
+---
+
+<header class="site-header" data-scrolled="false">
+  <div class="container site-header__inner">
+    <a class="site-header__brand" href="#conteudo" aria-label="Maisa Palma — início">
+      <img src="/images/logo-maisa.png" alt="Maisa Palma — Fonoaudióloga" width="1707" height="819" />
+    </a>
+    <nav class="site-header__nav" aria-label="Navegação principal">
+      {navigation.map(({ href, label }) => <a href={href}>{label}</a>)}
+    </nav>
+    <Button href={whatsappUrl} label="Agendar avaliação" external={whatsappUrl.startsWith('https://')} />
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const updateHeader = () => {
+    if (header) header.dataset.scrolled = String(window.scrollY > 24);
+  };
+  updateHeader();
+  window.addEventListener('scroll', updateHeader, { passive: true });
+</script>

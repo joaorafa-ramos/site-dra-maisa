@@ -264,12 +264,20 @@ export const content = {
     eyebrow: 'FALE COM A DRA. MAISA',
     title: 'Vamos conversar sobre o que você tem observado?',
     description:
-      'Conte brevemente o que tem chamado sua atenção na comunicação do seu filho pelo WhatsApp.',
+      'Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.',
     cta: 'Conversar pelo WhatsApp',
   },
   footer: {
+    specialization: 'Fonoaudiologia infantil',
     navigationLabel: 'NAVEGAÇÃO',
     contactLabel: 'CONTATO',
     privacyLabel: 'Política de Privacidade',
+    navigation: [
+      { href: '#sobre', label: 'Sobre' },
+      { href: '#avaliacao', label: 'Avaliação' },
+      { href: '#areas', label: 'Áreas de atuação' },
+      { href: '#duvidas', label: 'Dúvidas' },
+      { href: '#contato', label: 'Contato' },
+    ],
   },
 } as const;

@@ -209,6 +209,73 @@ test('hero message and CTA remain available when the photograph cannot load', as
   await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });
 });
 
+test('FAQ publishes all answers with one native accordion item open and keyboard controls', async ({ page }) => {
+  await page.goto('/');
+  const faq = page.locator('section#duvidas');
+  const items = faq.locator('details[name="faq"]');
+  const answers = [
+    'Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.',
+    'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.',
+    'A avaliação acontece com escuta, brincadeiras e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
+    'Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.',
+    'Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.',
+    'Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.',
+  ];
+
+  await expect(items).toHaveCount(6);
+  await expect(items.locator('summary')).toHaveCount(6);
+  for (const answer of answers) await expect(faq.getByText(answer, { exact: true })).toHaveCount(1);
+  await expect(items.first()).toHaveAttribute('open', '');
+  expect(await items.evaluateAll(elements => elements.filter(item => item.hasAttribute('open')).length)).toBe(1);
+
+  const firstSummary = items.first().locator('summary');
+  const thirdSummary = items.nth(2).locator('summary');
+  await firstSummary.focus();
+  await expect(firstSummary).toBeFocused();
+  await expect(firstSummary).toHaveCSS('outline-style', 'solid');
+  await page.keyboard.press('Space');
+  await expect(items.first()).not.toHaveAttribute('open', '');
+  await thirdSummary.focus();
+  await page.keyboard.press('Enter');
+  await expect(items.nth(2)).toHaveAttribute('open', '');
+  expect(await items.evaluateAll(elements => elements.filter(item => item.hasAttribute('open')).length)).toBe(1);
+});
+
+test('FAQ opening reveals existing answer characters without changing the answer text', async ({ page }) => {
+  await page.goto('/');
+  const item = page.locator('section#duvidas details[name="faq"]').nth(1);
+  const answer = item.locator('[data-faq-answer]');
+  const expectedAnswer = 'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.';
+  await item.locator('summary').click();
+  await expect(item).toHaveAttribute('open', '');
+  await expect(answer).toHaveText(expectedAnswer);
+  await expect(answer.locator('[data-faq-character]').first()).toHaveCSS('transition-duration', '0.3s, 0.3s');
+  await expect(answer.locator('[data-faq-character]').nth(1)).toHaveCSS('transition-delay', '0.015s');
+  await expect(answer.locator('[data-faq-character]').first()).toHaveCSS('filter', 'blur(0px)');
+});
+
+test('FAQ answers remain readable without JavaScript and skip reveal motion when reduced', async ({ browser }) => {
+  const noJavaScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
+  const noJavaScriptPage = await noJavaScript.newPage();
+  await noJavaScriptPage.goto('/');
+  const noJavaScriptFaq = noJavaScriptPage.locator('section#duvidas');
+  await expect(noJavaScriptFaq.locator('details[name="faq"]')).toHaveCount(6);
+  await noJavaScriptFaq.locator('details[name="faq"]').nth(4).locator('summary').click();
+  await expect(noJavaScriptFaq.getByText('Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.', { exact: true })).toBeVisible();
+  await noJavaScript.close();
+
+  const reduced = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const reducedPage = await reduced.newPage();
+  await reducedPage.goto('/');
+  const item = reducedPage.locator('section#duvidas details[name="faq"]').nth(1);
+  const answer = item.locator('[data-faq-answer]');
+  await item.locator('summary').click();
+  await expect(answer).toHaveText('A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
+  await expect(answer).toHaveCSS('filter', 'none');
+  await expect(answer).toHaveCSS('transition-duration', '0s');
+  await reduced.close();
+});
+
 for (const width of [1024, 1280, 1440, 1920]) {
   test(`signals and introduction preserve readable desktop geometry at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

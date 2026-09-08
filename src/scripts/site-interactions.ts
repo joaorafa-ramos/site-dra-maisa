@@ -28,3 +28,51 @@ document.querySelectorAll<HTMLElement>('[data-flip-card]').forEach(card => {
   card.dataset.enhanced = 'true';
   button.hidden = false;
 });
+
+const faqDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('details[name="faq"]'));
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const revealFaqAnswer = (details: HTMLDetailsElement) => {
+  if (prefersReducedMotion.matches) return;
+
+  const answer = details.querySelector<HTMLElement>('[data-faq-answer]')!;
+  if (!answer.dataset.faqCharacters) {
+    const walker = document.createTreeWalker(answer, NodeFilter.SHOW_TEXT);
+    const textNodes: Text[] = [];
+    let node: Node | null;
+    while ((node = walker.nextNode())) textNodes.push(node as Text);
+
+    textNodes.forEach(textNode => {
+      const characters = Array.from(textNode.data);
+      const fragment = document.createDocumentFragment();
+      characters.forEach((character, index) => {
+        const span = document.createElement('span');
+        span.dataset.faqCharacter = '';
+        span.style.setProperty('--faq-character-index', String(index));
+        span.textContent = character;
+        fragment.append(span);
+      });
+      textNode.replaceWith(fragment);
+    });
+    answer.dataset.faqCharacters = 'true';
+  }
+
+  answer.classList.remove('is-revealed');
+  answer.classList.add('is-revealing');
+  void answer.offsetWidth;
+  requestAnimationFrame(() => {
+    if (!details.open) return;
+    answer.classList.remove('is-revealing');
+    answer.classList.add('is-revealed');
+  });
+};
+
+faqDetails.forEach(details => {
+  details.addEventListener('toggle', () => {
+    if (!details.open) return;
+    faqDetails.forEach(sibling => {
+      if (sibling !== details) sibling.open = false;
+    });
+    revealFaqAnswer(details);
+  });
+});

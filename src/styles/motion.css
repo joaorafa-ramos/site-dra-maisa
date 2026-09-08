@@ -24,4 +24,10 @@
   .area-card[data-enhanced].is-flipped .card-front {
     opacity: 0;
   }
+
+  .faq__answer,
+  .faq__answer [data-faq-character] {
+    filter: none !important;
+    transition: none !important;
+  }
 }

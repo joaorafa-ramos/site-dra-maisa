@@ -1,0 +1,35 @@
+---
+import Button from '../ui/Button.astro';
+import { getWhatsAppUrl } from '../../config/site';
+import { content, faqItems } from '../../data/content';
+
+const whatsappUrl = getWhatsAppUrl();
+---
+
+<section class="section faq" id="duvidas" aria-labelledby="faq-title">
+  <div class="container faq__layout">
+    <div class="faq__intro">
+      <p class="section-eyebrow">{content.faq.eyebrow}</p>
+      <h2 class="section-heading" id="faq-title">{content.faq.title}</h2>
+      <p class="section-description">{content.faq.description}</p>
+      <div class="faq__action">
+        <Button href={whatsappUrl} label={content.faq.cta} external={whatsappUrl.startsWith('https://')} />
+      </div>
+    </div>
+
+    <div class="faq__list">
+      {faqItems.map((item, index) => (
+        <details name="faq" open={index === 0} class="faq__item">
+          <summary>
+            <span>{item.question}</span>
+            <span class="faq__indicator" aria-hidden="true">
+              <span class="faq__plus">+</span>
+              <span class="faq__minus">−</span>
+            </span>
+          </summary>
+          <p class="faq__answer" data-faq-answer>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

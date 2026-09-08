@@ -1,0 +1,37 @@
+---
+import { getWhatsAppUrl, siteConfig } from '../../config/site';
+
+const whatsappUrl = getWhatsAppUrl();
+const navigation = [
+  { href: '#sobre', label: 'Sobre' },
+  { href: '#avaliacao', label: 'Avaliação' },
+  { href: '#areas', label: 'Áreas de atuação' },
+  { href: '#duvidas', label: 'Dúvidas' },
+  { href: '#contato', label: 'Contato' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__main">
+    <div class="site-footer__identity">
+      <img src="/images/logo-maisa.png" alt="Maisa Palma — Fonoaudióloga" width="1707" height="819" loading="lazy" />
+      <p>Fonoaudiologia infantil em {siteConfig.city}</p>
+    </div>
+    <nav aria-label="Navegação do rodapé">
+      <p class="site-footer__label">NAVEGAÇÃO</p>
+      <ul>
+        {navigation.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="site-footer__contact">
+      <p class="site-footer__label">CONTATO</p>
+      <a href={whatsappUrl} target={whatsappUrl.startsWith('https://') ? '_blank' : undefined} rel={whatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}>WhatsApp</a>
+      <a href="https://instagram.com/fonomaisapalma" target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
+      {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
+      {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
+    </div>
+  </div>
+  <div class="container site-footer__bottom">
+    <p>© {new Date().getFullYear()} {siteConfig.name}. Todos os direitos reservados.</p>
+  </div>
+</footer>

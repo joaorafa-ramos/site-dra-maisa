@@ -1,0 +1,27 @@
+---
+import Button from '../ui/Button.astro';
+import { getWhatsAppUrl, siteConfig } from '../../config/site';
+
+const whatsappUrl = getWhatsAppUrl();
+---
+
+<section class="section contact" id="contato" aria-labelledby="contact-title">
+  <div class="container contact__layout">
+    <div class="contact__copy">
+      <p class="section-eyebrow">FALE COM A DRA. MAISA</p>
+      <h2 class="section-heading" id="contact-title">Vamos conversar sobre o que você tem observado?</h2>
+      <p class="section-description">
+        Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.
+      </p>
+      <Button href={whatsappUrl} label="Conversar pelo WhatsApp" external={whatsappUrl.startsWith('https://')} />
+    </div>
+    <aside class="contact__details" aria-label="Informações de contato">
+      <p>Fonoaudiologia infantil em {siteConfig.city}</p>
+      <a href="https://instagram.com/fonomaisapalma" target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
+      {siteConfig.address && <p>{siteConfig.address}</p>}
+      {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
+      {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
+      {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
+    </aside>
+  </div>
+</section>

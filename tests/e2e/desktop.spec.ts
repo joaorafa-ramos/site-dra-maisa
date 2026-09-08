@@ -306,6 +306,51 @@ test('final conversion section keeps two columns with a 300px 4:5 portrait at 10
   expect(box.width / box.height).toBeCloseTo(4 / 5, 2);
 });
 
+// Catches a missing practical contact route or unconfirmed operational data being published.
+test('contact and footer provide safe practical information without unconfirmed credentials', async ({ page }) => {
+  await page.goto('/');
+  const contact = page.locator('section#contato');
+  const footer = page.getByRole('contentinfo');
+
+  await expect(contact).toHaveCount(1);
+  await expect(contact.getByRole('heading', { level: 2 })).toHaveText('Vamos conversar sobre o que você tem observado?');
+  await expect(contact.getByText('Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
+  await expect(contact.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+  await expect(contact.getByText('@fonomaisapalma', { exact: true })).toBeVisible();
+  await expect(contact.getByText('Fonoaudiologia infantil em Itapeva–SP', { exact: true })).toBeVisible();
+  await expect(contact.getByText(/CRFa|CNPJ|Endereço|Horários de atendimento/)).toHaveCount(0);
+
+  await expect(footer).toHaveCount(1);
+  await expect(footer.getByRole('img', { name: 'Maisa Palma — Fonoaudióloga' })).toBeVisible();
+  await expect(footer.getByText('Fonoaudiologia infantil em Itapeva–SP', { exact: true })).toBeVisible();
+  await expect(footer.getByRole('link', { name: '@fonomaisapalma', exact: true })).toHaveAttribute('href', 'https://instagram.com/fonomaisapalma');
+  await expect(footer.getByText(/CRFa|CNPJ|Política de Privacidade/)).toHaveCount(0);
+});
+
+// Catches stale fragment URLs, duplicate section ids, and anchors hidden under the sticky header.
+test('every header and footer fragment link has one visible target below the sticky header', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const header = page.getByRole('banner');
+  const headerHeight = (await header.boundingBox())!.height;
+  const links = await page.locator('.site-header__nav a[href^="#"], .site-header .button[href^="#"], footer nav a[href^="#"]').evaluateAll(elements =>
+    [...new Set(elements.map(link => (link as HTMLAnchorElement).hash))],
+  );
+
+  expect(links.length).toBeGreaterThan(0);
+  for (const hash of links) {
+    const id = hash.slice(1);
+    const target = page.locator(`#${id}`);
+    await expect(target).toHaveCount(1);
+    await page.locator(`.site-header__nav a[href="${hash}"], .site-header .button[href="${hash}"], footer nav a[href="${hash}"]`).first().click();
+    await expect(page).toHaveURL(new RegExp(`${hash}$`));
+    const targetTop = await target.evaluate(element => element.getBoundingClientRect().top);
+    expect(targetTop).toBeGreaterThanOrEqual(headerHeight);
+    await expect(target.getByRole('heading').first()).toBeInViewport();
+  }
+});
+
 for (const width of [1024, 1280, 1440, 1920]) {
   test(`signals and introduction preserve readable desktop geometry at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

@@ -725,6 +725,128 @@
   box-shadow: var(--shadow-soft);
 }
 
+.contact {
+  background: var(--color-cream);
+}
+
+.contact__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  align-items: center;
+  gap: 96px;
+}
+
+.contact__copy {
+  min-width: 0;
+}
+
+.contact .section-heading {
+  max-width: 720px;
+}
+
+.contact__copy .section-description {
+  max-width: 650px;
+}
+
+.contact .button {
+  min-height: 56px;
+  padding-inline: 32px;
+}
+
+.contact__details {
+  display: grid;
+  gap: 16px;
+  padding: 32px;
+  border: 1px solid rgb(48 86 106 / 0.12);
+  border-radius: var(--radius-card);
+  background: var(--color-pale-blue);
+  color: var(--color-navy);
+  font-size: 15px;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.contact__details p,
+.contact__details a {
+  margin: 0;
+}
+
+.contact__details a {
+  font-weight: 600;
+}
+
+.site-footer {
+  padding-top: 72px;
+  background: var(--color-navy);
+  color: var(--color-cream);
+}
+
+.site-footer__main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(160px, 0.7fr) minmax(160px, 0.7fr);
+  gap: 64px;
+  padding-bottom: 56px;
+}
+
+.site-footer__identity img {
+  width: 160px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.site-footer__identity p {
+  max-width: 280px;
+  margin: 20px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.site-footer__label {
+  margin: 0 0 16px;
+  color: rgb(247 242 238 / 0.72);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+}
+
+.site-footer ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer a {
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.site-footer__contact {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.site-footer__contact p {
+  margin: 0;
+}
+
+.site-footer__bottom {
+  padding-block: 20px;
+  border-top: 1px solid rgb(247 242 238 / 0.2);
+}
+
+.site-footer__bottom p {
+  margin: 0;
+  color: rgb(247 242 238 / 0.72);
+  font-size: 12px;
+}
+
 @media (max-width: 1199px) {
   .final-cta__layout {
     grid-template-columns: minmax(0, 1fr) 300px;
@@ -733,5 +855,13 @@
 
   .final-cta__portrait {
     width: 300px;
+  }
+
+  .contact__layout {
+    gap: 56px;
+  }
+
+  .site-footer__main {
+    gap: 40px;
   }
 }

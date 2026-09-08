@@ -32,6 +32,27 @@ document.querySelectorAll<HTMLElement>('[data-flip-card]').forEach(card => {
 const faqDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('details[name="faq"]'));
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+const enableProgressiveReveals = () => {
+  if (prefersReducedMotion.matches || !('IntersectionObserver' in window)) return;
+
+  const revealTargets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  revealTargets.forEach(target => target.classList.add('reveal-pending'));
+
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const target = entry.target as HTMLElement;
+      target.classList.remove('reveal-pending');
+      target.classList.add('is-visible');
+      revealObserver.unobserve(target);
+    });
+  }, { threshold: 0.12 });
+
+  revealTargets.forEach(target => revealObserver.observe(target));
+};
+
+enableProgressiveReveals();
+
 const revealFaqAnswer = (details: HTMLDetailsElement) => {
   if (prefersReducedMotion.matches) return;
 

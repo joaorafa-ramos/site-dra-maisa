@@ -6,16 +6,16 @@ import { areas, content } from '../../data/content';
 const whatsappUrl = getWhatsAppUrl();
 ---
 
-<section class="section areas" id="areas" aria-labelledby="areas-title">
+<section class="section areas" id="areas" aria-labelledby="areas-title" data-reveal-group="areas">
   <div class="container">
-    <div class="areas__intro">
+    <div class="areas__intro" data-reveal>
       <p class="section-eyebrow">{content.areas.eyebrow}</p>
       <h2 class="section-heading" id="areas-title">{content.areas.title}</h2>
       <p class="section-description">{content.areas.description}</p>
     </div>
-    <ul class="areas__grid" role="list">
+    <ul class="areas__grid" role="list" data-reveal-stagger>
       {areas.map(area => (
-        <li class="area-card" data-flip-card data-area={area.title}>
+        <li class="area-card" data-flip-card data-area={area.title} data-reveal>
           <div class="area-card__faces">
             <div class="card-front">
               <p class="area-card__category">{area.category}</p>
@@ -43,7 +43,7 @@ const whatsappUrl = getWhatsAppUrl();
         </li>
       ))}
     </ul>
-    <div class="areas__action">
+    <div class="areas__action" data-reveal>
       <Button href={whatsappUrl} label={content.areas.cta} external={whatsappUrl.startsWith('https://')} />
     </div>
   </div>

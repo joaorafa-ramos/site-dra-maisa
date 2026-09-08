@@ -1,3 +1,48 @@
+/* Reveal states are opt-in: server-rendered content starts fully visible. */
+[data-reveal] {
+  --reveal-delay: 0ms;
+}
+
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 460ms var(--ease-calm), transform 460ms var(--ease-calm);
+  transition-delay: var(--reveal-delay);
+}
+
+[data-reveal-stagger] > [data-reveal]:nth-child(3n + 1) {
+  --reveal-delay: 0ms;
+}
+
+[data-reveal-stagger] > [data-reveal]:nth-child(3n + 2) {
+  --reveal-delay: 75ms;
+}
+
+[data-reveal-stagger] > [data-reveal]:nth-child(3n) {
+  --reveal-delay: 150ms;
+}
+
+.button {
+  transition: transform 180ms var(--ease-calm), box-shadow 180ms var(--ease-calm);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.site-header {
+  transition: border-color 180ms var(--ease-calm), box-shadow 180ms var(--ease-calm);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -29,5 +74,11 @@
   .faq__answer [data-faq-character] {
     filter: none !important;
     transition: none !important;
+  }
+
+  [data-reveal],
+  .button,
+  .site-header {
+    transform: none !important;
   }
 }

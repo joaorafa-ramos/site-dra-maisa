@@ -202,6 +202,47 @@ test('header stays visible without changing height when its scroll border appear
   await expect(header).toHaveAttribute('data-scrolled', 'false');
 });
 
+// Catches reveal code that hides server-rendered content, skips the observer callback,
+// or staggers an entire six-card grid instead of each desktop row.
+test('progressive reveals keep content visible by default and reveal area rows in short staggered groups', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const cards = page.locator('#areas .area-card[data-reveal]');
+  await expect(cards).toHaveCount(6);
+  await expect(cards.first()).toHaveClass(/reveal-pending/);
+  const delays = await cards.evaluateAll(elements => elements.map(element => getComputedStyle(element).getPropertyValue('--reveal-delay').trim()));
+  expect(delays).toEqual(['0ms', '75ms', '150ms', '0ms', '75ms', '150ms']);
+
+  await cards.first().scrollIntoViewIfNeeded();
+  await expect(cards.first()).toHaveClass(/is-visible/);
+  await expect(cards.first()).not.toHaveClass(/reveal-pending/);
+  await expect(cards.first()).toHaveCSS('opacity', '1');
+  await expect(cards.first()).toHaveCSS('transition-delay', '0s');
+});
+
+test('reveal targets remain readable with JavaScript disabled or reduced motion enabled', async ({ browser }) => {
+  const noJavaScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
+  const noJavaScriptPage = await noJavaScript.newPage();
+  await noJavaScriptPage.goto('/');
+  expect(await noJavaScriptPage.locator('[data-reveal]').evaluateAll(elements =>
+    elements.every(element => !element.classList.contains('reveal-pending')),
+  )).toBe(true);
+  await expect(noJavaScriptPage.locator('#areas .area-card').first()).toBeVisible();
+  await expect(noJavaScriptPage.locator('#areas').getByRole('heading', { level: 2 })).toBeVisible();
+  await expect(noJavaScriptPage.locator('#areas').getByRole('link')).toBeVisible();
+  await noJavaScript.close();
+
+  const reduced = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const reducedPage = await reduced.newPage();
+  await reducedPage.goto('/');
+  const reveal = reducedPage.locator('#areas [data-reveal]').first();
+  await expect(reveal).toBeVisible();
+  await expect(reveal).not.toHaveClass(/reveal-pending/);
+  expect(await reveal.evaluate(element => parseFloat(getComputedStyle(element).transitionDuration) <= 0.01)).toBe(true);
+  await reduced.close();
+});
+
 test('hero message and CTA remain available when the photograph cannot load', async ({ page }) => {
   await page.route('**/images/hero-maisa.webp', route => route.abort());
   await page.goto('/');

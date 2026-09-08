@@ -4,14 +4,14 @@ import { benefits, content } from '../../data/content';
 
 <section class="section benefits" aria-labelledby="benefits-title" data-reveal-group="benefits">
   <div class="container benefits__layout">
-    <div class="benefits__intro">
+    <div class="benefits__intro" data-reveal>
       <p class="section-eyebrow">{content.benefits.eyebrow}</p>
       <h2 class="section-heading" id="benefits-title">{content.benefits.title}</h2>
       <p class="section-description">{content.benefits.description}</p>
     </div>
-    <ul class="benefits__list" role="list">
+    <ul class="benefits__list" role="list" data-reveal-stagger>
       {benefits.map(benefit => (
-        <li class="benefit-row">
+        <li class="benefit-row" data-reveal>
           <span class="benefit-row__marker" aria-hidden="true"></span>
           <div>
             <h3>{benefit.title}</h3>

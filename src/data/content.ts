@@ -254,11 +254,11 @@ export const content = {
   },
   finalCta: {
     eyebrow: 'VOCÊ NÃO PRECISA TER TODAS AS RESPOSTAS',
-    title:
-      'Se algo na comunicação do seu filho preocupa você, o primeiro passo pode ser uma conversa.',
+    title: 'Você não precisa ter todas as respostas para dar o primeiro passo.',
     description:
-      'Conte à Dra. Maisa o que você tem observado. Pelo WhatsApp, você recebe uma orientação inicial e pode entender se é o momento de agendar uma avaliação fonoaudiológica.',
-    cta: 'Conversar com a Dra. Maisa',
+      'Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.',
+    cta: 'Conversar pelo WhatsApp',
+    detail: 'Atendimento infantil em Itapeva–SP • Contato pelo WhatsApp',
   },
   contact: {
     eyebrow: 'FALE COM A DRA. MAISA',

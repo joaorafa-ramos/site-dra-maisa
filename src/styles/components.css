@@ -678,3 +678,60 @@
   transition: opacity 300ms var(--ease-calm), filter 300ms var(--ease-calm);
   transition-delay: calc(var(--faq-character-index) * 15ms);
 }
+
+.final-cta {
+  display: grid;
+  min-height: 780px;
+  align-items: center;
+  background: rgb(227 240 242 / 0.35);
+}
+
+.final-cta__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  align-items: center;
+  gap: 90px;
+}
+
+.final-cta__copy {
+  min-width: 0;
+}
+
+.final-cta .section-heading {
+  max-width: 650px;
+  font-size: clamp(44px, 3.6vw, 52px);
+}
+
+.final-cta__copy .section-description {
+  max-width: 620px;
+  margin-bottom: 32px;
+}
+
+.final-cta .button {
+  min-height: 56px;
+  padding-inline: 32px;
+}
+
+.final-cta__detail {
+  margin: 16px 0 0;
+  color: var(--color-navy);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.final-cta__portrait {
+  width: 350px;
+  border-radius: 26px;
+  box-shadow: var(--shadow-soft);
+}
+
+@media (max-width: 1199px) {
+  .final-cta__layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 56px;
+  }
+
+  .final-cta__portrait {
+    width: 300px;
+  }
+}

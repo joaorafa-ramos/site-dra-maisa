@@ -276,6 +276,36 @@ test('FAQ answers remain readable without JavaScript and skip reveal motion when
   await reduced.close();
 });
 
+test('final conversion section keeps its accessible empty portrait slot and 4:5 desktop geometry', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const section = page.locator('section#conversar');
+  const copy = section.locator('.final-cta__copy');
+  const portrait = section.locator('.final-cta__portrait');
+
+  await expect(section).toHaveAttribute('aria-labelledby', 'final-cta-title');
+  await expect(section.locator('#final-cta-title')).toHaveCount(1);
+  await expect(section.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para dar o primeiro passo.');
+  await expect(section.getByText('Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
+  await expect(section.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+  await expect(portrait.locator('img')).toHaveCount(0);
+  await expect(portrait.getByRole('img', { name: 'Espaço reservado para retrato da Dra. Maisa' })).toBeVisible();
+
+  const [copyBox, portraitBox] = await Promise.all([copy.boundingBox(), portrait.boundingBox()]);
+  expect(portraitBox!.width / portraitBox!.height).toBeCloseTo(4 / 5, 2);
+  expect(portraitBox!.x).toBeGreaterThan(copyBox!.x + copyBox!.width);
+  expect(copyBox!.x + copyBox!.width).toBeLessThanOrEqual(portraitBox!.x);
+});
+
+test('final conversion section keeps two columns with a 300px 4:5 portrait at 1024px', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto('/');
+  const portrait = page.locator('section#conversar .final-cta__portrait');
+  const box = (await portrait.boundingBox())!;
+  expect(box.width).toBeCloseTo(300, 0);
+  expect(box.width / box.height).toBeCloseTo(4 / 5, 2);
+});
+
 for (const width of [1024, 1280, 1440, 1920]) {
   test(`signals and introduction preserve readable desktop geometry at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

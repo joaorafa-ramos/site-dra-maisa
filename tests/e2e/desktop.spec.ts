@@ -371,20 +371,21 @@ test('FAQ answers remain readable without JavaScript and skip reveal motion when
   await reduced.close();
 });
 
-test('final conversion section keeps its accessible empty portrait slot and 4:5 desktop geometry', async ({ page }) => {
+test('unified contact conversion keeps its accessible portrait slot and 4:5 desktop geometry', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  const section = page.locator('section#conversar');
-  const copy = section.locator('.final-cta__copy');
-  const portrait = section.locator('.final-cta__portrait');
+  const section = page.locator('section#contato');
+  const copy = section.locator('.contact__copy');
+  const portrait = section.locator('.contact__portrait');
 
-  await expect(section).toHaveAttribute('aria-labelledby', 'final-cta-title');
-  await expect(section.locator('#final-cta-title')).toHaveCount(1);
-  await expect(section.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para dar o primeiro passo.');
-  await expect(section.getByText('Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
+  await expect(section).toHaveAttribute('aria-labelledby', 'contact-title');
+  await expect(section.locator('#contact-title')).toHaveCount(1);
+  await expect(section.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para começar uma conversa.');
+  await expect(section.getByText('Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
   await expect(section.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
   await expect(portrait.locator('img')).toHaveCount(0);
   await expect(portrait.getByRole('img', { name: 'Espaço reservado para retrato da Dra. Maisa' })).toBeVisible();
+  await expect(page.locator('section#conversar')).toHaveCount(0);
 
   const [copyBox, portraitBox] = await Promise.all([copy.boundingBox(), portrait.boundingBox()]);
   expect(portraitBox!.width / portraitBox!.height).toBeCloseTo(4 / 5, 2);
@@ -392,27 +393,26 @@ test('final conversion section keeps its accessible empty portrait slot and 4:5 
   expect(copyBox!.x + copyBox!.width).toBeLessThanOrEqual(portraitBox!.x);
 });
 
-test('final conversion section keeps two columns with a 300px 4:5 portrait at 1024px', async ({ page }) => {
+test('unified contact conversion keeps two columns with a 300px 4:5 portrait at 1024px', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.goto('/');
-  const portrait = page.locator('section#conversar .final-cta__portrait');
+  const portrait = page.locator('section#contato .contact__portrait');
   const box = (await portrait.boundingBox())!;
   expect(box.width).toBeCloseTo(300, 0);
   expect(box.width / box.height).toBeCloseTo(4 / 5, 2);
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.
-test('contact and footer provide safe practical information without unconfirmed credentials', async ({ page }) => {
+test('unified contact conversion and footer provide safe practical information without unconfirmed credentials', async ({ page }) => {
   await page.goto('/');
   const contact = page.locator('section#contato');
   const footer = page.getByRole('contentinfo');
 
   await expect(contact).toHaveCount(1);
-  await expect(contact.getByRole('heading', { level: 2 })).toHaveText('Vamos conversar sobre o que você tem observado?');
-  await expect(contact.getByText('Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
+  await expect(contact.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para começar uma conversa.');
+  await expect(contact.getByText('Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
   await expect(contact.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
-  await expect(contact.getByText('@fonomaisapalma', { exact: true })).toBeVisible();
-  await expect(contact.getByText('Fonoaudiologia infantil em Itapeva–SP', { exact: true })).toBeVisible();
+  await expect(contact.getByText('Fonoaudiologia infantil em Itapeva–SP • @fonomaisapalma', { exact: true })).toBeVisible();
   await expect(contact.getByText(/CRFa|CNPJ|Endereço|Horários de atendimento/)).toHaveCount(0);
 
   await expect(footer).toHaveCount(1);

@@ -252,20 +252,13 @@ export const content = {
       'Cada criança tem seu próprio ritmo. A avaliação fonoaudiológica ajuda a compreender o que está acontecendo e quais são os próximos passos.',
     cta: 'Conversar com a Dra. Maisa',
   },
-  finalCta: {
-    eyebrow: 'VOCÊ NÃO PRECISA TER TODAS AS RESPOSTAS',
-    title: 'Você não precisa ter todas as respostas para dar o primeiro passo.',
-    description:
-      'Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.',
-    cta: 'Conversar pelo WhatsApp',
-    detail: 'Atendimento infantil em Itapeva–SP • Contato pelo WhatsApp',
-  },
   contact: {
-    eyebrow: 'FALE COM A DRA. MAISA',
-    title: 'Vamos conversar sobre o que você tem observado?',
+    eyebrow: 'UM PRIMEIRO PASSO, NO SEU TEMPO',
+    title: 'Você não precisa ter todas as respostas para começar uma conversa.',
     description:
-      'Pelo WhatsApp, você pode contar sua dúvida, conhecer o atendimento e consultar os horários disponíveis para avaliação.',
+      'Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.',
     cta: 'Conversar pelo WhatsApp',
+    detail: 'Fonoaudiologia infantil em Itapeva–SP • @fonomaisapalma',
   },
   footer: {
     specialization: 'Fonoaudiologia infantil',

@@ -1,5 +1,6 @@
 ---
 import Button from '../ui/Button.astro';
+import PictureFrame from '../ui/PictureFrame.astro';
 import { getWhatsAppUrl, siteConfig } from '../../config/site';
 import { content } from '../../data/content';
 
@@ -13,14 +14,21 @@ const whatsappUrl = getWhatsAppUrl();
       <h2 class="section-heading" id="contact-title">{content.contact.title}</h2>
       <p class="section-description">{content.contact.description}</p>
       <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="contato" />
+      <p class="contact__detail">{content.contact.detail}</p>
+      {(siteConfig.address || siteConfig.businessHours || siteConfig.crfa || siteConfig.cnpj) && (
+        <aside class="contact__details" aria-label="Informações de contato">
+          {siteConfig.address && <p>{siteConfig.address}</p>}
+          {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
+          {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
+          {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
+        </aside>
+      )}
     </div>
-    <aside class="contact__details" aria-label="Informações de contato">
-      <p>{content.footer.specialization} em {siteConfig.city}</p>
-      <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
-      {siteConfig.address && <p>{siteConfig.address}</p>}
-      {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
-      {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
-      {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
-    </aside>
+    <PictureFrame
+      class="contact__portrait"
+      alt="Espaço reservado para retrato da Dra. Maisa"
+      width={350}
+      height={438}
+    />
   </div>
 </section>

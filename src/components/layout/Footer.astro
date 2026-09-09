@@ -20,7 +20,7 @@ const whatsappUrl = getWhatsAppUrl();
     <div class="site-footer__contact">
       <p class="site-footer__label">{content.footer.contactLabel}</p>
       <a href={whatsappUrl} target={whatsappUrl.startsWith('https://') ? '_blank' : undefined} rel={whatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}>WhatsApp</a>
-      <a href="https://instagram.com/fonomaisapalma" target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
+      <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
       {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
       {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
     </div>

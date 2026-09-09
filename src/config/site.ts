@@ -28,5 +28,15 @@ export const buildWhatsAppUrl = (phone: string, message: string): string => {
   return digits ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}` : '#contato';
 };
 
+export const normalizePublicSiteUrl = (value?: string): string | undefined => {
+  if (!value?.trim()) return undefined;
+  try {
+    const parsed = new URL(value.trim());
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export const getWhatsAppUrl = (message = whatsappInitialMessage): string =>
   buildWhatsAppUrl(siteConfig.whatsappNumber ?? '', message);

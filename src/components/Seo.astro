@@ -1,5 +1,5 @@
 ---
-import { siteConfig } from '../config/site';
+import { normalizePublicSiteUrl, siteConfig } from '../config/site';
 
 interface Props {
   title: string;
@@ -8,16 +8,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 
-const siteUrl = (() => {
-  const configuredUrl = siteConfig.publicSiteUrl;
-  if (!configuredUrl) return undefined;
-  try {
-    const parsed = new URL(configuredUrl);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.origin : undefined;
-  } catch {
-    return undefined;
-  }
-})();
+const siteUrl = normalizePublicSiteUrl(siteConfig.publicSiteUrl);
 
 const person: Record<string, unknown> = {
   '@type': 'Person',

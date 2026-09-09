@@ -13,7 +13,7 @@ const credential = siteConfig.crfa?.trim();
   <div class="container about__layout">
     <PictureFrame
       class="about__portrait"
-      src="/images/apresentacao-maisa.webp"
+      src="/images/apresentacao-maisa.optimized.webp"
       alt="Retrato de Maisa Palma, sorrindo e com a mão apoiada sob o queixo."
       width={960}
       height={1200}
@@ -26,7 +26,7 @@ const credential = siteConfig.crfa?.trim();
         <p>{content.about.description}</p>
       </div>
       {credential && <p class="about__credential">CRFa {credential}</p>}
-      <Button href={whatsappUrl} label={content.about.cta} external={whatsappUrl.startsWith('https://')} />
+      <Button href={whatsappUrl} label={content.about.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="sobre" />
     </div>
   </div>
 </section>

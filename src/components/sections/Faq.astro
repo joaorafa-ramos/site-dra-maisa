@@ -13,7 +13,7 @@ const whatsappUrl = getWhatsAppUrl();
       <h2 class="section-heading" id="faq-title">{content.faq.title}</h2>
       <p class="section-description">{content.faq.description}</p>
       <div class="faq__action">
-        <Button href={whatsappUrl} label={content.faq.cta} external={whatsappUrl.startsWith('https://')} />
+        <Button href={whatsappUrl} label={content.faq.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="duvidas" />
       </div>
     </div>
 

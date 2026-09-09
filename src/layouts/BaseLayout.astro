@@ -7,12 +7,17 @@ import '../styles/tokens.css';
 import '../styles/global.css';
 import '../styles/components.css';
 import '../styles/motion.css';
+import Seo from '../components/Seo.astro';
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = 'Maisa Palma' } = Astro.props;
+const {
+  title = 'Fonoaudióloga infantil em Itapeva | Maisa Palma',
+  description = 'Seu filho fala pouco ou é difícil compreendê-lo? Conheça o atendimento infantil da fonoaudióloga Maisa Palma, em Itapeva. Converse pelo WhatsApp.',
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -21,6 +26,7 @@ const { title = 'Maisa Palma' } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <Seo title={title} description={description} />
   </head>
   <body>
     <slot />

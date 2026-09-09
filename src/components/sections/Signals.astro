@@ -16,11 +16,11 @@ const whatsappUrl = getWhatsAppUrl();
         <SectionHeading>{content.signals.title}</SectionHeading>
         <p class="section-description">{content.signals.description}</p>
         <p class="signals__reassurance">{content.signals.reassurance}</p>
-        <Button href={whatsappUrl} label={content.signals.cta} external={whatsappUrl.startsWith('https://')} />
+        <Button href={whatsappUrl} label={content.signals.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="sinais" />
       </div>
       <PictureFrame
         class="signals__portrait"
-        src="/images/sinais-maisa.webp"
+        src="/images/sinais-maisa.optimized.webp"
         alt="Maisa Palma segurando um brinquedo de dinossauro no consultório."
         width={800}
         height={1000}

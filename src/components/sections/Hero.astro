@@ -21,7 +21,7 @@ const whatsappUrl = getWhatsAppUrl();
       <p class="hero__eyebrow">{content.hero.eyebrow}</p>
       <h1 id="hero-title" class="section-heading hero__title">{content.hero.title}</h1>
       <p class="hero__description">{content.hero.description}</p>
-      <Button href={whatsappUrl} label={content.hero.cta} external={whatsappUrl.startsWith('https://')} />
+      <Button href={whatsappUrl} label={content.hero.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="hero" />
     </div>
   </div>
 </section>

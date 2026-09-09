@@ -4,9 +4,13 @@ interface Props {
   label: string;
   variant?: 'peach' | 'navy';
   external?: boolean;
+  whatsappLocation?: string;
 }
 
-const { href, label, variant = 'peach', external = false } = Astro.props;
+const { href, label, variant = 'peach', external = false, whatsappLocation } = Astro.props;
+const whatsappEventHandler = whatsappLocation
+  ? `window.dispatchEvent(new CustomEvent('whatsapp_click', { detail: { cta_location: ${JSON.stringify(whatsappLocation)}, cta_label: ${JSON.stringify(label)} } }));`
+  : undefined;
 ---
 
 <a
@@ -14,6 +18,10 @@ const { href, label, variant = 'peach', external = false } = Astro.props;
   href={href}
   target={external ? '_blank' : undefined}
   rel={external ? 'noopener noreferrer' : undefined}
+  data-whatsapp-cta={whatsappLocation ? '' : undefined}
+  data-whatsapp-location={whatsappLocation}
+  data-whatsapp-label={whatsappLocation ? label : undefined}
+  onclick={whatsappEventHandler}
 >
   {label}
 </a>

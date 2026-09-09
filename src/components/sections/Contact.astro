@@ -12,11 +12,11 @@ const whatsappUrl = getWhatsAppUrl();
       <p class="section-eyebrow">{content.contact.eyebrow}</p>
       <h2 class="section-heading" id="contact-title">{content.contact.title}</h2>
       <p class="section-description">{content.contact.description}</p>
-      <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} />
+      <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="contato" />
     </div>
     <aside class="contact__details" aria-label="Informações de contato">
       <p>{content.footer.specialization} em {siteConfig.city}</p>
-      <a href="https://instagram.com/fonomaisapalma" target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
+      <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
       {siteConfig.address && <p>{siteConfig.address}</p>}
       {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
       {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}

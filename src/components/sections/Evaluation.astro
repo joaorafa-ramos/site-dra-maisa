@@ -28,7 +28,7 @@ const whatsappUrl = getWhatsAppUrl();
     <div class="evaluation__closing" data-reveal>
       <p class="evaluation__reassurance">{content.evaluation.reassurance}</p>
       <div class="evaluation__action">
-        <Button href={whatsappUrl} label={content.evaluation.cta} external={whatsappUrl.startsWith('https://')} />
+        <Button href={whatsappUrl} label={content.evaluation.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="avaliacao" />
         <p class="evaluation__cta-detail">{content.evaluation.ctaDetail}</p>
       </div>
     </div>

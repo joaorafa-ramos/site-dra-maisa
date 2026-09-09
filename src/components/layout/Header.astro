@@ -14,12 +14,12 @@ const navigation = [
 <header class="site-header" data-scrolled="false">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="#conteudo" aria-label="Maisa Palma — início">
-      <img src="/images/logo-maisa.png" alt="Maisa Palma — Fonoaudióloga" width="1707" height="819" />
+      <img src="/images/logo-maisa.webp" alt="Maisa Palma — Fonoaudióloga" width="280" height="134" />
     </a>
     <nav class="site-header__nav" aria-label="Navegação principal">
       {navigation.map(({ href, label }) => <a href={href}>{label}</a>)}
     </nav>
-    <Button href={whatsappUrl} label="Agendar avaliação" external={whatsappUrl.startsWith('https://')} />
+    <Button href={whatsappUrl} label="Agendar avaliação" external={whatsappUrl.startsWith('https://')} whatsappLocation="cabecalho" />
   </div>
 </header>
 

@@ -13,7 +13,7 @@ const whatsappUrl = getWhatsAppUrl();
       <p class="section-eyebrow">{content.finalCta.eyebrow}</p>
       <h2 class="section-heading" id="final-cta-title">{content.finalCta.title}</h2>
       <p class="section-description">{content.finalCta.description}</p>
-      <Button href={whatsappUrl} label={content.finalCta.cta} external={whatsappUrl.startsWith('https://')} />
+      <Button href={whatsappUrl} label={content.finalCta.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="conversar" />
       <p class="final-cta__detail">{content.finalCta.detail}</p>
     </div>
     <PictureFrame

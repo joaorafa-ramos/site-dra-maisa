@@ -5,6 +5,8 @@ export interface SiteConfig {
   name: string;
   city: string;
   instagram: string;
+  instagramUrl: string;
+  publicSiteUrl?: string;
   whatsappNumber?: string;
   crfa?: string;
   address?: string;
@@ -16,6 +18,8 @@ export const siteConfig: SiteConfig = {
   name: 'Maisa Palma',
   city: 'Itapeva–SP',
   instagram: '@fonomaisapalma',
+  instagramUrl: 'https://instagram.com/fonomaisapalma',
+  publicSiteUrl: import.meta.env.PUBLIC_SITE_URL?.trim(),
   whatsappNumber: import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '',
 };
 

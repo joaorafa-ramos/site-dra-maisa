@@ -2,6 +2,60 @@ import { expect, test } from '@playwright/test';
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
+test('publishes complete, truthful SEO metadata and accessible optimized images', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page).toHaveTitle('Fonoaudióloga infantil em Itapeva | Maisa Palma');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'Seu filho fala pouco ou é difícil compreendê-lo? Conheça o atendimento infantil da fonoaudióloga Maisa Palma, em Itapeva. Converse pelo WhatsApp.',
+  );
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#F7F2EE');
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+  await expect(page.locator('meta[property="og:url"]')).toHaveCount(0);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Fonoaudióloga infantil em Itapeva | Maisa Palma');
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
+
+  const jsonLd = await page.locator('script[type="application/ld+json"]').textContent();
+  const schema = JSON.parse(jsonLd!);
+  expect(schema['@context']).toBe('https://schema.org');
+  expect(schema['@graph'].map((item: { '@type': string }) => item['@type'])).toEqual(['Person', 'ProfessionalService']);
+  expect(JSON.stringify(schema)).toContain('https://instagram.com/fonomaisapalma');
+  expect(JSON.stringify(schema)).not.toMatch(/telephone|streetAddress|CRFa/i);
+
+  const images = page.locator('img');
+  await expect(images).not.toHaveCount(0);
+  for (const image of await images.all()) {
+    await expect(image).toHaveAttribute('alt', /.+/);
+    await expect(image).toHaveAttribute('width', /\d+/);
+    await expect(image).toHaveAttribute('height', /\d+/);
+    const dimensions = await image.evaluate((element: HTMLImageElement) => {
+      const box = element.getBoundingClientRect();
+      return { deliveredWidth: element.naturalWidth, displayWidth: box.width };
+    });
+    expect(dimensions.deliveredWidth).toBeLessThanOrEqual(Math.ceil(dimensions.displayWidth * 2));
+  }
+  await expect(page.locator('.hero img')).toHaveAttribute('loading', 'eager');
+  await expect(page.locator('.hero img')).toHaveAttribute('fetchpriority', 'high');
+  for (const image of await page.locator('main img').all()) {
+    if (await image.evaluate(element => !element.closest('.hero'))) {
+      await expect(image).toHaveAttribute('loading', 'lazy');
+    }
+  }
+});
+
+test('WhatsApp CTAs dispatch the vendor-neutral conversion event with their origin and label', async ({ page }) => {
+  await page.goto('/');
+  const cta = page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
+  await expect(cta).toHaveAttribute('data-whatsapp-cta', '');
+  const event = await cta.evaluate(link => new Promise(resolve => {
+    window.addEventListener('whatsapp_click', customEvent => resolve((customEvent as CustomEvent).detail), { once: true });
+    (link as HTMLAnchorElement).onclick?.(new PointerEvent('click'));
+  }));
+  expect(event).toEqual({ cta_location: 'hero', cta_label: 'Conversar pelo WhatsApp' });
+});
+
 test('area cards expose only the active face and support Enter, click and Escape', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('#areas [data-flip-card]');

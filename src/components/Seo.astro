@@ -1,0 +1,59 @@
+---
+import { siteConfig } from '../config/site';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const siteUrl = (() => {
+  const configuredUrl = siteConfig.publicSiteUrl;
+  if (!configuredUrl) return undefined;
+  try {
+    const parsed = new URL(configuredUrl);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.origin : undefined;
+  } catch {
+    return undefined;
+  }
+})();
+
+const person: Record<string, unknown> = {
+  '@type': 'Person',
+  name: siteConfig.name,
+  jobTitle: 'Fonoaudióloga infantil',
+  sameAs: [siteConfig.instagramUrl],
+};
+const practice: Record<string, unknown> = {
+  '@type': 'ProfessionalService',
+  name: 'Maisa Palma — Fonoaudiologia infantil em Itapeva',
+  description,
+  areaServed: { '@type': 'City', name: 'Itapeva' },
+  sameAs: [siteConfig.instagramUrl],
+};
+
+if (siteUrl) {
+  person.url = siteUrl;
+  practice.url = siteUrl;
+}
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [person, practice],
+};
+---
+
+<meta name="description" content={description} />
+<meta name="theme-color" content="#F7F2EE" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{siteUrl && <link rel="canonical" href={siteUrl} />}
+{siteUrl && <meta property="og:url" content={siteUrl} />}
+<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>

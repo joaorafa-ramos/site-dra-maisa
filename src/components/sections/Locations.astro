@@ -10,12 +10,12 @@ import { locations } from '../../data/locations';
     </div>
     <div class="locations__grid">
       {locations.map((location) => (
-        <article class="location-card" data-location-card data-expanded="false">
+        <article class="location-card is-expanded" data-location-card data-expanded="true">
           <button
             class="location-card__trigger"
             type="button"
             data-location-toggle
-            aria-expanded="false"
+            aria-expanded="true"
             aria-controls={`location-map-${location.id}`}
             aria-label={`Ver mapa da ${location.name}`}
           >
@@ -30,9 +30,9 @@ import { locations } from '../../data/locations';
               <span class="location-card__name">{location.name}</span>
               <span class="location-card__address">{location.address}</span>
             </span>
-            <span class="location-card__hint">Clique para ver o mapa <span aria-hidden="true">+</span></span>
+            <span class="location-card__hint">Clique para ocultar o mapa <span aria-hidden="true">+</span></span>
           </button>
-          <div class="location-card__map" id={`location-map-${location.id}`} data-location-panel hidden>
+          <div class="location-card__map" id={`location-map-${location.id}`} data-location-panel>
             <div class="location-card__map-frame">
               <iframe
                 src={location.embedUrl}

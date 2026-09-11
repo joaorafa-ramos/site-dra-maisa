@@ -138,7 +138,7 @@ const setLocationExpanded = (card: HTMLElement, expanded: boolean) => {
 
 document.querySelectorAll<HTMLElement>('[data-location-card]').forEach(card => {
   const button = card.querySelector<HTMLButtonElement>('[data-location-toggle]')!;
-  setLocationExpanded(card, false);
+  setLocationExpanded(card, true);
 
   button.addEventListener('click', () => {
     setLocationExpanded(card, button.getAttribute('aria-expanded') !== 'true');

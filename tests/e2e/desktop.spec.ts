@@ -529,8 +529,8 @@ test('last content section provides the three confirmed clinic maps in the reque
   await expect(locations.locator('iframe').nth(2)).toHaveAttribute('src', /Rua%20Santos%20Dumont%2C%20221/);
 });
 
-// Catches a regression where locations revert to permanently exposed maps or lose keyboard-accessible expansion.
-test('location cards reveal their map through accessible independent controls', async ({ page }) => {
+// Catches maps being hidden at page load, which leaves the requested interactive locations unavailable without JavaScript.
+test('location cards expose all interactive maps on load and retain independent keyboard controls', async ({ page }) => {
   await page.goto('/');
   const locations = page.locator('section#localizacoes');
   const cards = locations.locator('.location-card');
@@ -538,21 +538,21 @@ test('location cards reveal their map through accessible independent controls', 
   const sinapse = cards.nth(1);
   const sensesToggle = senses.getByRole('button', { name: 'Ver mapa da Clínica Senses' });
 
-  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(senses.locator('iframe')).not.toBeVisible();
-  await expect(senses.getByText(/Clique para ver o mapa/)).toBeVisible();
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(senses.locator('iframe')).toBeVisible();
+  await expect(locations.locator('iframe:visible')).toHaveCount(3);
 
   await sensesToggle.focus();
   await page.keyboard.press('Enter');
 
-  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(senses.locator('iframe')).toBeVisible();
-  await expect(sinapse.getByRole('button', { name: 'Ver mapa da Clínica Sinapse' })).toHaveAttribute('aria-expanded', 'false');
-  await expect(sinapse.locator('iframe')).not.toBeVisible();
-
-  await page.keyboard.press('Escape');
   await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(senses.locator('iframe')).not.toBeVisible();
+  await expect(sinapse.getByRole('button', { name: 'Ver mapa da Clínica Sinapse' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(sinapse.locator('iframe')).toBeVisible();
+
+  await page.keyboard.press('Enter');
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(senses.locator('iframe')).toBeVisible();
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.

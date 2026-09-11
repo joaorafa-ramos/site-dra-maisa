@@ -217,6 +217,8 @@ test('signals uses an exclusive accordion beside the preserved portrait and a ce
   await expect(items.nth(1)).toHaveAttribute('open', '');
 
   await expect(reassurance).toHaveText('Um sinal isolado não define um diagnóstico. A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
+  await expect(reassurance).toHaveCSS('background-color', 'rgb(227, 240, 242)');
+  await expect(items.first().locator('summary')).toHaveCSS('text-transform', 'uppercase');
   await expect(cta).toHaveClass(/button--peach/);
   await expect(cta).toHaveCSS('background-image', /gradient/);
 });

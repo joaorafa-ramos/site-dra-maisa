@@ -221,9 +221,9 @@
 
 .signals__layout {
   display: grid;
-  grid-template-columns: minmax(280px, 42fr) minmax(0, 58fr);
+  grid-template-columns: minmax(300px, 45fr) minmax(0, 55fr);
   align-items: center;
-  gap: 64px;
+  gap: 48px;
 }
 
 .signals__copy,
@@ -239,6 +239,9 @@
 .signals__reassurance {
   max-width: 800px;
   margin: 0;
+  padding: 20px 28px;
+  border-radius: var(--radius-card);
+  background: var(--color-pale-blue);
   font-size: 16px;
   line-height: 1.6;
 }
@@ -250,12 +253,12 @@
 }
 
 .signals__portrait {
-  max-width: 440px;
+  max-width: 480px;
   justify-self: start;
 }
 
 .signals__list {
-  margin-top: 32px;
+  margin-top: 24px;
   border-top: 1px solid rgb(48 86 106 / 0.18);
 }
 
@@ -269,14 +272,16 @@
   align-items: center;
   gap: 20px;
   min-width: 0;
-  min-height: 76px;
-  padding: 16px 0;
+  min-height: 66px;
+  padding: 12px 0;
   color: var(--color-navy);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.04em;
   line-height: 1.4;
   list-style: none;
+  text-transform: uppercase;
 }
 
 .signal-item summary::-webkit-details-marker {
@@ -297,7 +302,7 @@
 
 .signal-item p {
   margin: 0;
-  padding: 0 44px 24px 0;
+  padding: 0 44px 20px 0;
   font-size: 16px;
   line-height: 1.6;
 }

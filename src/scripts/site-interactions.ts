@@ -97,3 +97,14 @@ faqDetails.forEach(details => {
     revealFaqAnswer(details);
   });
 });
+
+const signalDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('details[name="signals"]'));
+
+signalDetails.forEach(details => {
+  details.addEventListener('toggle', () => {
+    if (!details.open) return;
+    signalDetails.forEach(sibling => {
+      if (sibling !== details) sibling.open = false;
+    });
+  });
+});

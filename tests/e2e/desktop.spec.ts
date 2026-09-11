@@ -174,24 +174,24 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
   expect(sizes.content).toBe(sizes.viewport);
 });
 
-test('signals introduction uses the calm two-color treatment and semantic card icons', async ({ page }) => {
+test('signals uses an exclusive accordion beside the preserved portrait and a centered peach CTA', async ({ page }) => {
   await page.goto('/');
 
   const signals = page.locator('section.signals');
-  const intro = signals.locator('.signals__copy');
-  await expect(intro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
-  await expect(intro.locator('.signals__reassurance')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect(intro.locator('.signals__reassurance')).toHaveCSS('color', 'rgb(48, 86, 106)');
-  await expect(intro.getByRole('link')).toHaveCSS('background-image', /gradient/);
-  await expect(intro.getByRole('link')).toHaveCSS('color', 'rgb(247, 242, 238)');
+  const layout = signals.locator('.signals__layout');
+  const portrait = signals.locator('.signals__portrait img');
+  const items = signals.locator('details[name="signals"]');
+  const reassurance = signals.locator('.signals__reassurance');
+  const cta = signals.locator('.signals__action .button');
 
-  const list = signals.locator('ol.signals__list');
-  await expect(list).toHaveCount(1);
-  await expect(list.locator(':scope > li.signal-card')).toHaveCount(6);
-  await expect(list.locator('.signal-card__number')).toHaveText([
-    '01', '02', '03', '04', '05', '06',
-  ]);
-  await expect(list.locator('.signal-card h3')).toHaveText([
+  await expect(layout).toHaveCount(1);
+  await expect(portrait).toHaveAttribute('src', '/images/sinais-maisa.optimized.webp');
+  await expect(portrait).toHaveAttribute(
+    'alt',
+    'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
+  );
+  await expect(items).toHaveCount(6);
+  await expect(items.locator('summary')).toHaveText([
     'Fala pouco',
     'Troca ou omite sons',
     'Nem sempre é compreendida',
@@ -199,7 +199,7 @@ test('signals introduction uses the calm two-color treatment and semantic card i
     'Entende, mas não consegue responder',
     'Evita participar de conversas',
   ]);
-  await expect(list.locator('.signal-card p')).toHaveText([
+  await expect(items.locator('p')).toHaveText([
     'Você tem dúvidas sobre a quantidade de palavras ou a formação de frases para a idade do seu filho.',
     'Algumas palavras ficam difíceis de entender no dia a dia.',
     'Pessoas próximas pedem para repetir com frequência.',
@@ -207,45 +207,43 @@ test('signals introduction uses the calm two-color treatment and semantic card i
     'Parece compreender, porém encontra dificuldade para organizar a fala.',
     'Você percebe que a criança se incomoda ou deixa de participar quando precisa falar.',
   ]);
+  await expect(signals.locator('[data-signal-icon], .signal-card__number')).toHaveCount(0);
+  await expect(signals.locator('details[name="signals"][open]')).toHaveCount(0);
 
-  const portrait = signals.locator('.signals__portrait img');
-  await expect(portrait).toHaveAttribute('src', '/images/sinais-maisa.optimized.webp');
-  await expect(portrait).toHaveAttribute(
-    'alt',
-    'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
-  );
-  const icons = signals.locator('[data-signal-icon]');
-  await expect(icons).toHaveCount(6);
-  await expect(icons.evaluateAll(elements => elements.map(element => element.getAttribute('data-signal-icon')))).resolves.toEqual([
-    'few-words',
-    'sound-change',
-    'clarity',
-    'frustration',
-    'understanding',
-    'conversation-avoidance',
-  ]);
-  for (const icon of await icons.all()) {
-    await expect(icon).toHaveAttribute('aria-hidden', 'true');
-    await expect(icon.locator('svg')).toHaveCount(1);
-  }
+  await items.nth(0).locator('summary').click();
+  await expect(items.nth(0)).toHaveAttribute('open', '');
+  await items.nth(1).locator('summary').click();
+  await expect(items.nth(0)).not.toHaveAttribute('open', '');
+  await expect(items.nth(1)).toHaveAttribute('open', '');
+
+  await expect(reassurance).toHaveText('Um sinal isolado não define um diagnóstico. A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
+  await expect(cta).toHaveClass(/button--peach/);
+  await expect(cta).toHaveCSS('background-image', /gradient/);
 });
 
-test('evaluation intro and signal cards use a calm filled visual language with a light hover response', async ({ page }) => {
+test('evaluation intro and signal accordions use a calm filled visual language with a light hover response', async ({ page }) => {
   await page.goto('/');
   const evaluationIntro = page.locator('#avaliacao .evaluation__intro');
   await expect(evaluationIntro.locator('.section-eyebrow')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-heading')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
 
-  const firstCard = page.locator('.signal-card').first();
-  const icon = firstCard.locator('.signal-card__icon svg');
-  await expect(icon).toHaveAttribute('fill', 'currentColor');
-  await expect(firstCard).not.toHaveCSS('transition-duration', '0s');
-  const before = await firstCard.boundingBox();
-  await firstCard.hover();
-  const after = await firstCard.boundingBox();
-  expect(after!.y).toBeLessThan(before!.y);
-  await expect(firstCard).toHaveCSS('box-shadow', /rgb/);
+  const firstItem = page.locator('details[name="signals"]').first();
+  await expect(firstItem).not.toHaveCSS('transition-duration', '0s');
+  await firstItem.locator('summary').hover();
+  await expect(firstItem.locator('summary')).toHaveCSS('color', 'rgb(48, 86, 106)');
+});
+
+test('signals stacks the portrait above the accordion before the two-column layout becomes cramped', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  await page.goto('/');
+
+  const portrait = page.locator('.signals__portrait');
+  const copy = page.locator('.signals__copy');
+  const portraitBox = await portrait.boundingBox();
+  const copyBox = await copy.boundingBox();
+
+  expect(copyBox!.y).toBeGreaterThanOrEqual(portraitBox!.y + portraitBox!.height + 32);
 });
 
 test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
@@ -580,7 +578,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
     await expect(about).toBeVisible();
     await expect(page.locator('#sobre')).toHaveCount(1);
 
-    const cards = signals.locator('.signal-card');
+    const cards = signals.locator('details.signal-item');
     await expect(cards).toHaveCount(6);
     const boxes = await cards.evaluateAll(elements => elements.map(element => {
       const box = element.getBoundingClientRect();
@@ -589,8 +587,8 @@ for (const width of [1024, 1280, 1440, 1920]) {
     for (let index = 0; index < boxes.length; index += 1) {
       expect(Math.abs(boxes[index]!.x - boxes[0]!.x)).toBeLessThan(1);
       expect(Math.abs(boxes[index]!.width - boxes[0]!.width)).toBeLessThan(1);
-      expect(boxes[index]!.height).toBeLessThanOrEqual(112);
-      if (index > 0) expect(boxes[index]!.y).toBeGreaterThan(boxes[index - 1]!.bottom);
+      expect(boxes[index]!.height).toBeLessThanOrEqual(96);
+      if (index > 0) expect(boxes[index]!.y).toBeGreaterThanOrEqual(boxes[index - 1]!.bottom);
     }
 
     for (const section of [signals, about]) {
@@ -605,7 +603,8 @@ for (const width of [1024, 1280, 1440, 1920]) {
       await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
     }
 
-    const textBlocks = page.locator('.signals h2, .signals h3, .signal-card p, .about h2');
+    await cards.first().locator('summary').click();
+    const textBlocks = page.locator('.signals h2, .signal-item summary, .signal-item[open] p, .about h2');
     for (const block of await textBlocks.all()) {
       await expect(block).toBeVisible();
       const geometry = await block.evaluate(element => {

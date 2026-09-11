@@ -273,7 +273,7 @@ for (const width of [1024, 1440, 1920]) {
     await expect(hero.getByText('FONOAUDIOLOGIA INFANTIL • ITAPEVA–SP', { exact: true })).toBeVisible();
     await expect(hero.getByText('Seu filho fala pouco, troca sons ou nem sempre é compreendido? A avaliação fonoaudiológica ajuda a entender suas necessidades e orientar os próximos passos.', { exact: true })).toBeVisible();
     const image = hero.locator('img');
-    await expect(image).toHaveAttribute('src', '/images/HERO.webp');
+    await expect(image).toHaveAttribute('src', '/images/HERO-extended.png');
     await expect(image).toHaveCSS('object-fit', 'cover');
     expect(await image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
     const cta = hero.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
@@ -413,7 +413,7 @@ test('reveal targets remain readable with JavaScript disabled or reduced motion 
 });
 
 test('hero message and CTA remain available when the photograph cannot load', async ({ page }) => {
-  await page.route('**/images/HERO.webp', route => route.abort());
+  await page.route('**/images/HERO-extended.png', route => route.abort());
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Cada pequena voz merece ser ouvida.' })).toBeVisible();
   await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });

@@ -2,6 +2,7 @@
 import Button from '../ui/Button.astro';
 import PictureFrame from '../ui/PictureFrame.astro';
 import SectionHeading from '../ui/SectionHeading.astro';
+import SignalIcon from '../ui/SignalIcon.astro';
 import { getWhatsAppUrl } from '../../config/site';
 import { content, signals } from '../../data/content';
 
@@ -16,7 +17,7 @@ const whatsappUrl = getWhatsAppUrl();
         <SectionHeading>{content.signals.title}</SectionHeading>
         <p class="section-description">{content.signals.description}</p>
         <p class="signals__reassurance">{content.signals.reassurance}</p>
-        <Button href={whatsappUrl} label={content.signals.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="sinais" />
+        <Button href={whatsappUrl} label={content.signals.cta} variant="navy" external={whatsappUrl.startsWith('https://')} whatsappLocation="sinais" />
       </div>
       <PictureFrame
         class="signals__portrait"
@@ -29,7 +30,7 @@ const whatsappUrl = getWhatsAppUrl();
     <ul class="signals__grid" role="list">
       {signals.map(signal => (
         <li class="signal-card">
-          <span class="signal-card__marker" aria-hidden="true"></span>
+          <SignalIcon icon={signal.icon} />
           <h3>{signal.title}</h3>
           <p>{signal.description}</p>
         </li>

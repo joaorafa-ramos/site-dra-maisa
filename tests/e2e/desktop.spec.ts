@@ -174,6 +174,34 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
   expect(sizes.content).toBe(sizes.viewport);
 });
 
+test('signals introduction uses the calm two-color treatment and semantic card icons', async ({ page }) => {
+  await page.goto('/');
+
+  const signals = page.locator('section.signals');
+  const intro = signals.locator('.signals__copy');
+  await expect(intro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(intro.locator('.signals__reassurance')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(intro.locator('.signals__reassurance')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(intro.getByRole('link')).toHaveCSS('background-color', 'rgb(48, 86, 106)');
+  await expect(intro.getByRole('link')).toHaveCSS('color', 'rgb(247, 242, 238)');
+
+  await expect(signals.locator('.signal-card__marker')).toHaveCount(0);
+  const icons = signals.locator('[data-signal-icon]');
+  await expect(icons).toHaveCount(6);
+  await expect(icons.evaluateAll(elements => elements.map(element => element.getAttribute('data-signal-icon')))).resolves.toEqual([
+    'few-words',
+    'sound-change',
+    'clarity',
+    'frustration',
+    'understanding',
+    'conversation-avoidance',
+  ]);
+  for (const icon of await icons.all()) {
+    await expect(icon).toHaveAttribute('aria-hidden', 'true');
+    await expect(icon.locator('svg')).toHaveCount(1);
+  }
+});
+
 test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
   await page.goto('/');
 

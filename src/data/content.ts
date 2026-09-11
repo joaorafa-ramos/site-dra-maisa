@@ -1,6 +1,9 @@
+import type { SignalIconName } from '../types/signals';
+
 export interface Signal {
   title: string;
   description: string;
+  icon: SignalIconName;
 }
 
 export interface EvaluationStep {
@@ -32,28 +35,34 @@ export const signals: Signal[] = [
     title: 'Fala pouco',
     description:
       'Você tem dúvidas sobre a quantidade de palavras ou a formação de frases para a idade do seu filho.',
+    icon: 'few-words',
   },
   {
     title: 'Troca ou omite sons',
     description: 'Algumas palavras ficam difíceis de entender no dia a dia.',
+    icon: 'sound-change',
   },
   {
     title: 'Nem sempre é compreendida',
     description: 'Pessoas próximas pedem para repetir com frequência.',
+    icon: 'clarity',
   },
   {
     title: 'Fica frustrada ao tentar falar',
     description: 'Chora, se irrita ou desiste quando não consegue se expressar.',
+    icon: 'frustration',
   },
   {
     title: 'Entende, mas não consegue responder',
     description:
       'Parece compreender, porém encontra dificuldade para organizar a fala.',
+    icon: 'understanding',
   },
   {
     title: 'Evita participar de conversas',
     description:
       'Você percebe que a criança se incomoda ou deixa de participar quando precisa falar.',
+    icon: 'conversation-avoidance',
   },
 ];
 

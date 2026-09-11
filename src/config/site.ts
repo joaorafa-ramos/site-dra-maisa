@@ -20,7 +20,7 @@ export const siteConfig: SiteConfig = {
   instagram: '@fonomaisapalma',
   instagramUrl: 'https://instagram.com/fonomaisapalma',
   publicSiteUrl: import.meta.env.PUBLIC_SITE_URL?.trim(),
-  whatsappNumber: import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '',
+  whatsappNumber: import.meta.env.PUBLIC_WHATSAPP_NUMBER?.trim() || '5515992719708',
 };
 
 export const buildWhatsAppUrl = (phone: string, message: string): string => {

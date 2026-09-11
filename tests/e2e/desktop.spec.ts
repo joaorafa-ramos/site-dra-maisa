@@ -334,6 +334,17 @@ test('header overlays the hero from the page top while scrolling state changes',
   await expect(header).toHaveAttribute('data-scrolled', 'false');
 });
 
+// Catches low-contrast navigation links or an accidental color change to the header CTA.
+test('header navigation links are white while the peach CTA keeps its existing dark text', async ({ page }) => {
+  await page.goto('/');
+  const header = page.getByRole('banner');
+
+  for (const link of await header.locator('.site-header__nav a').all()) {
+    await expect(link).toHaveCSS('color', 'rgb(247, 242, 238)');
+  }
+  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toHaveCSS('color', 'rgb(69, 63, 59)');
+});
+
 test('scrolling down collapses the header to a hover rail and pointer reveals it again', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 700 });
   await page.goto('/');

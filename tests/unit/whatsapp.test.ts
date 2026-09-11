@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildWhatsAppUrl, normalizePublicSiteUrl } from '../../src/config/site';
+import { buildWhatsAppUrl, getWhatsAppUrl, normalizePublicSiteUrl } from '../../src/config/site';
 
 describe('buildWhatsAppUrl', () => {
   it('normalizes the phone and encodes the message', () => {
@@ -10,6 +10,12 @@ describe('buildWhatsAppUrl', () => {
 
   it('falls back to the contact section before a number is configured', () => {
     expect(buildWhatsAppUrl('', 'Olá')).toBe('#contato');
+  });
+});
+
+describe('getWhatsAppUrl', () => {
+  it('uses configured public contact number when deployment environment omits it', () => {
+    expect(getWhatsAppUrl('Olá')).toBe('https://wa.me/5515992719708?text=Ol%C3%A1');
   });
 });
 

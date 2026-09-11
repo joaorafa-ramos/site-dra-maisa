@@ -744,11 +744,61 @@
 }
 
 .contact {
+  --cta-progress: 0.5;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--color-cream);
+}
+
+.contact__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Parallax dos blobs: 0% → 30% conforme --cta-progress (0 → 1). */
+  transform: translateY(calc(var(--cta-progress) * 30%));
+}
+
+.contact__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+}
+
+.contact__blob--blue {
+  top: -12%;
+  left: 30%;
+  width: 600px;
+  height: 600px;
+  background: rgb(227 240 242 / 0.9);
+}
+
+.contact__blob--peach {
+  right: 18%;
+  bottom: -14%;
+  width: 500px;
+  height: 500px;
+  background: rgb(215 169 141 / 0.35);
+}
+
+.contact__dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 2px 2px, rgb(74 69 65 / 0.4) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.1;
 }
 
 .contact__layout {
   max-width: 980px;
+  /* translateY: +10% → 0 → −10%; scale: 0.95 → 1 → 0.95 (pico no centro). */
+  --cta-centered: calc(1 - abs(var(--cta-progress) - 0.5) * 2);
+  transform:
+    translateY(calc((0.5 - var(--cta-progress)) * 20%))
+    scale(calc(0.95 + 0.05 * var(--cta-centered)));
+  transform-origin: center;
+  will-change: transform;
 }
 
 .contact__panel {

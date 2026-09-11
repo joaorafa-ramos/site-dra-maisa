@@ -148,4 +148,9 @@
   .cta-pending .contact__glow {
     transform: none !important;
   }
+
+  .contact__layout,
+  .contact__backdrop {
+    transform: none !important;
+  }
 }

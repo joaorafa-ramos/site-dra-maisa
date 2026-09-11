@@ -6,9 +6,14 @@ import { content } from '../../data/content';
 const whatsappUrl = getWhatsAppUrl();
 ---
 
-<section class="section contact" id="contato" aria-labelledby="contact-title">
+<section class="section contact" id="contato" aria-labelledby="contact-title" data-cta-scroll>
+  <div class="contact__backdrop" aria-hidden="true">
+    <span class="contact__blob contact__blob--blue"></span>
+    <span class="contact__blob contact__blob--peach"></span>
+    <span class="contact__dots"></span>
+  </div>
   <div class="container contact__layout" data-cta>
-    <div class="contact__panel">
+    <div class="contact__panel" data-cta-panel>
       <div class="contact__glow" aria-hidden="true"></div>
       <div class="contact__copy">
         <p class="section-eyebrow" data-cta-step style="--cta-delay: 100ms">{content.contact.eyebrow}</p>

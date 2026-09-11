@@ -671,3 +671,64 @@ for (const width of [1024, 1280, 1440, 1920]) {
     expect(pageWidth.content).toBe(pageWidth.viewport);
   });
 }
+
+// Catches a static CTA: the panel must translate/scale with scroll progress and the backdrop must parallax.
+test('contact CTA moves with scroll progress and settles centered at full scale', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const section = page.locator('section#contato');
+  const layout = section.locator('.contact__layout[data-cta]');
+  await expect(section).toHaveAttribute('data-cta-scroll', '');
+  await expect(section.locator('.contact__backdrop[aria-hidden="true"]')).toHaveCount(1);
+  await expect(section.locator('.contact__blob--blue')).toHaveCount(1);
+  await expect(section.locator('.contact__blob--peach')).toHaveCount(1);
+  await expect(section.locator('.contact__dots')).toHaveCount(1);
+
+  const readProgress = () => section.evaluate(element => parseFloat(getComputedStyle(element).getPropertyValue('--cta-progress')));
+  const readMatrix = () => layout.evaluate(element => getComputedStyle(element).transform);
+
+  // Section just entering from the bottom: progress near 0, panel pushed down and shrunk.
+  await section.evaluate(element => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - window.innerHeight + 40);
+  });
+  await expect.poll(readProgress, { timeout: 3000 }).toBeLessThan(0.15);
+  const entering = await readMatrix();
+  expect(entering).not.toBe('none');
+  const enteringScale = parseFloat(entering.replace('matrix(', '').split(',')[0]!);
+  expect(enteringScale).toBeLessThan(0.98);
+
+  // Section centered: progress near 0.5, scale back to ~1.
+  await section.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    window.scrollTo(0, box.top + window.scrollY - (window.innerHeight - box.height) / 2);
+  });
+  await expect.poll(readProgress, { timeout: 3000 }).toBeGreaterThan(0.4);
+  await expect.poll(readProgress, { timeout: 3000 }).toBeLessThan(0.6);
+  await expect.poll(async () => parseFloat((await readMatrix()).replace('matrix(', '').split(',')[0]!), { timeout: 3000 }).toBeGreaterThan(0.99);
+
+  const blobTransform = await section.locator('.contact__backdrop').evaluate(element => getComputedStyle(element).transform);
+  expect(blobTransform).not.toBe('none');
+});
+
+test('contact CTA motion is inert with reduced motion and without JavaScript', async ({ browser }) => {
+  const reduced = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const reducedPage = await reduced.newPage();
+  await reducedPage.goto('/');
+  const layout = reducedPage.locator('section#contato .contact__layout[data-cta]');
+  await layout.scrollIntoViewIfNeeded();
+  await expect(layout).toHaveCSS('transform', 'none');
+  await expect(reducedPage.locator('section#contato .contact__backdrop')).toHaveCSS('transform', 'none');
+  await expect(reducedPage.locator('section#contato .section-heading')).toHaveCSS('opacity', '1');
+  await reduced.close();
+
+  const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
+  const noJsPage = await noJs.newPage();
+  await noJsPage.goto('/');
+  const panel = noJsPage.locator('section#contato .contact__panel');
+  await panel.scrollIntoViewIfNeeded();
+  await expect(panel).toBeVisible();
+  await expect(noJsPage.locator('section#contato .section-heading')).toHaveCSS('opacity', '1');
+  await expect(noJsPage.locator('section#contato').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeVisible();
+  await noJs.close();
+});

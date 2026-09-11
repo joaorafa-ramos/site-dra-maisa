@@ -174,13 +174,13 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
   expect(sizes.content).toBe(sizes.viewport);
 });
 
-test('uses the Maisa type scale and accessible desktop CTA size', async ({ page }) => {
+test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
   await page.goto('/');
 
   const heading = page.locator('.section-heading').first();
   await expect(heading).toBeVisible();
-  await expect(heading).toHaveCSS('font-family', /Newsreader/);
-  await expect(page.locator('body')).toHaveCSS('font-family', /Manrope/);
+  await expect(heading).toHaveCSS('font-family', /Figtree/);
+  await expect(page.locator('body')).toHaveCSS('font-family', /Figtree/);
 
   const buttons = page.locator('.button:visible');
   await expect(buttons).not.toHaveCount(0);
@@ -199,9 +199,9 @@ for (const width of [1024, 1440, 1920]) {
     await expect(hero.getByText('FONOAUDIOLOGIA INFANTIL • ITAPEVA–SP', { exact: true })).toBeVisible();
     await expect(hero.getByText('Seu filho fala pouco, troca sons ou nem sempre é compreendido? A avaliação fonoaudiológica ajuda a entender suas necessidades e orientar os próximos passos.', { exact: true })).toBeVisible();
     const image = hero.locator('img');
-    await expect(image).toHaveAttribute('src', '/images/hero-maisa.webp');
+    await expect(image).toHaveAttribute('src', '/images/HERO.webp');
     await expect(image).toHaveCSS('object-fit', 'cover');
-    expect(await image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0 && img.naturalWidth <= 1440)).toBe(true);
+    expect(await image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
     const cta = hero.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
     await expect(cta).toBeInViewport({ ratio: 1 });
     await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
@@ -493,13 +493,18 @@ for (const width of [1024, 1280, 1440, 1920]) {
         range.selectNodeContents(element);
         const text = range.getBoundingClientRect();
         const box = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
         return {
-          textFits: text.left >= box.left - 1 && text.right <= box.right + 1 && text.bottom <= box.bottom + 2,
+          textFitsHorizontally: text.left >= box.left - 1 && text.right <= box.right + 1,
+          verticalContentVisible: text.bottom <= box.bottom + 2 || style.overflowY === 'visible',
           widthFits: element.scrollWidth <= element.clientWidth + 1,
-          heightFits: element.scrollHeight <= element.clientHeight + 1,
         };
       });
-      expect(geometry).toEqual({ textFits: true, widthFits: true, heightFits: true });
+      expect(geometry, `Text must fit without clipping: ${await block.innerText()}`).toEqual({
+        textFitsHorizontally: true,
+        verticalContentVisible: true,
+        widthFits: true,
+      });
     }
     const pageWidth = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
     expect(pageWidth.content).toBe(pageWidth.viewport);

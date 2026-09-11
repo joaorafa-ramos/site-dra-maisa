@@ -185,7 +185,35 @@ test('signals introduction uses the calm two-color treatment and semantic card i
   await expect(intro.getByRole('link')).toHaveCSS('background-image', /gradient/);
   await expect(intro.getByRole('link')).toHaveCSS('color', 'rgb(247, 242, 238)');
 
-  await expect(signals.locator('.signal-card__marker')).toHaveCount(0);
+  const list = signals.locator('ol.signals__list');
+  await expect(list).toHaveCount(1);
+  await expect(list.locator(':scope > li.signal-card')).toHaveCount(6);
+  await expect(list.locator('.signal-card__number')).toHaveText([
+    '01', '02', '03', '04', '05', '06',
+  ]);
+  await expect(list.locator('.signal-card h3')).toHaveText([
+    'Fala pouco',
+    'Troca ou omite sons',
+    'Nem sempre é compreendida',
+    'Fica frustrada ao tentar falar',
+    'Entende, mas não consegue responder',
+    'Evita participar de conversas',
+  ]);
+  await expect(list.locator('.signal-card p')).toHaveText([
+    'Você tem dúvidas sobre a quantidade de palavras ou a formação de frases para a idade do seu filho.',
+    'Algumas palavras ficam difíceis de entender no dia a dia.',
+    'Pessoas próximas pedem para repetir com frequência.',
+    'Chora, se irrita ou desiste quando não consegue se expressar.',
+    'Parece compreender, porém encontra dificuldade para organizar a fala.',
+    'Você percebe que a criança se incomoda ou deixa de participar quando precisa falar.',
+  ]);
+
+  const portrait = signals.locator('.signals__portrait img');
+  await expect(portrait).toHaveAttribute('src', '/images/sinais-maisa.optimized.webp');
+  await expect(portrait).toHaveAttribute(
+    'alt',
+    'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
+  );
   const icons = signals.locator('[data-signal-icon]');
   await expect(icons).toHaveCount(6);
   await expect(icons.evaluateAll(elements => elements.map(element => element.getAttribute('data-signal-icon')))).resolves.toEqual([
@@ -556,16 +584,14 @@ for (const width of [1024, 1280, 1440, 1920]) {
     await expect(cards).toHaveCount(6);
     const boxes = await cards.evaluateAll(elements => elements.map(element => {
       const box = element.getBoundingClientRect();
-      return { x: box.x, y: box.y, width: box.width, bottom: box.bottom };
+      return { x: box.x, y: box.y, width: box.width, height: box.height, bottom: box.bottom };
     }));
-    for (let column = 0; column < 3; column++) {
-      expect(Math.abs(boxes[column]!.y - boxes[0]!.y)).toBeLessThan(1);
-      expect(Math.abs(boxes[column + 3]!.y - boxes[3]!.y)).toBeLessThan(1);
-      expect(Math.abs(boxes[column]!.x - boxes[column + 3]!.x)).toBeLessThan(1);
-      expect(Math.abs(boxes[column]!.width - boxes[0]!.width)).toBeLessThan(1);
-      if (column > 0) expect(boxes[column]!.x).toBeGreaterThan(boxes[column - 1]!.x + boxes[column - 1]!.width);
+    for (let index = 0; index < boxes.length; index += 1) {
+      expect(Math.abs(boxes[index]!.x - boxes[0]!.x)).toBeLessThan(1);
+      expect(Math.abs(boxes[index]!.width - boxes[0]!.width)).toBeLessThan(1);
+      expect(boxes[index]!.height).toBeLessThanOrEqual(112);
+      if (index > 0) expect(boxes[index]!.y).toBeGreaterThan(boxes[index - 1]!.bottom);
     }
-    expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
 
     for (const section of [signals, about]) {
       const portrait = section.locator('.picture-frame img');

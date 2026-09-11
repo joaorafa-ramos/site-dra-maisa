@@ -27,14 +27,19 @@ const whatsappUrl = getWhatsAppUrl();
         height={1000}
       />
     </div>
-    <ul class="signals__grid" role="list">
-      {signals.map(signal => (
+    <ol class="signals__list">
+      {signals.map((signal, index) => (
         <li class="signal-card">
+          <span class="signal-card__number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
           <SignalIcon icon={signal.icon} />
-          <h3>{signal.title}</h3>
-          <p>{signal.description}</p>
+          <div class="signal-card__content">
+            <h3>{signal.title}</h3>
+            <p>{signal.description}</p>
+          </div>
         </li>
       ))}
-    </ul>
+    </ol>
   </div>
 </section>

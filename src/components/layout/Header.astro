@@ -11,7 +11,7 @@ const navigation = [
 ];
 ---
 
-<header class="site-header" data-scrolled="false">
+<header class="site-header" data-scrolled="false" data-hidden="false" data-hovered="false" data-focused="false">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="#conteudo" aria-label="Maisa Palma — início">
       <img src="/images/logo-maisa.webp" alt="Maisa Palma — Fonoaudióloga" width="280" height="134" />
@@ -25,9 +25,54 @@ const navigation = [
 
 <script>
   const header = document.querySelector<HTMLElement>('.site-header');
-  const updateHeader = () => {
-    if (header) header.dataset.scrolled = String(window.scrollY > 24);
+  let previousScrollY = window.scrollY;
+
+  const updateVisibility = () => {
+    if (!header) return;
+    const isPastTop = window.scrollY > 24;
+    const isHovered = header.dataset.hovered === 'true';
+    const isFocused = header.dataset.focused === 'true';
+    header.dataset.hidden = String(isPastTop && !isHovered && !isFocused);
   };
+
+  const updateHeader = () => {
+    if (!header) return;
+    const currentScrollY = window.scrollY;
+    header.dataset.scrolled = String(currentScrollY > 24);
+
+    if (currentScrollY <= 24) {
+      header.dataset.hidden = 'false';
+    } else if (currentScrollY > previousScrollY) {
+      updateVisibility();
+    }
+
+    previousScrollY = currentScrollY;
+  };
+
   updateHeader();
   window.addEventListener('scroll', updateHeader, { passive: true });
+
+  header?.addEventListener('pointerenter', () => {
+    header.dataset.hovered = 'true';
+    header.dataset.hidden = 'false';
+  });
+
+  header?.addEventListener('pointerleave', () => {
+    header.dataset.hovered = 'false';
+    updateVisibility();
+  });
+
+  header?.addEventListener('focusin', () => {
+    header.dataset.focused = 'true';
+    header.dataset.hidden = 'false';
+  });
+
+  header?.addEventListener('focusout', () => {
+    requestAnimationFrame(() => {
+      if (!header?.contains(document.activeElement)) {
+        header!.dataset.focused = 'false';
+        updateVisibility();
+      }
+    });
+  });
 </script>

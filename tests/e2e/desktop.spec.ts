@@ -182,7 +182,7 @@ test('signals introduction uses the calm two-color treatment and semantic card i
   await expect(intro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(intro.locator('.signals__reassurance')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await expect(intro.locator('.signals__reassurance')).toHaveCSS('color', 'rgb(48, 86, 106)');
-  await expect(intro.getByRole('link')).toHaveCSS('background-color', 'rgb(48, 86, 106)');
+  await expect(intro.getByRole('link')).toHaveCSS('background-image', /gradient/);
   await expect(intro.getByRole('link')).toHaveCSS('color', 'rgb(247, 242, 238)');
 
   await expect(signals.locator('.signal-card__marker')).toHaveCount(0);
@@ -200,6 +200,24 @@ test('signals introduction uses the calm two-color treatment and semantic card i
     await expect(icon).toHaveAttribute('aria-hidden', 'true');
     await expect(icon.locator('svg')).toHaveCount(1);
   }
+});
+
+test('evaluation intro and signal cards use a calm filled visual language with a light hover response', async ({ page }) => {
+  await page.goto('/');
+  const evaluationIntro = page.locator('#avaliacao .evaluation__intro');
+  await expect(evaluationIntro.locator('.section-eyebrow')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(evaluationIntro.locator('.section-heading')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(evaluationIntro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
+
+  const firstCard = page.locator('.signal-card').first();
+  const icon = firstCard.locator('.signal-card__icon svg');
+  await expect(icon).toHaveAttribute('fill', 'currentColor');
+  await expect(firstCard).not.toHaveCSS('transition-duration', '0s');
+  const before = await firstCard.boundingBox();
+  await firstCard.hover();
+  const after = await firstCard.boundingBox();
+  expect(after!.y).toBeLessThan(before!.y);
+  await expect(firstCard).toHaveCSS('box-shadow', /rgb/);
 });
 
 test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
@@ -269,7 +287,7 @@ for (const width of [1024, 1440, 1920]) {
   });
 }
 
-test('header stays visible without changing height when its scroll border appears', async ({ page }) => {
+test('header keeps its layout height while scrolling state changes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 700 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
@@ -281,9 +299,45 @@ test('header stays visible without changing height when its scroll border appear
   const scrolled = await header.boundingBox();
   expect(scrolled!.y).toBe(0);
   expect(scrolled!.height).toBe(initial!.height);
-  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toBeInViewport({ ratio: 1 });
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(header).toHaveAttribute('data-scrolled', 'false');
+});
+
+test('scrolling down collapses the header to a hover rail and pointer reveals it again', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 });
+  await page.goto('/');
+  const header = page.getByRole('banner');
+
+  await page.evaluate(() => window.scrollTo(0, 180));
+  await expect(header).toHaveAttribute('data-hidden', 'true');
+  expect((await header.boundingBox())!.y).toBeLessThanOrEqual(-70);
+
+  await page.mouse.move(720, 6);
+  await expect(header).toHaveAttribute('data-hovered', 'true');
+  await expect(header).toHaveAttribute('data-hidden', 'false');
+  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toBeInViewport({ ratio: 1 });
+
+  await page.mouse.move(720, 300);
+  await expect(header).toHaveAttribute('data-hovered', 'false');
+  await expect(header).toHaveAttribute('data-hidden', 'true');
+});
+
+test('header stays genuinely glass-transparent and CTAs retain a restrained visible glow', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 });
+  await page.goto('/');
+  const header = page.getByRole('banner');
+  await expect(header).toHaveCSS('background-color', 'rgba(247, 242, 238, 0.15)');
+  await expect(header).toHaveCSS('backdrop-filter', /blur/);
+
+  await page.evaluate(() => window.scrollTo(0, 120));
+  await expect(header).toHaveAttribute('data-scrolled', 'true');
+  await expect(header).toHaveCSS('background-color', 'rgba(247, 242, 238, 0.15)');
+
+  for (const button of [page.locator('.hero .button'), page.locator('.signals .button--navy')]) {
+    await expect(button).toBeVisible();
+    await expect(button).toHaveCSS('box-shadow', /rgb/);
+    await expect(button).toHaveCSS('background-image', /gradient/);
+  }
 });
 
 // Catches reveal code that hides server-rendered content, skips the observer callback,
@@ -401,35 +455,47 @@ test('FAQ answers remain readable without JavaScript and skip reveal motion when
   await reduced.close();
 });
 
-test('unified contact conversion keeps its accessible portrait slot and 4:5 desktop geometry', async ({ page }) => {
+test('contact CTA is a centered, photo-free conversion panel with the existing WhatsApp route', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const section = page.locator('section#contato');
-  const copy = section.locator('.contact__copy');
-  const portrait = section.locator('.contact__portrait');
 
   await expect(section).toHaveAttribute('aria-labelledby', 'contact-title');
   await expect(section.locator('#contact-title')).toHaveCount(1);
+  await expect(section.locator('.contact__panel')).toBeVisible();
   await expect(section.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para começar uma conversa.');
   await expect(section.getByText('Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
-  await expect(section.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
-  await expect(portrait.locator('img')).toHaveCount(0);
-  await expect(portrait.getByRole('img', { name: 'Espaço reservado para retrato da Dra. Maisa' })).toBeVisible();
+  await expect(section.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /https:\/\/wa\.me\/5515992719708\?text=.+/);
+  await expect(section.locator('.contact__portrait')).toHaveCount(0);
+  await expect(section.locator('.contact__glow[aria-hidden="true"]')).toHaveCount(1);
   await expect(page.locator('section#conversar')).toHaveCount(0);
-
-  const [copyBox, portraitBox] = await Promise.all([copy.boundingBox(), portrait.boundingBox()]);
-  expect(portraitBox!.width / portraitBox!.height).toBeCloseTo(4 / 5, 2);
-  expect(portraitBox!.x).toBeGreaterThan(copyBox!.x + copyBox!.width);
-  expect(copyBox!.x + copyBox!.width).toBeLessThanOrEqual(portraitBox!.x);
 });
 
-test('unified contact conversion keeps two columns with a 300px 4:5 portrait at 1024px', async ({ page }) => {
-  await page.setViewportSize({ width: 1024, height: 900 });
+test('FAQ is centered while preserving its native accordion', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  const portrait = page.locator('section#contato .contact__portrait');
-  const box = (await portrait.boundingBox())!;
-  expect(box.width).toBeCloseTo(300, 0);
-  expect(box.width / box.height).toBeCloseTo(4 / 5, 2);
+  const faq = page.locator('section#duvidas');
+  const layout = faq.locator('.faq__layout');
+  const styles = await layout.evaluate(element => getComputedStyle(element));
+  expect(styles.textAlign).toBe('center');
+  expect(parseFloat(styles.maxWidth)).toBeLessThanOrEqual(820);
+  await expect(faq.locator('details[name="faq"]')).toHaveCount(6);
+  await expect(faq.locator('details[name="faq"]').first()).toHaveAttribute('open', '');
+});
+
+test('last content section provides the three confirmed clinic maps in the requested order', async ({ page }) => {
+  await page.goto('/');
+  const locations = page.locator('section#localizacoes');
+  const cards = locations.locator('.location-card');
+
+  await expect(locations.getByRole('heading', { level: 2 })).toHaveText('Onde encontrar o atendimento');
+  await expect(cards).toHaveCount(3);
+  await expect(cards.locator('h3')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
+  await expect(cards.locator('iframe')).toHaveCount(3);
+  for (let index = 0; index < 3; index++) await expect(cards.locator('iframe').nth(index)).toHaveAttribute('loading', 'lazy');
+  await expect(cards.locator('a', { hasText: 'Como chegar' })).toHaveCount(3);
+  await expect(locations.locator('iframe').nth(1)).toHaveAttribute('src', /Cl%C3%ADnica%20Sinapse%20Itapeva/);
+  await expect(locations.locator('iframe').nth(2)).toHaveAttribute('src', /Rua%20Santos%20Dumont%2C%20221/);
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.

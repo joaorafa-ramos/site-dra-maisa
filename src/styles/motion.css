@@ -35,12 +35,82 @@
   transform: translateY(-2px);
 }
 
+.button--peach:hover {
+  box-shadow: 0 12px 28px rgb(215 169 141 / 0.42), inset 0 1px 0 rgb(247 242 238 / 0.68);
+}
+
+.button--navy:hover {
+  box-shadow: 0 12px 28px rgb(48 86 106 / 0.4), inset 0 1px 0 rgb(247 242 238 / 0.34);
+}
+
 .button:active {
   transform: translateY(0);
 }
 
 .site-header {
-  transition: border-color 180ms var(--ease-calm), box-shadow 180ms var(--ease-calm);
+  transition: transform 240ms var(--ease-calm), background-color 180ms var(--ease-calm), border-color 180ms var(--ease-calm), box-shadow 180ms var(--ease-calm);
+  will-change: transform;
+}
+
+.site-header[data-hidden='true'] {
+  transform: translateY(calc(-100% + 12px));
+}
+
+.signal-card {
+  transition: transform 220ms var(--ease-calm), border-color 220ms var(--ease-calm), box-shadow 220ms var(--ease-calm);
+}
+
+.signal-card__icon {
+  transition: transform 220ms var(--ease-calm), background-color 220ms var(--ease-calm);
+}
+
+.signal-card:hover {
+  transform: translateY(-4px);
+  border-color: rgb(48 86 106 / 0.2);
+  box-shadow: 0 16px 32px rgb(48 86 106 / 0.12);
+}
+
+.signal-card:hover .signal-card__icon {
+  transform: scale(1.06);
+  background: rgb(227 240 242 / 0.7);
+}
+
+@keyframes cta-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cta-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cta-pending [data-cta-step],
+.cta-pending .contact__glow {
+  opacity: 0;
+}
+
+.cta-animate [data-cta-step] {
+  animation: cta-fade-up 500ms ease-out both;
+  animation-delay: var(--cta-delay, 0ms);
+}
+
+.cta-animate .contact__glow {
+  animation: cta-scale-in 500ms ease-out 700ms both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -78,7 +148,11 @@
 
   [data-reveal],
   .button,
-  .site-header {
+  .site-header,
+  .signal-card:hover,
+  .signal-card:hover .signal-card__icon,
+  .cta-pending [data-cta-step],
+  .cta-pending .contact__glow {
     transform: none !important;
   }
 }

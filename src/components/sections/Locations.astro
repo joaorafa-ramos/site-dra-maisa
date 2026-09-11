@@ -1,0 +1,30 @@
+---
+import { locations } from '../../data/locations';
+---
+
+<section class="section locations" id="localizacoes" aria-labelledby="locations-title">
+  <div class="container">
+    <div class="locations__intro">
+      <p class="section-eyebrow">LOCALIZAÇÕES</p>
+      <h2 class="section-heading" id="locations-title">Onde encontrar o atendimento</h2>
+    </div>
+    <div class="locations__grid">
+      {locations.map((location) => (
+        <article class="location-card">
+          <h3>{location.name}</h3>
+          <p>{location.address}</p>
+          <iframe
+            src={location.embedUrl}
+            title={`Localização da ${location.name} em Itapeva`}
+            loading="lazy"
+            width="100%"
+            height="300"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+          <a href={location.mapsUrl} target="_blank" rel="noopener noreferrer">Como chegar</a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

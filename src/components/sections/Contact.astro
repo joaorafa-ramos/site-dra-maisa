@@ -1,6 +1,5 @@
 ---
 import Button from '../ui/Button.astro';
-import PictureFrame from '../ui/PictureFrame.astro';
 import { getWhatsAppUrl, siteConfig } from '../../config/site';
 import { content } from '../../data/content';
 
@@ -8,27 +7,30 @@ const whatsappUrl = getWhatsAppUrl();
 ---
 
 <section class="section contact" id="contato" aria-labelledby="contact-title">
-  <div class="container contact__layout">
-    <div class="contact__copy">
-      <p class="section-eyebrow">{content.contact.eyebrow}</p>
-      <h2 class="section-heading" id="contact-title">{content.contact.title}</h2>
-      <p class="section-description">{content.contact.description}</p>
-      <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="contato" />
-      <p class="contact__detail">{content.contact.detail}</p>
-      {(siteConfig.address || siteConfig.businessHours || siteConfig.crfa || siteConfig.cnpj) && (
-        <aside class="contact__details" aria-label="Informações de contato">
-          {siteConfig.address && <p>{siteConfig.address}</p>}
-          {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
-          {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
-          {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
-        </aside>
-      )}
+  <div class="container contact__layout" data-cta>
+    <div class="contact__panel">
+      <div class="contact__glow" aria-hidden="true"></div>
+      <div class="contact__copy">
+        <p class="section-eyebrow" data-cta-step style="--cta-delay: 100ms">{content.contact.eyebrow}</p>
+        <h2 class="section-heading" id="contact-title" data-cta-step style="--cta-delay: 200ms">{content.contact.title}</h2>
+        <p class="section-description" data-cta-step style="--cta-delay: 300ms">{content.contact.description}</p>
+        <div class="contact__action" data-cta-step style="--cta-delay: 500ms">
+          <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="contato" />
+          <p class="contact__detail">{content.contact.detail}</p>
+        </div>
+        {(siteConfig.address || siteConfig.businessHours || siteConfig.crfa || siteConfig.cnpj) && (
+          <aside class="contact__details" aria-label="Informações de contato">
+            {siteConfig.address && <p>{siteConfig.address}</p>}
+            {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
+            {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
+            {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
+          </aside>
+        )}
+      </div>
     </div>
-    <PictureFrame
-      class="contact__portrait"
-      alt="Espaço reservado para retrato da Dra. Maisa"
-      width={350}
-      height={438}
-    />
   </div>
 </section>
+
+<script>
+  import '../../scripts/cta-motion';
+</script>

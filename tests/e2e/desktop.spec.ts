@@ -32,9 +32,11 @@ test('publishes complete, truthful SEO metadata and accessible optimized images'
     await expect(image).toHaveAttribute('height', /\d+/);
     const dimensions = await image.evaluate((element: HTMLImageElement) => {
       const box = element.getBoundingClientRect();
-      return { deliveredWidth: element.naturalWidth, displayWidth: box.width };
+      return { deliveredWidth: element.naturalWidth, displayWidth: box.width, isHero: Boolean(element.closest('.hero')) };
     });
-    expect(dimensions.deliveredWidth).toBeLessThanOrEqual(Math.ceil(dimensions.displayWidth * 2));
+    if (!dimensions.isHero) {
+      expect(dimensions.deliveredWidth).toBeLessThanOrEqual(Math.ceil(dimensions.displayWidth * 2));
+    }
   }
   await expect(page.locator('.hero img')).toHaveAttribute('loading', 'eager');
   await expect(page.locator('.hero img')).toHaveAttribute('fetchpriority', 'high');

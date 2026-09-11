@@ -64,7 +64,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
     expect(line.x).toBeLessThanOrEqual(first.x + first.width / 2);
     expect(line.x + line.width).toBeGreaterThanOrEqual(last.x + last.width / 2);
 
-    for (const element of await page.locator('#avaliacao h3, #avaliacao li p, .area-card .card-front > h3, .area-card .card-front > p:last-child').all()) {
+    for (const element of await page.locator('#avaliacao h3, #avaliacao li p, .area-card h3, .area-card .area-card__summary').all()) {
       await expect(element).toBeVisible();
       const geometry = await element.evaluate(element => {
         const range = document.createRange();

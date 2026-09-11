@@ -15,18 +15,20 @@ const whatsappUrl = getWhatsAppUrl();
     </div>
     <ul class="areas__grid" role="list" data-reveal-stagger>
       {areas.map(area => (
-        <li class="area-card" data-flip-card data-area={area.title} data-reveal>
-          <div class="area-card__faces">
-            <div class="card-front">
-              <p class="area-card__category">{area.category}</p>
-              <h3>{area.title}</h3>
-              <p>{area.front}</p>
-            </div>
-            <div class="card-back" id={`area-${area.slug}-details`}>
-              <p class="area-card__category">NA AVALIAÇÃO</p>
-              <h3>{area.title}</h3>
-              <p>{area.back}</p>
-            </div>
+        <li class="area-card" data-area-card data-area={area.title} data-reveal>
+          <span class="area-card__bar" aria-hidden="true"></span>
+          <span class="area-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.5 12.2 2.3 2.3 4.7-4.9" />
+            </svg>
+          </span>
+          <p class="area-card__category">{area.category}</p>
+          <h3>{area.title}</h3>
+          <p class="area-card__summary">{area.front}</p>
+          <div class="area-card__details" id={`area-${area.slug}-details`}>
+            <p class="area-card__category">NA AVALIAÇÃO</p>
+            <p>{area.back}</p>
           </div>
           <button
             class="card-toggle"

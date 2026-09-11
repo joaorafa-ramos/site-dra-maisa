@@ -58,37 +58,33 @@ test('WhatsApp CTAs dispatch the vendor-neutral conversion event with their orig
   expect(event).toEqual({ cta_location: 'hero', cta_label: 'Conversar pelo WhatsApp' });
 });
 
-test('area cards expose only the active face and support Enter, click and Escape', async ({ page }) => {
+test('area cards expand their evaluation note inline and support Enter, click and Escape', async ({ page }) => {
   await page.goto('/');
-  const cards = page.locator('#areas [data-flip-card]');
+  const cards = page.locator('#areas [data-area-card]');
   await expect(cards).toHaveCount(6);
+  await expect(page.locator('#areas [data-flip-card], #areas .card-front, #areas .card-back')).toHaveCount(0);
   for (const card of await cards.all()) {
     const area = (await card.getAttribute('data-area'))!;
     const button = card.getByRole('button');
+    const details = card.locator('.area-card__details');
+    const backCopy = (await details.locator('p').last().innerText()).trim();
+    await expect(card.locator('.area-card__icon svg')).toHaveCount(1);
+    await expect(card.locator('h3')).toHaveText(area);
     await expect(button).toHaveAccessibleName(`Saiba mais sobre ${area}`);
-    const front = card.locator('.card-front');
-    const back = card.locator('.card-back');
-    const backCopy = (await back.locator('p').last().innerText()).trim();
     await expect(button).toHaveAttribute('aria-expanded', 'false');
-    await expect(back).toHaveAttribute('aria-hidden', 'true');
-    expect(await back.evaluate(element => (element as HTMLElement).inert)).toBe(true);
+    await expect(details).toBeHidden();
     expect(await card.ariaSnapshot()).not.toContain(backCopy);
     await button.focus();
     await page.keyboard.press('Enter');
     await expect(button).toHaveAttribute('aria-expanded', 'true');
     await expect(button).toHaveAccessibleName(`Voltar para ${area}`);
-    await expect(front).toHaveAttribute('aria-hidden', 'true');
-    expect(await front.evaluate(element => (element as HTMLElement).inert)).toBe(true);
-    await expect(back).toHaveAttribute('aria-hidden', 'false');
-    expect(await back.evaluate(element => (element as HTMLElement).inert)).toBe(false);
+    await expect(details).toBeVisible();
+    await expect(details.getByText('NA AVALIAÇÃO', { exact: true })).toBeVisible();
     expect(await card.ariaSnapshot()).toContain(backCopy);
     await page.keyboard.press('Escape');
     await expect(button).toHaveAttribute('aria-expanded', 'false');
-    await expect(button).toHaveAccessibleName(`Saiba mais sobre ${area}`);
     await expect(button).toBeFocused();
-    await expect(front).toHaveAttribute('aria-hidden', 'false');
-    expect(await front.evaluate(element => (element as HTMLElement).inert)).toBe(false);
-    expect(await card.ariaSnapshot()).not.toContain(backCopy);
+    await expect(details).toBeHidden();
     await button.click();
     await expect(button).toHaveAttribute('aria-expanded', 'true');
     await button.click();
@@ -98,42 +94,18 @@ test('area cards expose only the active face and support Enter, click and Escape
   }
 });
 
-test('area cards switch content immediately without rotation with reduced motion', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  const card = page.locator('#areas [data-flip-card]').first();
-  const button = card.getByRole('button');
-  const front = card.locator('.card-front');
-  const back = card.locator('.card-back');
-  await expect(front).toHaveCSS('opacity', '1');
-  await expect(back).toHaveCSS('opacity', '0');
-  await button.focus();
-  await page.keyboard.press('Enter');
-  await expect(button).toHaveAttribute('aria-expanded', 'true');
-  await expect(front).toHaveCSS('opacity', '0');
-  await expect(back).toHaveCSS('opacity', '1');
-  for (const face of [card.locator('.area-card__faces'), front, back]) {
-    await expect(face).toHaveCSS('transform', 'none');
-    await expect(face).toHaveCSS('transition-duration', '0s');
-  }
-  await page.keyboard.press('Escape');
-  await expect(button).toHaveAttribute('aria-expanded', 'false');
-  await expect(front).toHaveCSS('opacity', '1');
-  await expect(back).toHaveCSS('opacity', '0');
-});
-
-test('area summaries and evaluation details are readable without JavaScript', async ({ browser }) => {
+test('area cards never rotate and keep both texts readable without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto('/');
-  const cards = page.locator('#areas [data-flip-card]');
+  const cards = page.locator('#areas [data-area-card]');
   await expect(cards).toHaveCount(6);
   for (const card of await cards.all()) {
-    await expect(card.locator('.card-front')).toBeVisible();
-    await expect(card.locator('.card-back')).toBeVisible();
-    const snapshot = await card.ariaSnapshot();
-    expect(snapshot).toContain((await card.locator('.card-back p').last().innerText()).trim());
+    await expect(card.locator('.area-card__summary')).toBeVisible();
+    await expect(card.locator('.area-card__details')).toBeVisible();
+    await expect(card.locator('.area-card__details p').last()).toBeVisible();
     await expect(card.getByRole('button')).toHaveCount(0);
+    await expect(card).toHaveCSS('transform', 'none');
   }
   await context.close();
 });
@@ -143,7 +115,7 @@ for (const width of [1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await expect(page.locator('#areas')).toHaveCount(1);
-    const cards = page.locator('#areas [data-flip-card]');
+    const cards = page.locator('#areas [data-area-card]');
     await expect(cards).toHaveCount(6);
     const boxes = await cards.evaluateAll(elements => elements.map(element => {
       const { x, y, width, bottom } = element.getBoundingClientRect();
@@ -158,7 +130,7 @@ for (const width of [1024, 1440, 1920]) {
     expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
     for (const card of await cards.all()) {
       expect((await card.getByRole('button').boundingBox())!.height).toBeGreaterThanOrEqual(48);
-      expect(await card.locator('.card-front').evaluate(element => element.scrollHeight <= element.clientHeight && element.scrollWidth <= element.clientWidth)).toBe(true);
+      expect(await card.locator('.area-card__summary').evaluate(element => element.scrollHeight <= element.clientHeight + 1 && element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   });

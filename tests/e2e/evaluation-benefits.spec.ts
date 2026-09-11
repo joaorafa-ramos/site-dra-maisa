@@ -31,31 +31,17 @@ test('evaluation provides the complete ordered journey and scheduling action wit
   expect((await reassurance.boundingBox())!.y).toBeGreaterThan(listBox.y + listBox.height);
 });
 
-// Catches hidden/flip content, missing benefits, and accidental interactive wrappers.
-test('all five benefits are readable without JavaScript or interaction', async ({ page }) => {
+// Catches accidental reintroduction of the removed section while preserving the adjacent journey.
+test('the removed benefits section is absent while the evaluation journey remains visible', async ({ page }) => {
   await page.goto('/');
-  const section = page.locator('section.benefits');
-  await expect(section.getByRole('heading', { level: 2 })).toHaveText('Cada criança tem seu jeito de se comunicar. O atendimento também precisa respeitar isso.');
-  const items = section.locator('ul > li');
-  await expect(items).toHaveCount(5);
-  const expected = [
-    ['Avaliação individualizada', 'Um olhar atento para compreender a criança além da queixa inicial.'],
-    ['Estratégias lúdicas', 'Brincadeiras e recursos adequados à idade tornam a sessão mais natural.'],
-    ['Respeito ao ritmo da criança', 'Cada avanço é construído sem comparações e com objetivos possíveis.'],
-    ['Orientações claras para a família', 'Você entende o que está sendo trabalhado e como apoiar no dia a dia.'],
-    ['Objetivos terapêuticos claros', 'Com brincadeiras, vínculo e objetivos terapêuticos claros, construímos um caminho para que ela possa se comunicar com mais segurança.'],
-  ];
-  for (const [index, [title, description]] of expected.entries()) {
-    await expect(items.nth(index)).toBeVisible();
-    await expect(items.nth(index).getByRole('heading', { level: 3 })).toHaveText(title!);
-    await expect(items.nth(index).getByText(description!, { exact: true })).toBeVisible();
-  }
-  await expect(section.locator('a, button, input, select, textarea, summary, [role="button"], [tabindex]')).toHaveCount(0);
+  await expect(page.locator('section.benefits')).toHaveCount(0);
+  await expect(page.locator('#avaliacao')).toBeVisible();
+  await expect(page.locator('#areas')).toBeVisible();
 });
 
 for (const width of [1024, 1280, 1440, 1920]) {
   // Catches collapsed timeline columns, broken connectors, clipped copy and undersized type.
-  test(`evaluation and benefits preserve readable desktop geometry at ${width}px`, async ({ page }) => {
+  test(`evaluation and areas preserve readable desktop geometry at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     const steps = page.locator('#avaliacao ol > li');
@@ -78,7 +64,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
     expect(line.x).toBeLessThanOrEqual(first.x + first.width / 2);
     expect(line.x + line.width).toBeGreaterThanOrEqual(last.x + last.width / 2);
 
-    for (const element of await page.locator('#avaliacao h3, #avaliacao li p, .benefits h3, .benefits li p').all()) {
+    for (const element of await page.locator('#avaliacao h3, #avaliacao li p, .area-card .card-front > h3, .area-card .card-front > p:last-child').all()) {
       await expect(element).toBeVisible();
       const geometry = await element.evaluate(element => {
         const range = document.createRange();

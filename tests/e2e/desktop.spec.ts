@@ -298,7 +298,7 @@ test('reveal targets remain readable with JavaScript disabled or reduced motion 
 });
 
 test('hero message and CTA remain available when the photograph cannot load', async ({ page }) => {
-  await page.route('**/images/hero-maisa.webp', route => route.abort());
+  await page.route('**/images/HERO.webp', route => route.abort());
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Cada pequena voz merece ser ouvida.' })).toBeVisible();
   await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });

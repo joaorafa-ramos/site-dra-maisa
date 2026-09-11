@@ -108,3 +108,60 @@ signalDetails.forEach(details => {
     });
   });
 });
+
+const reducedLocationMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+const setLocationExpanded = (card: HTMLElement, expanded: boolean) => {
+  const button = card.querySelector<HTMLButtonElement>('[data-location-toggle]')!;
+  const panel = card.querySelector<HTMLElement>('[data-location-panel]')!;
+  button.setAttribute('aria-expanded', String(expanded));
+  card.dataset.expanded = String(expanded);
+
+  if (expanded) {
+    panel.hidden = false;
+    void panel.offsetHeight;
+    card.classList.add('is-expanded');
+    return;
+  }
+
+  card.classList.remove('is-expanded');
+  if (reducedLocationMotion.matches) {
+    panel.hidden = true;
+    return;
+  }
+
+  window.setTimeout(() => {
+    if (card.dataset.expanded === 'false') panel.hidden = true;
+  }, 260);
+};
+
+document.querySelectorAll<HTMLElement>('[data-location-card]').forEach(card => {
+  const button = card.querySelector<HTMLButtonElement>('[data-location-toggle]')!;
+  setLocationExpanded(card, false);
+
+  button.addEventListener('click', () => {
+    setLocationExpanded(card, button.getAttribute('aria-expanded') !== 'true');
+  });
+
+  card.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || button.getAttribute('aria-expanded') !== 'true') return;
+    event.preventDefault();
+    setLocationExpanded(card, false);
+    button.focus();
+  });
+
+  card.addEventListener('pointermove', event => {
+    if (!finePointer.matches || reducedLocationMotion.matches) return;
+    const bounds = card.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    card.style.setProperty('--location-rotate-x', `${-y * 4}deg`);
+    card.style.setProperty('--location-rotate-y', `${x * 4}deg`);
+  });
+
+  card.addEventListener('pointerleave', () => {
+    card.style.removeProperty('--location-rotate-x');
+    card.style.removeProperty('--location-rotate-y');
+  });
+});

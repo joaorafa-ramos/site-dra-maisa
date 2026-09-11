@@ -521,12 +521,38 @@ test('last content section provides the three confirmed clinic maps in the reque
 
   await expect(locations.getByRole('heading', { level: 2 })).toHaveText('Onde encontrar o atendimento');
   await expect(cards).toHaveCount(3);
-  await expect(cards.locator('h3')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
+  await expect(cards.locator('.location-card__name')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
   await expect(cards.locator('iframe')).toHaveCount(3);
   for (let index = 0; index < 3; index++) await expect(cards.locator('iframe').nth(index)).toHaveAttribute('loading', 'lazy');
   await expect(cards.locator('a', { hasText: 'Como chegar' })).toHaveCount(3);
   await expect(locations.locator('iframe').nth(1)).toHaveAttribute('src', /Cl%C3%ADnica%20Sinapse%20Itapeva/);
   await expect(locations.locator('iframe').nth(2)).toHaveAttribute('src', /Rua%20Santos%20Dumont%2C%20221/);
+});
+
+// Catches a regression where locations revert to permanently exposed maps or lose keyboard-accessible expansion.
+test('location cards reveal their map through accessible independent controls', async ({ page }) => {
+  await page.goto('/');
+  const locations = page.locator('section#localizacoes');
+  const cards = locations.locator('.location-card');
+  const senses = cards.nth(0);
+  const sinapse = cards.nth(1);
+  const sensesToggle = senses.getByRole('button', { name: 'Ver mapa da Clínica Senses' });
+
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(senses.locator('iframe')).not.toBeVisible();
+  await expect(senses.getByText(/Clique para ver o mapa/)).toBeVisible();
+
+  await sensesToggle.focus();
+  await page.keyboard.press('Enter');
+
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(senses.locator('iframe')).toBeVisible();
+  await expect(sinapse.getByRole('button', { name: 'Ver mapa da Clínica Sinapse' })).toHaveAttribute('aria-expanded', 'false');
+  await expect(sinapse.locator('iframe')).not.toBeVisible();
+
+  await page.keyboard.press('Escape');
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(senses.locator('iframe')).not.toBeVisible();
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.

@@ -133,6 +133,7 @@
 .hero {
   --hero-position-x: 50%;
   position: relative;
+  margin-top: -88px;
   isolation: isolate;
   height: 820px;
   background: var(--color-graphite);

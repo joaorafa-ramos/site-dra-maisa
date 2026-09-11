@@ -315,13 +315,16 @@ for (const width of [1024, 1440, 1920]) {
   });
 }
 
-test('header keeps its layout height while scrolling state changes', async ({ page }) => {
+test('header overlays the hero from the page top while scrolling state changes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 700 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const header = page.getByRole('banner');
+  const hero = page.locator('section.hero');
   await expect(header).toHaveCSS('position', 'sticky');
   const initial = await header.boundingBox();
+  expect(initial!.y).toBe(0);
+  expect((await hero.boundingBox())!.y).toBe(0);
   await page.evaluate(() => window.scrollTo(0, 120));
   await expect(header).toHaveAttribute('data-scrolled', 'true');
   const scrolled = await header.boundingBox();
@@ -361,7 +364,7 @@ test('header stays genuinely glass-transparent and CTAs retain a restrained visi
   await expect(header).toHaveAttribute('data-scrolled', 'true');
   await expect(header).toHaveCSS('background-color', 'rgba(247, 242, 238, 0.15)');
 
-  for (const button of [page.locator('.hero .button'), page.locator('.signals .button--navy')]) {
+  for (const button of [page.locator('.hero .button'), page.locator('.signals .button--peach')]) {
     await expect(button).toBeVisible();
     await expect(button).toHaveCSS('box-shadow', /rgb/);
     await expect(button).toHaveCSS('background-image', /gradient/);

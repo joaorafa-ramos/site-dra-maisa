@@ -56,23 +56,15 @@
   transform: translateY(calc(-100% + 12px));
 }
 
-.signal-card {
-  transition: transform 220ms var(--ease-calm), border-color 220ms var(--ease-calm), box-shadow 220ms var(--ease-calm);
+.signal-item,
+.signal-item summary,
+.signal-item__indicator {
+  transition: color 220ms var(--ease-calm), border-color 220ms var(--ease-calm), transform 220ms var(--ease-calm);
 }
 
-.signal-card__icon {
-  transition: transform 220ms var(--ease-calm), background-color 220ms var(--ease-calm);
-}
-
-.signal-card:hover {
-  transform: translateY(-4px);
-  border-color: rgb(48 86 106 / 0.2);
-  box-shadow: 0 16px 32px rgb(48 86 106 / 0.12);
-}
-
-.signal-card:hover .signal-card__icon {
-  transform: scale(1.06);
-  background: rgb(227 240 242 / 0.7);
+.signal-item summary:hover,
+.signal-item summary:focus-visible {
+  color: var(--color-peach);
 }
 
 @keyframes cta-fade-up {
@@ -149,8 +141,9 @@
   [data-reveal],
   .button,
   .site-header,
-  .signal-card:hover,
-  .signal-card:hover .signal-card__icon,
+  .signal-item,
+  .signal-item summary,
+  .signal-item__indicator,
   .cta-pending [data-cta-step],
   .cta-pending .contact__glow {
     transform: none !important;

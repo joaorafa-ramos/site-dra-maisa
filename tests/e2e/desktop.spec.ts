@@ -174,50 +174,78 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
   expect(sizes.content).toBe(sizes.viewport);
 });
 
-test('signals introduction uses the calm two-color treatment and semantic card icons', async ({ page }) => {
+test('signals uses an exclusive accordion beside the preserved portrait and a centered peach CTA', async ({ page }) => {
   await page.goto('/');
 
   const signals = page.locator('section.signals');
-  const intro = signals.locator('.signals__copy');
-  await expect(intro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
-  await expect(intro.locator('.signals__reassurance')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect(intro.locator('.signals__reassurance')).toHaveCSS('color', 'rgb(48, 86, 106)');
-  await expect(intro.getByRole('link')).toHaveCSS('background-image', /gradient/);
-  await expect(intro.getByRole('link')).toHaveCSS('color', 'rgb(247, 242, 238)');
+  const layout = signals.locator('.signals__layout');
+  const portrait = signals.locator('.signals__portrait img');
+  const items = signals.locator('details[name="signals"]');
+  const reassurance = signals.locator('.signals__reassurance');
+  const cta = signals.locator('.signals__action .button');
 
-  await expect(signals.locator('.signal-card__marker')).toHaveCount(0);
-  const icons = signals.locator('[data-signal-icon]');
-  await expect(icons).toHaveCount(6);
-  await expect(icons.evaluateAll(elements => elements.map(element => element.getAttribute('data-signal-icon')))).resolves.toEqual([
-    'few-words',
-    'sound-change',
-    'clarity',
-    'frustration',
-    'understanding',
-    'conversation-avoidance',
+  await expect(layout).toHaveCount(1);
+  await expect(portrait).toHaveAttribute('src', '/images/sinais-maisa.optimized.webp');
+  await expect(portrait).toHaveAttribute(
+    'alt',
+    'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
+  );
+  await expect(items).toHaveCount(6);
+  await expect(items.locator('summary')).toHaveText([
+    'Fala pouco',
+    'Troca ou omite sons',
+    'Nem sempre é compreendida',
+    'Fica frustrada ao tentar falar',
+    'Entende, mas não consegue responder',
+    'Evita participar de conversas',
   ]);
-  for (const icon of await icons.all()) {
-    await expect(icon).toHaveAttribute('aria-hidden', 'true');
-    await expect(icon.locator('svg')).toHaveCount(1);
-  }
+  await expect(items.locator('p')).toHaveText([
+    'Você tem dúvidas sobre a quantidade de palavras ou a formação de frases para a idade do seu filho.',
+    'Algumas palavras ficam difíceis de entender no dia a dia.',
+    'Pessoas próximas pedem para repetir com frequência.',
+    'Chora, se irrita ou desiste quando não consegue se expressar.',
+    'Parece compreender, porém encontra dificuldade para organizar a fala.',
+    'Você percebe que a criança se incomoda ou deixa de participar quando precisa falar.',
+  ]);
+  await expect(signals.locator('[data-signal-icon], .signal-card__number')).toHaveCount(0);
+  await expect(signals.locator('details[name="signals"][open]')).toHaveCount(0);
+
+  await items.nth(0).locator('summary').click();
+  await expect(items.nth(0)).toHaveAttribute('open', '');
+  await items.nth(1).locator('summary').click();
+  await expect(items.nth(0)).not.toHaveAttribute('open', '');
+  await expect(items.nth(1)).toHaveAttribute('open', '');
+
+  await expect(reassurance).toHaveText('Um sinal isolado não define um diagnóstico. A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
+  await expect(reassurance).toHaveCSS('background-color', 'rgb(227, 240, 242)');
+  await expect(items.first().locator('summary')).toHaveCSS('text-transform', 'uppercase');
+  await expect(cta).toHaveClass(/button--peach/);
+  await expect(cta).toHaveCSS('background-image', /gradient/);
 });
 
-test('evaluation intro and signal cards use a calm filled visual language with a light hover response', async ({ page }) => {
+test('evaluation intro and signal accordions use a calm filled visual language with a light hover response', async ({ page }) => {
   await page.goto('/');
   const evaluationIntro = page.locator('#avaliacao .evaluation__intro');
   await expect(evaluationIntro.locator('.section-eyebrow')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-heading')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
 
-  const firstCard = page.locator('.signal-card').first();
-  const icon = firstCard.locator('.signal-card__icon svg');
-  await expect(icon).toHaveAttribute('fill', 'currentColor');
-  await expect(firstCard).not.toHaveCSS('transition-duration', '0s');
-  const before = await firstCard.boundingBox();
-  await firstCard.hover();
-  const after = await firstCard.boundingBox();
-  expect(after!.y).toBeLessThan(before!.y);
-  await expect(firstCard).toHaveCSS('box-shadow', /rgb/);
+  const firstItem = page.locator('details[name="signals"]').first();
+  await expect(firstItem).not.toHaveCSS('transition-duration', '0s');
+  await firstItem.locator('summary').hover();
+  await expect(firstItem.locator('summary')).toHaveCSS('color', 'rgb(48, 86, 106)');
+});
+
+test('signals stacks the portrait above the accordion before the two-column layout becomes cramped', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  await page.goto('/');
+
+  const portrait = page.locator('.signals__portrait');
+  const copy = page.locator('.signals__copy');
+  const portraitBox = await portrait.boundingBox();
+  const copyBox = await copy.boundingBox();
+
+  expect(copyBox!.y).toBeGreaterThanOrEqual(portraitBox!.y + portraitBox!.height + 32);
 });
 
 test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
@@ -245,7 +273,7 @@ for (const width of [1024, 1440, 1920]) {
     await expect(hero.getByText('FONOAUDIOLOGIA INFANTIL • ITAPEVA–SP', { exact: true })).toBeVisible();
     await expect(hero.getByText('Seu filho fala pouco, troca sons ou nem sempre é compreendido? A avaliação fonoaudiológica ajuda a entender suas necessidades e orientar os próximos passos.', { exact: true })).toBeVisible();
     const image = hero.locator('img');
-    await expect(image).toHaveAttribute('src', '/images/HERO.webp');
+    await expect(image).toHaveAttribute('src', '/images/HERO-extended.png');
     await expect(image).toHaveCSS('object-fit', 'cover');
     expect(await image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
     const cta = hero.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
@@ -287,13 +315,16 @@ for (const width of [1024, 1440, 1920]) {
   });
 }
 
-test('header keeps its layout height while scrolling state changes', async ({ page }) => {
+test('header overlays the hero from the page top while scrolling state changes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 700 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const header = page.getByRole('banner');
+  const hero = page.locator('section.hero');
   await expect(header).toHaveCSS('position', 'sticky');
   const initial = await header.boundingBox();
+  expect(initial!.y).toBe(0);
+  expect((await hero.boundingBox())!.y).toBe(0);
   await page.evaluate(() => window.scrollTo(0, 120));
   await expect(header).toHaveAttribute('data-scrolled', 'true');
   const scrolled = await header.boundingBox();
@@ -301,6 +332,17 @@ test('header keeps its layout height while scrolling state changes', async ({ pa
   expect(scrolled!.height).toBe(initial!.height);
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(header).toHaveAttribute('data-scrolled', 'false');
+});
+
+// Catches low-contrast navigation links or an accidental color change to the header CTA.
+test('header navigation links are white while the peach CTA keeps its existing dark text', async ({ page }) => {
+  await page.goto('/');
+  const header = page.getByRole('banner');
+
+  for (const link of await header.locator('.site-header__nav a').all()) {
+    await expect(link).toHaveCSS('color', 'rgb(247, 242, 238)');
+  }
+  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toHaveCSS('color', 'rgb(69, 63, 59)');
 });
 
 test('scrolling down collapses the header to a hover rail and pointer reveals it again', async ({ page }) => {
@@ -333,7 +375,7 @@ test('header stays genuinely glass-transparent and CTAs retain a restrained visi
   await expect(header).toHaveAttribute('data-scrolled', 'true');
   await expect(header).toHaveCSS('background-color', 'rgba(247, 242, 238, 0.15)');
 
-  for (const button of [page.locator('.hero .button'), page.locator('.signals .button--navy')]) {
+  for (const button of [page.locator('.hero .button'), page.locator('.signals .button--peach')]) {
     await expect(button).toBeVisible();
     await expect(button).toHaveCSS('box-shadow', /rgb/);
     await expect(button).toHaveCSS('background-image', /gradient/);
@@ -382,7 +424,7 @@ test('reveal targets remain readable with JavaScript disabled or reduced motion 
 });
 
 test('hero message and CTA remain available when the photograph cannot load', async ({ page }) => {
-  await page.route('**/images/HERO.webp', route => route.abort());
+  await page.route('**/images/HERO-extended.png', route => route.abort());
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Cada pequena voz merece ser ouvida.' })).toBeVisible();
   await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });
@@ -490,12 +532,38 @@ test('last content section provides the three confirmed clinic maps in the reque
 
   await expect(locations.getByRole('heading', { level: 2 })).toHaveText('Onde encontrar o atendimento');
   await expect(cards).toHaveCount(3);
-  await expect(cards.locator('h3')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
+  await expect(cards.locator('.location-card__name')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
   await expect(cards.locator('iframe')).toHaveCount(3);
   for (let index = 0; index < 3; index++) await expect(cards.locator('iframe').nth(index)).toHaveAttribute('loading', 'lazy');
   await expect(cards.locator('a', { hasText: 'Como chegar' })).toHaveCount(3);
   await expect(locations.locator('iframe').nth(1)).toHaveAttribute('src', /Cl%C3%ADnica%20Sinapse%20Itapeva/);
   await expect(locations.locator('iframe').nth(2)).toHaveAttribute('src', /Rua%20Santos%20Dumont%2C%20221/);
+});
+
+// Catches maps being hidden at page load, which leaves the requested interactive locations unavailable without JavaScript.
+test('location cards expose all interactive maps on load and retain independent keyboard controls', async ({ page }) => {
+  await page.goto('/');
+  const locations = page.locator('section#localizacoes');
+  const cards = locations.locator('.location-card');
+  const senses = cards.nth(0);
+  const sinapse = cards.nth(1);
+  const sensesToggle = senses.getByRole('button', { name: 'Ver mapa da Clínica Senses' });
+
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(senses.locator('iframe')).toBeVisible();
+  await expect(locations.locator('iframe:visible')).toHaveCount(3);
+
+  await sensesToggle.focus();
+  await page.keyboard.press('Enter');
+
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(senses.locator('iframe')).not.toBeVisible();
+  await expect(sinapse.getByRole('button', { name: 'Ver mapa da Clínica Sinapse' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(sinapse.locator('iframe')).toBeVisible();
+
+  await page.keyboard.press('Enter');
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(senses.locator('iframe')).toBeVisible();
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.
@@ -552,20 +620,18 @@ for (const width of [1024, 1280, 1440, 1920]) {
     await expect(about).toBeVisible();
     await expect(page.locator('#sobre')).toHaveCount(1);
 
-    const cards = signals.locator('.signal-card');
+    const cards = signals.locator('details.signal-item');
     await expect(cards).toHaveCount(6);
     const boxes = await cards.evaluateAll(elements => elements.map(element => {
       const box = element.getBoundingClientRect();
-      return { x: box.x, y: box.y, width: box.width, bottom: box.bottom };
+      return { x: box.x, y: box.y, width: box.width, height: box.height, bottom: box.bottom };
     }));
-    for (let column = 0; column < 3; column++) {
-      expect(Math.abs(boxes[column]!.y - boxes[0]!.y)).toBeLessThan(1);
-      expect(Math.abs(boxes[column + 3]!.y - boxes[3]!.y)).toBeLessThan(1);
-      expect(Math.abs(boxes[column]!.x - boxes[column + 3]!.x)).toBeLessThan(1);
-      expect(Math.abs(boxes[column]!.width - boxes[0]!.width)).toBeLessThan(1);
-      if (column > 0) expect(boxes[column]!.x).toBeGreaterThan(boxes[column - 1]!.x + boxes[column - 1]!.width);
+    for (let index = 0; index < boxes.length; index += 1) {
+      expect(Math.abs(boxes[index]!.x - boxes[0]!.x)).toBeLessThan(1);
+      expect(Math.abs(boxes[index]!.width - boxes[0]!.width)).toBeLessThan(1);
+      expect(boxes[index]!.height).toBeLessThanOrEqual(96);
+      if (index > 0) expect(boxes[index]!.y).toBeGreaterThanOrEqual(boxes[index - 1]!.bottom);
     }
-    expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
 
     for (const section of [signals, about]) {
       const portrait = section.locator('.picture-frame img');
@@ -579,7 +645,8 @@ for (const width of [1024, 1280, 1440, 1920]) {
       await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
     }
 
-    const textBlocks = page.locator('.signals h2, .signals h3, .signal-card p, .about h2');
+    await cards.first().locator('summary').click();
+    const textBlocks = page.locator('.signals h2, .signal-item summary, .signal-item[open] p, .about h2');
     for (const block of await textBlocks.all()) {
       await expect(block).toBeVisible();
       const geometry = await block.evaluate(element => {

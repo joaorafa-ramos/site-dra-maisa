@@ -2,7 +2,6 @@
 import Button from '../ui/Button.astro';
 import PictureFrame from '../ui/PictureFrame.astro';
 import SectionHeading from '../ui/SectionHeading.astro';
-import SignalIcon from '../ui/SignalIcon.astro';
 import { getWhatsAppUrl } from '../../config/site';
 import { content, signals } from '../../data/content';
 
@@ -11,14 +10,7 @@ const whatsappUrl = getWhatsAppUrl();
 
 <section class="section signals" id="sinais">
   <div class="container">
-    <div class="signals__intro">
-      <div class="signals__copy">
-        <p class="section-eyebrow">{content.signals.eyebrow}</p>
-        <SectionHeading>{content.signals.title}</SectionHeading>
-        <p class="section-description">{content.signals.description}</p>
-        <p class="signals__reassurance">{content.signals.reassurance}</p>
-        <Button href={whatsappUrl} label={content.signals.cta} variant="navy" external={whatsappUrl.startsWith('https://')} whatsappLocation="sinais" />
-      </div>
+    <div class="signals__layout">
       <PictureFrame
         class="signals__portrait"
         src="/images/sinais-maisa.optimized.webp"
@@ -26,15 +18,26 @@ const whatsappUrl = getWhatsAppUrl();
         width={800}
         height={1000}
       />
+      <div class="signals__copy">
+        <p class="section-eyebrow">{content.signals.eyebrow}</p>
+        <SectionHeading>{content.signals.title}</SectionHeading>
+        <p class="section-description">{content.signals.description}</p>
+        <div class="signals__list">
+          {signals.map(signal => (
+            <details name="signals" class="signal-item">
+              <summary>
+                <span>{signal.title}</span>
+                <span class="signal-item__indicator" aria-hidden="true"></span>
+              </summary>
+              <p>{signal.description}</p>
+            </details>
+          ))}
+        </div>
+      </div>
     </div>
-    <ul class="signals__grid" role="list">
-      {signals.map(signal => (
-        <li class="signal-card">
-          <SignalIcon icon={signal.icon} />
-          <h3>{signal.title}</h3>
-          <p>{signal.description}</p>
-        </li>
-      ))}
-    </ul>
+    <div class="signals__action">
+      <p class="signals__reassurance">{content.signals.reassurance}</p>
+      <Button href={whatsappUrl} label={content.signals.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="sinais" />
+    </div>
   </div>
 </section>

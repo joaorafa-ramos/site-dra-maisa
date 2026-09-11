@@ -10,19 +10,42 @@ import { locations } from '../../data/locations';
     </div>
     <div class="locations__grid">
       {locations.map((location) => (
-        <article class="location-card">
-          <h3>{location.name}</h3>
-          <p>{location.address}</p>
-          <iframe
-            src={location.embedUrl}
-            title={`Localização da ${location.name} em Itapeva`}
-            loading="lazy"
-            width="100%"
-            height="300"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen
-          ></iframe>
-          <a href={location.mapsUrl} target="_blank" rel="noopener noreferrer">Como chegar</a>
+        <article class="location-card is-expanded" data-location-card data-expanded="true">
+          <button
+            class="location-card__trigger"
+            type="button"
+            data-location-toggle
+            aria-expanded="true"
+            aria-controls={`location-map-${location.id}`}
+            aria-label={`Ver mapa da ${location.name}`}
+          >
+            <span class="location-card__topline">
+              <svg class="location-card__icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6.5 9 3l6 3.5L21 3v14.5L15 21l-6-3.5L3 21V6.5Z" />
+                <path d="M9 3v14.5M15 6.5V21" />
+              </svg>
+              <span class="location-card__status"><i aria-hidden="true"></i>Itapeva — SP</span>
+            </span>
+            <span class="location-card__copy">
+              <span class="location-card__name">{location.name}</span>
+              <span class="location-card__address">{location.address}</span>
+            </span>
+            <span class="location-card__hint">Clique para ocultar o mapa <span aria-hidden="true">+</span></span>
+          </button>
+          <div class="location-card__map" id={`location-map-${location.id}`} data-location-panel>
+            <div class="location-card__map-frame">
+              <iframe
+                src={location.embedUrl}
+                title={`Localização da ${location.name} em Itapeva`}
+                loading="lazy"
+                width="100%"
+                height="300"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+            </div>
+            <a href={location.mapsUrl} target="_blank" rel="noopener noreferrer">Como chegar <span aria-hidden="true">↗</span></a>
+          </div>
         </article>
       ))}
     </div>

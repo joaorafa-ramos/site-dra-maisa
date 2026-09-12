@@ -143,10 +143,16 @@ test('area cards use the centered reference format and lift with a top bar and f
   const card = page.locator('#areas [data-area-card]').first();
   const bar = card.locator('.area-card__bar');
   const button = card.getByRole('button');
-  await card.scrollIntoViewIfNeeded();
-  // The page uses `scroll-behavior: smooth` (global.css); without settling first, hover() can
-  // land the pointer on a card that keeps sliding away mid-animation and immediately loses :hover.
-  await page.waitForTimeout(500);
+  // The page uses `scroll-behavior: smooth` (global.css) and the reveal system animates each card's
+  // entrance transform over 460ms; either one still running when hover() fires can shift the card
+  // out from under the cursor and immediately drop :hover. Emulate reduced motion (which the site's
+  // own `prefers-reduced-motion: reduce` block turns into an instant scroll and ~0ms transitions) just
+  // long enough to scroll and let the reveal settle, then switch back to the real motion for the hover
+  // assertions below.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await card.evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'center' }));
+  await expect(card).toHaveClass(/is-visible/);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   await expect(card).toHaveCSS('text-align', 'center');
   await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');

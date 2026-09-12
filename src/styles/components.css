@@ -772,6 +772,7 @@
 
 .contact {
   --cta-progress: 0.5;
+  --cta-centered: calc(1 - abs(var(--cta-progress) - 0.5) * 2);
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -820,7 +821,6 @@
 .contact__layout {
   max-width: 980px;
   /* translateY: +10% → 0 → −10%; scale: 0.95 → 1 → 0.95 (pico no centro). */
-  --cta-centered: calc(1 - abs(var(--cta-progress) - 0.5) * 2);
   transform:
     translateY(calc((0.5 - var(--cta-progress)) * 20%))
     scale(calc(0.95 + 0.05 * var(--cta-centered)));

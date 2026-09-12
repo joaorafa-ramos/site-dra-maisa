@@ -110,6 +110,20 @@ test('area cards never rotate and keep both texts readable without JavaScript', 
   await context.close();
 });
 
+test('area card hover motion (lift, bar, icon scale) is inert with reduced motion', async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto('/');
+  const card = page.locator('#areas [data-area-card]').first();
+  await card.scrollIntoViewIfNeeded();
+  await expect(card).toHaveCSS('transform', 'none');
+  await card.hover();
+  await expect(card).toHaveCSS('transform', 'none');
+  await expect(card.locator('.area-card__icon')).toHaveCSS('transform', 'none');
+  await expect(card.locator('h3')).toHaveCSS('transform', 'none');
+  await context.close();
+});
+
 for (const width of [1024, 1440, 1920]) {
   test(`area cards keep a readable three-column two-row grid at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

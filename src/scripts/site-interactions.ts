@@ -21,7 +21,6 @@ document.querySelectorAll<HTMLElement>('[data-area-card]').forEach(card => {
   });
   // Sem JS o verso fica visível; com JS ele nasce recolhido e o botão aparece.
   setAreaExpanded(card, false);
-  card.dataset.enhanced = 'true';
   button.hidden = false;
 });
 
@@ -40,7 +39,12 @@ const enableProgressiveReveals = () => {
       const target = entry.target as HTMLElement;
       target.classList.remove('reveal-pending');
       target.classList.add('is-visible');
-      target.addEventListener('transitionend', () => target.classList.add('is-settled'), { once: true });
+      const settle = (event: TransitionEvent) => {
+        if (event.target !== target || event.propertyName !== 'opacity') return;
+        target.classList.add('is-settled');
+        target.removeEventListener('transitionend', settle);
+      };
+      target.addEventListener('transitionend', settle);
       revealObserver.unobserve(target);
     });
   }, { threshold: 0.12 });

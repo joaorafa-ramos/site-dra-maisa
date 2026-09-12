@@ -136,6 +136,39 @@ for (const width of [1024, 1440, 1920]) {
   });
 }
 
+// Catches a regression back to flip visuals or a hover without the reference's lift/bar/fill response.
+test('area cards use the centered reference format and lift with a top bar and filled button on hover', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const card = page.locator('#areas [data-area-card]').first();
+  const bar = card.locator('.area-card__bar');
+  const button = card.getByRole('button');
+  await card.scrollIntoViewIfNeeded();
+  // The page uses `scroll-behavior: smooth` (global.css); without settling first, hover() can
+  // land the pointer on a card that keeps sliding away mid-animation and immediately loses :hover.
+  await page.waitForTimeout(500);
+
+  await expect(card).toHaveCSS('text-align', 'center');
+  await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(card).toHaveCSS('border-top-left-radius', '24px');
+  await expect(card.locator('.area-card__icon')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(card.locator('h3')).toHaveCSS('font-family', /Figtree/);
+  await expect(card.locator('h3')).toHaveCSS('font-size', '28px');
+  await expect(card.locator('.area-card__summary')).toHaveCSS('font-size', '16px');
+  await expect(bar).toHaveCSS('opacity', '0');
+  await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(button).toHaveCSS('border-top-left-radius', '999px');
+  const restingShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+
+  await card.hover();
+  await expect(bar).toHaveCSS('opacity', '1');
+  await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toMatch(/matrix\(1, 0, 0, 1, 0, -[3-6]\)/);
+  await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
+  await button.hover();
+  await expect(button).toHaveCSS('background-color', 'rgb(48, 86, 106)');
+  await expect(button).toHaveCSS('color', 'rgb(247, 242, 238)');
+});
+
 test('renders the desktop page without horizontal overflow', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('main#conteudo')).toBeVisible();

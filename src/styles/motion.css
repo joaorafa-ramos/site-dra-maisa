@@ -105,6 +105,70 @@
   animation: cta-scale-in 500ms ease-out 700ms both;
 }
 
+/* Cards de áreas: resposta de hover inspirada na referência (levantar, barra, ícone, preenchimento). */
+.area-card {
+  transition: transform 300ms var(--ease-calm), box-shadow 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
+}
+
+/* Mantém a transição/atraso escalonado do reveal (.is-visible) intactos: como `transition` é um shorthand não
+   cumulativo, uma regra `.area-card.is-visible` mais específica reúne opacidade (reveal) e transform/box-shadow/
+   border-color (hover) em uma única declaração vencedora, preservando o atraso único de `--reveal-delay`. */
+.area-card.is-visible {
+  transition: opacity 460ms var(--ease-calm), transform 300ms var(--ease-calm), box-shadow 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
+  transition-delay: var(--reveal-delay);
+}
+
+.area-card__bar {
+  transition: opacity 300ms var(--ease-calm);
+}
+
+.area-card__icon,
+.area-card h3,
+.area-card__summary,
+.card-toggle {
+  transition: transform 400ms var(--ease-calm), color 300ms var(--ease-calm), background-color 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
+}
+
+.card-toggle::before {
+  transition: width 300ms var(--ease-calm);
+}
+
+.area-card:hover,
+.area-card:focus-within {
+  border-color: rgb(48 86 106 / 0.28);
+  box-shadow: 0 20px 30px rgb(48 86 106 / 0.12);
+  transform: translateY(-4px);
+}
+
+.area-card:hover .area-card__bar,
+.area-card:focus-within .area-card__bar {
+  opacity: 1;
+}
+
+.area-card:hover .area-card__icon,
+.area-card:focus-within .area-card__icon {
+  transform: scale(1.1);
+}
+
+.area-card:hover h3 {
+  transform: translateY(-3px);
+}
+
+.area-card:hover .area-card__summary {
+  transform: translateY(-2px);
+}
+
+.card-toggle:hover,
+.card-toggle:focus-visible {
+  background-color: var(--color-navy);
+  color: var(--color-cream);
+}
+
+.card-toggle:hover::before,
+.card-toggle:focus-visible::before {
+  width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -113,23 +177,6 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  .area-card[data-enhanced] .area-card__faces,
-  .area-card[data-enhanced] .card-front,
-  .area-card[data-enhanced] .card-back {
-    transform: none !important;
-    transition: none !important;
-  }
-
-  .area-card[data-enhanced] .card-front,
-  .area-card[data-enhanced].is-flipped .card-back {
-    opacity: 1;
-  }
-
-  .area-card[data-enhanced] .card-back,
-  .area-card[data-enhanced].is-flipped .card-front {
-    opacity: 0;
   }
 
   .faq__answer,
@@ -145,7 +192,12 @@
   .signal-item summary,
   .signal-item__indicator,
   .cta-pending [data-cta-step],
-  .cta-pending .contact__glow {
+  .cta-pending .contact__glow,
+  .area-card,
+  .area-card__icon,
+  .area-card h3,
+  .area-card__summary,
+  .card-toggle {
     transform: none !important;
   }
 

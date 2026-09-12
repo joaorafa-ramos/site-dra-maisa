@@ -21,6 +21,6 @@
 ## Revisão técnica desktop (2026-09-08)
 
 - [x] Capturas de página completa revisadas em 1024 × 900, 1280 × 900, 1366 × 900, 1440 × 900 e 1920 × 1080; sem sobreposição, truncamento ou rolagem horizontal observados. Artefatos: `tmp/task-13-1024.png` a `tmp/task-13-1920.png`.
-- [x] Verificados por testes E2E: ordem das seções, grade 3 × 2 de sinais e áreas, fotos 4:5, três etapas de avaliação, FAQ antes da conversão, slot 350 × 438 à direita na seção final, foco visível, teclado/Escape nos cards, FAQ nativo, âncoras abaixo do cabeçalho e redução de movimento.
+- [x] Verificados por testes E2E: ordem das seções, grade 3 × 2 de sinais e áreas, fotos 4:5, três etapas de avaliação, FAQ antes da conversão, slot 350 × 438 à direita na seção final, foco visível, cards de áreas expansíveis com teclado/Escape, entrada escalonada e hover; CTA com movimento ligado à rolagem e inerte com movimento reduzido, FAQ nativo, âncoras abaixo do cabeçalho e redução de movimento.
 - [x] Verificações em produção: `npm test` (3 testes), `npm run check` (0 erros/avisos), `npm run build` e `npm run test:e2e` (37 testes) concluídos com sucesso. A prévia de produção em 1440 px não registrou erros de console, requisições falhas ou âncoras internas sem destino.
 - [ ] Lighthouse: não medido. Não havia binário/pacote Lighthouse disponível no ambiente de revisão; nenhum pacote foi adicionado apenas para a auditoria. As metas Performance ≥ 90 e Accessibility/Best Practices/SEO ≥ 95 continuam gates para a publicação.

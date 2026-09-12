@@ -40,6 +40,7 @@ const enableProgressiveReveals = () => {
       const target = entry.target as HTMLElement;
       target.classList.remove('reveal-pending');
       target.classList.add('is-visible');
+      target.addEventListener('transitionend', () => target.classList.add('is-settled'), { once: true });
       revealObserver.unobserve(target);
     });
   }, { threshold: 0.12 });

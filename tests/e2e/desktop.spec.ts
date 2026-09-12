@@ -399,11 +399,11 @@ test('progressive reveals keep content visible by default and reveal area rows i
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
-  const cards = page.locator('#areas .area-card[data-reveal]');
+  const cards = page.locator('#areas [data-area-card][data-reveal]');
   await expect(cards).toHaveCount(6);
   await expect(cards.first()).toHaveClass(/reveal-pending/);
   const delays = await cards.evaluateAll(elements => elements.map(element => getComputedStyle(element).getPropertyValue('--reveal-delay').trim()));
-  expect(delays).toEqual(['0ms', '75ms', '150ms', '0ms', '75ms', '150ms']);
+  expect(delays).toEqual(['0ms', '50ms', '100ms', '150ms', '200ms', '250ms']);
 
   await cards.first().scrollIntoViewIfNeeded();
   await expect(cards.first()).toHaveClass(/is-visible/);

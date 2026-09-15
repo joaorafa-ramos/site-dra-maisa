@@ -1,21 +1,47 @@
 ---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
 interface Props {
-  src?: string;
-  srcset?: string;
-  sizes?: string;
+  src?: ImageMetadata;
   alt: string;
   width: number;
   height: number;
+  widths: number[];
+  sizes?: string;
   eager?: boolean;
   class?: string;
+  reveal?: 'image';
 }
 
-const { src, srcset, sizes, alt, width, height, eager = false, class: className } = Astro.props;
+const {
+  src,
+  alt,
+  width,
+  height,
+  widths,
+  sizes = '420px',
+  eager = false,
+  class: className,
+  reveal,
+} = Astro.props;
 ---
 
-<div class:list={['picture-frame', className]} style={`aspect-ratio: ${width} / ${height};`}>
+<div
+  class:list={['picture-frame', className]}
+  data-reveal={reveal}
+  style={`aspect-ratio: ${width} / ${height};`}
+>
   {src ? (
-    <img src={src} srcset={srcset} sizes={sizes} alt={alt} width={width} height={height} loading={eager ? 'eager' : 'lazy'} />
+    <Picture
+      src={src}
+      alt={alt}
+      formats={['avif', 'webp']}
+      fallbackFormat="webp"
+      widths={widths}
+      sizes={sizes}
+      loading={eager ? 'eager' : 'lazy'}
+    />
   ) : (
     <div class="picture-frame__slot" role="img" aria-label={alt}></div>
   )}

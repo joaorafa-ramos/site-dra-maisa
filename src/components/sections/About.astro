@@ -1,32 +1,38 @@
 ---
-import Button from '../ui/Button.astro';
+import { getImage } from 'astro:assets';
 import PictureFrame from '../ui/PictureFrame.astro';
 import SectionHeading from '../ui/SectionHeading.astro';
-import { getWhatsAppUrl, siteConfig } from '../../config/site';
+import { siteConfig } from '../../config/site';
 import { content } from '../../data/content';
+import aboutPortrait from '../../assets/dra-apresentacao.webp';
 
-const whatsappUrl = getWhatsAppUrl();
 const credential = siteConfig.crfa?.trim();
+const [aboutTitleBefore, aboutTitleAfter] = content.about.title.split(content.about.titleEmphasis);
+// center 85% picks up the lab coat and peach background, avoiding the dark hair mass (tested in the mock).
+const ambientAbout = await getImage({ src: aboutPortrait, width: 64, format: 'webp', quality: 50 });
 ---
 
-<section class="section about" id="sobre">
+<section class="section about" id="sobre" style={`--ambient-about: url(${ambientAbout.src})`}>
   <div class="container about__layout">
     <PictureFrame
       class="about__portrait"
-      src="/images/dra-apresentacao-sem-estetoscopio.optimized.webp"
-      alt="Retrato de Maisa Palma, sorrindo e com a mão apoiada sob o queixo."
+      reveal="image"
+      src={aboutPortrait}
       width={960}
       height={1200}
+      widths={[420, 640, 880]}
+      sizes="(max-width: 959px) 420px, 480px"
+      alt="Retrato de Maisa Palma, sorrindo e com a mão apoiada sob o queixo."
     />
-    <div class="about__copy">
+    <div class="about__copy" data-reveal="group">
       <p class="section-eyebrow">{content.about.eyebrow}</p>
-      <SectionHeading>{content.about.title}</SectionHeading>
+      <SectionHeading>{aboutTitleBefore}<em>{content.about.titleEmphasis}</em>{aboutTitleAfter}</SectionHeading>
       <div class="about__description">
         <p>{content.about.introduction}</p>
         <p>{content.about.description}</p>
       </div>
       {credential && <p class="about__credential">CRFa {credential}</p>}
-      <Button href={whatsappUrl} label={content.about.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="sobre" />
+      <a class="link-secondary" href="#avaliacao">{content.about.cta}</a>
     </div>
   </div>
 </section>

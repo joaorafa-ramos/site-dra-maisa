@@ -21,7 +21,7 @@ for (const width of [375, 390, 768]) {
 
     const hero = page.locator('.hero');
     await expect(hero.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(hero.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'Conversar sobre meu filho', exact: true })).toBeVisible();
 
     const intro = (await page.locator('.signals__intro').boundingBox())!;
     const portrait = (await page.locator('.signals__portrait').boundingBox())!;
@@ -93,7 +93,7 @@ test('mobile menu closes when focus or a tap leaves it and on Escape from anywhe
   // Tabbing past the last panel link moves focus out of the header.
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await panel.getByRole('link', { name: 'Agendar avaliação', exact: true }).focus();
+  await panel.getByRole('link', { name: 'WhatsApp', exact: true }).focus();
   await page.keyboard.press('Tab');
   expect(await header.evaluate(element => element.contains(document.activeElement))).toBe(false);
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -132,7 +132,7 @@ for (const width of [375, 390]) {
       const indicator = summary.querySelector('.faq__indicator')!.getBoundingClientRect();
       return indicator.left - text.right;
     }));
-    expect(gaps).toHaveLength(6);
+    expect(gaps).toHaveLength(8);
     for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(12);
   });
 }
@@ -158,7 +158,9 @@ test('navigation stays reachable and legible on a phone without JavaScript', asy
   await expect(header).not.toHaveCSS('position', 'sticky');
   await expectNoHorizontalOverflow(page);
 
-  await page.locator('#duvidas').scrollIntoViewIfNeeded();
+  // Scroll the heading itself, not the whole (now 8-item) section: scrolling the section can align its
+  // far edge into view on a short viewport, pushing the heading at its top back out.
+  await page.locator('#duvidas h2').scrollIntoViewIfNeeded();
   await expect(header).not.toBeInViewport();
   await expect(page.locator('#duvidas h2')).toBeInViewport();
   await context.close();
@@ -208,7 +210,7 @@ for (const width of [390, 1440]) {
 }
 
 // Catches the approved copy regressing or the replaced wording coming back.
-test('renders the approved About, Evaluation, Areas and FAQ copy', async ({ page }) => {
+test('renders the approved About, Evaluation and Areas copy', async ({ page }) => {
   await page.goto('/');
   const main = page.locator('main');
   for (const text of [
@@ -217,7 +219,6 @@ test('renders the approved About, Evaluation, Areas and FAQ copy', async ({ page
     'Não há respostas certas ou erradas. A avaliação é conduzida com atenção, acolhimento e respeito ao modo de cada criança se comunicar.',
     'Crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.',
     'Estimulação da fala e da linguagem para crianças que utilizam AASI (aparelho de amplificação sonora individual), implante coclear ou ambos.',
-    'A avaliação acontece com escuta, atividades lúdicas e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
   ]) {
     await expect(main.getByText(text, { exact: true })).toHaveCount(1);
   }
@@ -257,21 +258,59 @@ test('contact eyebrow is readable on the navy panel', async ({ page }) => {
   await expect(page.locator('#contato .section-eyebrow')).toHaveCSS('color', 'rgba(247, 242, 238, 0.84)');
 });
 
-// Catches an eyebrow chip missing from a section, drawn in the wrong ink for its background, or below AA contrast.
+// Shared by both loops below: composites every painted ancestor background from the page root down to
+// the element, then returns its contrast ratio against that ground.
+const readContrastRatio = (locator: ReturnType<import('@playwright/test').Page['locator']>) =>
+  locator.evaluate(element => {
+    const parse = (value: string) => {
+      const [r = 0, g = 0, b = 0, a = 1] = value.match(/[\d.]+/g)!.map(Number);
+      return { r, g, b, a };
+    };
+    const over = (top: { r: number; g: number; b: number; a: number }, bottom: { r: number; g: number; b: number }) => ({
+      r: top.r * top.a + bottom.r * (1 - top.a),
+      g: top.g * top.a + bottom.g * (1 - top.a),
+      b: top.b * top.a + bottom.b * (1 - top.a),
+      a: 1,
+    });
+    const layers: HTMLElement[] = [];
+    for (let node: HTMLElement | null = element.parentElement; node; node = node.parentElement) layers.unshift(node);
+    let ground = { r: 255, g: 255, b: 255, a: 1 };
+    for (const layer of layers) {
+      const color = parse(getComputedStyle(layer).backgroundColor);
+      if (color.a > 0) ground = over(color, ground);
+    }
+    const ink = over(parse(getComputedStyle(element).color), ground);
+    const luminance = ({ r, g, b }: { r: number; g: number; b: number }) => {
+      const channel = (value: number) => {
+        const v = value / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    };
+    const [light, dark] = [luminance(ink), luminance(ground)].sort((x, y) => y - x);
+    return (light! + 0.05) / (dark! + 0.05);
+  });
+
+// Iris 11.b A-02: the chip is kept only where it earns its place — Hero, Sinais and Contato. The other
+// 5 sections' H2 already carries the section, so their eyebrow is plain caps text, no border/pill.
 const navy = 'rgb(48, 86, 106)';
 const eyebrowChips = [
-  { section: 'section.hero', selector: '.hero__eyebrow', ink: 'rgb(247, 242, 238)', align: 'left', contrast: false },
-  { section: 'section.signals', selector: '.section-eyebrow', ink: navy, align: 'center', contrast: true },
-  { section: '#sobre', selector: '.section-eyebrow', ink: navy, align: 'left', contrast: true },
-  { section: '#avaliacao', selector: '.section-eyebrow', ink: navy, align: 'left', contrast: true },
-  { section: '#areas', selector: '.section-eyebrow', ink: navy, align: 'center', contrast: true },
-  { section: '#duvidas', selector: '.section-eyebrow', ink: navy, align: 'center', contrast: true },
-  { section: '#contato', selector: '.section-eyebrow', ink: 'rgba(247, 242, 238, 0.84)', align: 'center', contrast: true },
-  { section: '#localizacoes', selector: '.section-eyebrow', ink: navy, align: 'center', contrast: true },
+  { section: 'section.hero', selector: '.hero__eyebrow', ink: 'rgb(247, 242, 238)', align: 'left' },
+  { section: 'section.signals', selector: '.section-eyebrow', ink: navy, align: 'center' },
+  { section: '#contato', selector: '.section-eyebrow', ink: 'rgba(247, 242, 238, 0.84)', align: 'center' },
+] as const;
+
+const plainEyebrows = [
+  // "start" is the browser's computed value for unset text-align (left, in this LTR page), not "left" itself.
+  { section: '#sobre', align: 'start' },
+  { section: '#avaliacao', align: 'start' },
+  { section: '#areas', align: 'center' },
+  { section: '#duvidas', align: 'center' },
+  { section: '#localizacoes', align: 'center' },
 ] as const;
 
 for (const width of [390, 1440]) {
-  test(`every section eyebrow is an outlined chip in its section ink at ${width}px`, async ({ page }) => {
+  test(`hero, sinais and contato eyebrows are outlined chips in their section ink at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
@@ -302,38 +341,31 @@ for (const width of [390, 1440]) {
       if (chip.align === 'center') expect(Math.abs(geometry.left - geometry.right)).toBeLessThanOrEqual(1);
       else expect(geometry.left).toBeLessThanOrEqual(1);
 
-      if (!chip.contrast) continue;
-      const ratio = await eyebrow.evaluate(element => {
-        const parse = (value: string) => {
-          const [r = 0, g = 0, b = 0, a = 1] = value.match(/[\d.]+/g)!.map(Number);
-          return { r, g, b, a };
-        };
-        const over = (top: { r: number; g: number; b: number; a: number }, bottom: { r: number; g: number; b: number }) => ({
-          r: top.r * top.a + bottom.r * (1 - top.a),
-          g: top.g * top.a + bottom.g * (1 - top.a),
-          b: top.b * top.a + bottom.b * (1 - top.a),
-          a: 1,
-        });
-        // Composite every painted ancestor background from the page root down to the chip.
-        const layers: HTMLElement[] = [];
-        for (let node: HTMLElement | null = element.parentElement; node; node = node.parentElement) layers.unshift(node);
-        let ground = { r: 255, g: 255, b: 255, a: 1 };
-        for (const layer of layers) {
-          const color = parse(getComputedStyle(layer).backgroundColor);
-          if (color.a > 0) ground = over(color, ground);
-        }
-        const ink = over(parse(getComputedStyle(element).color), ground);
-        const luminance = ({ r, g, b }: { r: number; g: number; b: number }) => {
-          const channel = (value: number) => {
-            const v = value / 255;
-            return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-          };
-          return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-        };
-        const [light, dark] = [luminance(ink), luminance(ground)].sort((x, y) => y - x);
-        return (light! + 0.05) / (dark! + 0.05);
-      });
+      const ratio = await readContrastRatio(eyebrow);
       expect(ratio, `${chip.section} eyebrow contrast`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  test(`sobre, avaliacao, areas, duvidas and localizacoes eyebrows are plain caps text, no pill, at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+
+    for (const plain of plainEyebrows) {
+      const eyebrow = page.locator(plain.section).locator('.section-eyebrow');
+      await expect(eyebrow, plain.section).toHaveCount(1);
+      await expect(eyebrow).toBeVisible();
+      await expect(eyebrow).toHaveCSS('display', 'block');
+      await expect(eyebrow).toHaveCSS('border-top-style', 'none');
+      await expect(eyebrow).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(eyebrow).toHaveCSS('color', navy);
+      await expect(eyebrow).toHaveCSS('margin-bottom', '24px');
+      expect(await eyebrow.innerText()).toBe((await eyebrow.innerText()).toUpperCase());
+      // A block-level eyebrow spans its parent's width, so alignment lives in text-align, not box position.
+      await expect(eyebrow).toHaveCSS('text-align', plain.align);
+
+      const ratio = await readContrastRatio(eyebrow);
+      expect(ratio, `${plain.section} eyebrow contrast`).toBeGreaterThanOrEqual(4.5);
     }
   });
 }

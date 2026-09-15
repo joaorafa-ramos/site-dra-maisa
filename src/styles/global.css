@@ -28,9 +28,18 @@ a {
   color: inherit;
 }
 
+p {
+  text-wrap: pretty;
+}
+
 :focus-visible {
   outline: 3px solid var(--color-navy);
   outline-offset: 4px;
+}
+
+::selection {
+  background: rgb(215 169 141 / 0.45);
+  color: var(--color-graphite);
 }
 
 section[id] {

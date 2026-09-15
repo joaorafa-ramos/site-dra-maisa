@@ -39,9 +39,16 @@ test('publishes complete, truthful SEO metadata and accessible optimized images'
   const jsonLd = await page.locator('head script[type="application/ld+json"]').textContent();
   const schema = JSON.parse(jsonLd!);
   expect(schema['@context']).toBe('https://schema.org');
-  expect(schema['@graph'].map((item: { '@type': string }) => item['@type'])).toEqual(['Person', 'ProfessionalService']);
+  expect(schema['@graph'].map((item: { '@type': string }) => item['@type'])).toEqual(['Person', 'MedicalBusiness']);
   expect(JSON.stringify(schema)).toContain('https://instagram.com/fonomaisapalma');
-  expect(JSON.stringify(schema)).not.toMatch(/telephone|streetAddress|CRFa/i);
+  const [person, medicalBusiness] = schema['@graph'];
+  expect(person.hasCredential.name).toBe('CRFa 2-23944');
+  expect(medicalBusiness.telephone).toBe('+55-15-99271-9708');
+  expect(medicalBusiness.address.streetAddress).toBe('Alameda Toledo Ribas, 628');
+  expect(medicalBusiness.location).toHaveLength(2);
+  // No confirmed PUBLIC_SITE_URL yet: ids stay relative, no absolute urls or og:image are fabricated.
+  expect(person['@id']).toBe('#maisa');
+  expect(medicalBusiness.url).toBeUndefined();
 
   const images = page.locator('img');
   await expect(images).not.toHaveCount(0);
@@ -66,15 +73,20 @@ test('publishes complete, truthful SEO metadata and accessible optimized images'
   }
 });
 
-test('WhatsApp CTAs dispatch the vendor-neutral conversion event with their origin and label', async ({ page }) => {
+test('WhatsApp CTAs push a whatsapp_click event to dataLayer with their origin and label', async ({ page }) => {
   await page.goto('/');
-  const cta = page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
+  const cta = page.locator('.hero').getByRole('link', { name: 'Conversar sobre meu filho', exact: true });
   await expect(cta).toHaveAttribute('data-whatsapp-cta', '');
-  const event = await cta.evaluate(link => new Promise(resolve => {
-    window.addEventListener('whatsapp_click', customEvent => resolve((customEvent as CustomEvent).detail), { once: true });
-    (link as HTMLAnchorElement).onclick?.(new PointerEvent('click'));
-  }));
-  expect(event).toEqual({ cta_location: 'hero', cta_label: 'Conversar pelo WhatsApp' });
+  // Dispatch a real (bubbling) click so the delegated document listener in site-interactions.ts fires,
+  // but cancel it first so the anchor's real href/target never navigates the test page away.
+  const pushed = await cta.evaluate(link => {
+    const anchor = link as HTMLAnchorElement;
+    (window as unknown as { dataLayer: unknown[] }).dataLayer = [];
+    anchor.addEventListener('click', event => event.preventDefault(), { once: true });
+    anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    return (window as unknown as { dataLayer: unknown[] }).dataLayer;
+  });
+  expect(pushed).toEqual([{ event: 'whatsapp_click', cta_location: 'hero', cta_label: 'Conversar sobre meu filho' }]);
 });
 
 test('area cards show only icon, category, title and summary with no expand affordance', async ({ page }) => {
@@ -120,8 +132,10 @@ test('area card hover motion (lift, bar, icon scale) is inert with reduced motio
   await context.close();
 });
 
+// Iris 11.b A-01: six boxed cards with an identical check icon read as a template; replaced with a
+// left-aligned editorial list (2 columns, hairline divider, one icon per area from the logo's pictograms).
 for (const width of [1024, 1440, 1920]) {
-  test(`area cards keep a readable three-column two-row grid at ${width}px`, async ({ page }) => {
+  test(`area cards keep a readable two-column list at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await expect(page.locator('#areas')).toHaveCount(1);
@@ -131,13 +145,15 @@ for (const width of [1024, 1440, 1920]) {
       const { x, y, width, bottom } = element.getBoundingClientRect();
       return { x, y, width, bottom };
     }));
-    for (let column = 0; column < 3; column++) {
-      expect(boxes[column]!.y).toBe(boxes[0]!.y);
-      expect(boxes[column + 3]!.y).toBe(boxes[3]!.y);
-      expect(boxes[column]!.x).toBe(boxes[column + 3]!.x);
-      if (column > 0) expect(boxes[column]!.x).toBeGreaterThan(boxes[column - 1]!.x + boxes[column - 1]!.width);
+    // Two columns, three rows: items 0/1 share a row, 2/3 the next, 4/5 the last.
+    for (const row of [0, 1, 2]) {
+      const left = boxes[row * 2]!;
+      const right = boxes[row * 2 + 1]!;
+      expect(right.y).toBe(left.y);
+      expect(right.x).toBeGreaterThan(left.x + left.width);
     }
-    expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
+    expect(boxes[2]!.y).toBeGreaterThan(boxes[0]!.bottom);
+    expect(boxes[4]!.y).toBeGreaterThan(boxes[2]!.bottom);
     for (const card of await cards.all()) {
       expect(await card.locator('.area-card__summary').evaluate(element => element.scrollHeight <= element.clientHeight + 1 && element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     }
@@ -145,37 +161,33 @@ for (const width of [1024, 1440, 1920]) {
   });
 }
 
-// Catches a regression back to flip visuals or a hover without the reference's lift/bar response.
-test('area cards use the centered reference format and lift with a top bar on hover', async ({ page }) => {
+// Catches a regression back to boxed centered cards, or a hover that lifts/shadows instead of just
+// marking the divider (the flat list has no card surface left to lift).
+test('area cards are a left-aligned, unboxed list and hover only marks the divider', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const card = page.locator('#areas [data-area-card]').first();
-  const bar = card.locator('.area-card__bar');
-  // The page uses `scroll-behavior: smooth` (global.css) and the reveal system animates each card's
-  // entrance transform over 460ms; either one still running when hover() fires can shift the card
-  // out from under the cursor and immediately drop :hover. Emulate reduced motion (which the site's
-  // own `prefers-reduced-motion: reduce` block turns into an instant scroll and ~0ms transitions) just
-  // long enough to scroll and let the reveal settle, then switch back to the real motion for the hover
-  // assertions below.
+  // See the comment on the signal/FAQ equivalents: settle the reveal under reduced motion first so the
+  // entrance transition can't still be running when hover() fires below.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await card.evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'center' }));
   await expect(card).toHaveClass(/is-visible/);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
-  await expect(card).toHaveCSS('text-align', 'center');
-  await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');
-  await expect(card).toHaveCSS('border-top-left-radius', '24px');
-  await expect(card.locator('.area-card__icon')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(card).toHaveCSS('text-align', 'left');
+  await expect(card).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(card).toHaveCSS('border-radius', '0px');
+  await expect(card).toHaveCSS('border-top-color', 'rgba(48, 86, 106, 0.12)');
+  await expect(card.locator('.area-card__icon')).toHaveCSS('color', 'rgb(141, 128, 95)');
   await expect(card.locator('h3')).toHaveCSS('font-family', /Figtree/);
-  await expect(card.locator('h3')).toHaveCSS('font-size', '28px');
-  await expect(card.locator('.area-card__summary')).toHaveCSS('font-size', '16px');
-  await expect(bar).toHaveCSS('opacity', '0');
-  const restingShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+  await expect(card.locator('.area-card__summary')).toHaveCSS('font-size', '15px');
+  await expect(card).toHaveCSS('transform', 'none');
+  await expect(card).toHaveCSS('box-shadow', 'none');
 
   await card.hover();
-  await expect(bar).toHaveCSS('opacity', '1');
-  await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toMatch(/matrix\(1, 0, 0, 1, 0, -[3-6]\)/);
-  await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
+  await expect(card).toHaveCSS('transform', 'none');
+  await expect(card).toHaveCSS('box-shadow', 'none');
+  await expect(card).toHaveCSS('border-top-color', 'rgba(48, 86, 106, 0.24)');
 });
 
 // Catches the signal cards drifting from the Areas card motion: same staggered entrance, same hover, same timing.
@@ -200,7 +212,7 @@ test('signal cards reuse the Areas staggered entrance and hover motion', async (
   const areaPending = await readPending(page.locator('#areas [data-motion-card]'));
   expect(signalPending.map(card => [card.opacity, card.transform])).toEqual(Array(6).fill(['0', 'matrix(1, 0, 0, 1, 0, 20)']));
   expect(signalPending).toEqual(areaPending);
-  expect(signalPending.map(card => toMilliseconds(card.delay))).toEqual([0, 50, 100, 150, 200, 250]);
+  expect(signalPending.map(card => toMilliseconds(card.delay))).toEqual([0, 60, 120, 180, 240, 300]);
 
   // Record when each card starts to appear: later cards must start later (the stagger), and all end fully visible.
   await page.evaluate(() => {
@@ -227,15 +239,15 @@ test('signal cards reuse the Areas staggered entrance and hover motion', async (
     await expect(card).toHaveClass(/is-settled/);
   }
 
-  // Hover: same lift, border and shadow as Areas, title and description rise like the Areas title and summary.
+  // Hover: same lift, border and shadow as Areas; title and description no longer shift on their own.
   const card = cards.first();
   const restingShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
   await card.hover();
-  await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -4)');
-  await expect.poll(() => card.locator('h3').evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -3)');
-  await expect.poll(() => card.locator('p').evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -2)');
+  await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -2)');
+  await expect(card.locator('h3')).toHaveCSS('transform', 'none');
+  await expect(card.locator('p')).toHaveCSS('transform', 'none');
   await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
-  await expect(card).toHaveCSS('border-top-color', 'rgba(48, 86, 106, 0.28)');
+  await expect(card).toHaveCSS('border-top-color', 'rgba(48, 86, 106, 0.24)');
   await expect(card).toHaveCSS('transition-duration', '0.3s, 0.3s, 0.3s');
 });
 
@@ -281,7 +293,7 @@ test('signals lists every sign open beside the preserved portrait with a centere
   const cta = signals.locator('.signals__action .button');
 
   await expect(layout).toHaveCount(1);
-  await expect(portrait).toHaveAttribute('src', '/images/sinais-maisa.optimized.webp');
+  await expect(portrait).toHaveAttribute('src', /\/_astro\/sinais-maisa\..+\.webp$/);
   await expect(portrait).toHaveAttribute(
     'alt',
     'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
@@ -309,7 +321,8 @@ test('signals lists every sign open beside the preserved portrait with a centere
 
   await expect(reassurance).toHaveText('Um sinal isolado não define um diagnóstico. A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
   await expect(reassurance).toHaveCSS('background-color', 'rgb(227, 240, 242)');
-  await expect(items.first().getByRole('heading', { level: 3 })).toHaveCSS('text-transform', 'uppercase');
+  // Iris 11.b A-12: caps read as a clinical form for a list of parental worries; plain sentence case now.
+  await expect(items.first().getByRole('heading', { level: 3 })).toHaveCSS('text-transform', 'none');
   await expect(cta).toHaveClass(/button--peach/);
   await expect(cta).toHaveCSS('background-image', /gradient/);
 });
@@ -342,12 +355,12 @@ test('signals stacks the portrait above the accordion before the two-column layo
   expect(list.y).toBeGreaterThanOrEqual(portrait.y + portrait.height + 32);
 });
 
-test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
+test('uses Fraunces for display headings, Figtree elsewhere, and keeps accessible desktop CTA size', async ({ page }) => {
   await page.goto('/');
 
   const heading = page.locator('.section-heading').first();
   await expect(heading).toBeVisible();
-  await expect(heading).toHaveCSS('font-family', /Figtree/);
+  await expect(heading).toHaveCSS('font-family', /Fraunces/);
   await expect(page.locator('body')).toHaveCSS('font-family', /Figtree/);
 
   const buttons = page.locator('.button:visible');
@@ -367,14 +380,16 @@ for (const width of [1024, 1440, 1920]) {
     await expect(hero.getByText('FONOAUDIOLOGIA INFANTIL • ITAPEVA–SP', { exact: true })).toBeVisible();
     await expect(hero.getByText('Seu filho fala pouco, troca sons ou nem sempre é compreendido? A avaliação fonoaudiológica ajuda a entender suas necessidades e orientar os próximos passos.', { exact: true })).toBeVisible();
     const image = hero.locator('img');
-    await expect(image).toHaveAttribute('src', '/images/HERO-extended.png');
+    await expect(image).toHaveAttribute('src', /\/_astro\/hero\..+\.webp$/);
     await expect(image).toHaveCSS('object-fit', 'cover');
     expect(await image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
-    const cta = hero.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
+    const cta = hero.getByRole('link', { name: 'Conversar sobre meu filho', exact: true });
     await expect(cta).toBeInViewport({ ratio: 1 });
     await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+    // Iris 11.b A-08: the text column is now .9fr/1.1fr (was 1fr/1fr) so the H1 fits in 2 lines instead
+    // of 3, which starts the text column a little left of the exact half — still clearly the right side.
     const headline = await hero.locator('h1').boundingBox();
-    expect(headline!.x).toBeGreaterThanOrEqual(width / 2);
+    expect(headline!.x).toBeGreaterThanOrEqual(width * 0.4);
     const sizes = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
     expect(sizes.content).toBe(sizes.viewport);
     if (width === 1440) expect((await hero.boundingBox())!.height).toBe(820);
@@ -394,14 +409,14 @@ for (const width of [1024, 1440, 1920]) {
       await expect(page).toHaveURL(new RegExp(`#${id}$`));
     }
     await expect(page.locator('section#contato')).toHaveCount(1);
-    const cta = header.getByRole('link', { name: 'Agendar avaliação', exact: true });
+    const cta = header.getByRole('link', { name: 'WhatsApp', exact: true });
     await expect(cta).toBeInViewport({ ratio: 1 });
     await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
     if (await cta.getAttribute('href') === '#contato') {
       await cta.click();
       await expect(page).toHaveURL(/#contato$/);
     }
-    const heroCta = page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true });
+    const heroCta = page.locator('.hero').getByRole('link', { name: 'Conversar sobre meu filho', exact: true });
     if (await heroCta.getAttribute('href') === '#contato') {
       await heroCta.click();
       await expect(page).toHaveURL(/#contato$/);
@@ -436,7 +451,7 @@ test('header navigation links are white while the peach CTA keeps its existing d
   for (const link of await header.locator('.site-header__nav a').all()) {
     await expect(link).toHaveCSS('color', 'rgb(247, 242, 238)');
   }
-  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toHaveCSS('color', 'rgb(69, 63, 59)');
+  await expect(header.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveCSS('color', 'rgb(69, 63, 59)');
 });
 
 test('scrolling down collapses the header to a hover rail and pointer reveals it again', async ({ page }) => {
@@ -451,7 +466,7 @@ test('scrolling down collapses the header to a hover rail and pointer reveals it
   await page.mouse.move(720, 6);
   await expect(header).toHaveAttribute('data-hovered', 'true');
   await expect(header).toHaveAttribute('data-hidden', 'false');
-  await expect(header.getByRole('link', { name: 'Agendar avaliação', exact: true })).toBeInViewport({ ratio: 1 });
+  await expect(header.getByRole('link', { name: 'WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });
 
   await page.mouse.move(720, 300);
   await expect(header).toHaveAttribute('data-hovered', 'false');
@@ -487,7 +502,7 @@ test('progressive reveals keep content visible by default and reveal area rows i
   await expect(cards.first()).toHaveClass(/reveal-pending/);
   const delays = await cards.evaluateAll(elements => elements.map(element => getComputedStyle(element).getPropertyValue('--reveal-delay').trim()));
   // The production minifier rewrites `100ms` as `.1s`; compare durations, not spellings.
-  expect(delays.map(toMilliseconds)).toEqual([0, 50, 100, 150, 200, 250]);
+  expect(delays.map(toMilliseconds)).toEqual([0, 60, 120, 180, 240, 300]);
 
   await cards.first().scrollIntoViewIfNeeded();
   await expect(cards.first()).toHaveClass(/is-visible/);
@@ -519,10 +534,10 @@ test('reveal targets remain readable with JavaScript disabled or reduced motion 
 });
 
 test('hero message and CTA remain available when the photograph cannot load', async ({ page }) => {
-  await page.route('**/images/HERO-extended.png', route => route.abort());
+  await page.route('**/_astro/hero.*', route => route.abort());
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Cada pequena voz merece ser ouvida.' })).toBeVisible();
-  await expect(page.locator('.hero').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeInViewport({ ratio: 1 });
+  await expect(page.locator('.hero').getByRole('link', { name: 'Conversar sobre meu filho', exact: true })).toBeInViewport({ ratio: 1 });
 });
 
 test('FAQ publishes all answers with one native accordion item open and keyboard controls', async ({ page }) => {
@@ -530,16 +545,18 @@ test('FAQ publishes all answers with one native accordion item open and keyboard
   const faq = page.locator('section#duvidas');
   const items = faq.locator('details[name="faq"]');
   const answers = [
-    'Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.',
-    'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.',
-    'A avaliação acontece com escuta, atividades lúdicas e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
-    'Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.',
-    'Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.',
-    'Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.',
+    'É natural pensar assim — muitas crianças realmente evoluem sozinhas. Mas esperar sem uma avaliação pode adiar um cuidado que faria diferença agora. A avaliação não obriga a nada: ela mostra se há motivo para acompanhar de perto ou se está tudo dentro do esperado.',
+    'Não existe uma idade mínima nem um prazo para "esperar mais um pouco". Cada fase do desenvolvimento tem marcos próprios, e a avaliação considera isso desde bebês até a fase escolar. Quanto antes a dúvida for esclarecida, mais cedo a família fica tranquila — em qualquer direção que a resposta apontar.',
+    'O encontro é conduzido como uma brincadeira, com atividades escolhidas para a idade da criança — sem provas cronometradas ou cobrança. A maioria das crianças nem percebe que está sendo avaliada. Você acompanha de perto o tempo todo.',
+    'Nem toda avaliação termina em indicação de terapia; às vezes o resultado mostra que está tudo dentro do esperado para a idade. Quando há indicação, ela vem com uma explicação clara do motivo e do que esperar do acompanhamento.',
+    'Não existe um prazo padrão: depende da idade da criança, da queixa e da resposta ao trabalho ao longo do caminho. Esse tempo é revisado periodicamente com a família, para que vocês sempre saibam em que ponto do processo estão.',
+    'Sim — a família é parte do trabalho, não apenas espectadora. Você recebe orientações práticas para o dia a dia e é ouvida sobre o que tem funcionado em casa, porque o que acontece fora do consultório também importa.',
+    'O valor da avaliação é combinado diretamente pelo WhatsApp, de acordo com a necessidade de cada família.',
+    'O atendimento acontece de segunda a sexta, das 8h às 18h. Fale pelo WhatsApp para agendar um horário.',
   ];
 
-  await expect(items).toHaveCount(6);
-  await expect(items.locator('summary')).toHaveCount(6);
+  await expect(items).toHaveCount(8);
+  await expect(items.locator('summary')).toHaveCount(8);
   for (const answer of answers) await expect(faq.getByText(answer, { exact: true })).toHaveCount(1);
   await expect(items.first()).toHaveAttribute('open', '');
   expect(await items.evaluateAll(elements => elements.filter(item => item.hasAttribute('open')).length)).toBe(1);
@@ -566,7 +583,7 @@ test('FAQPage JSON-LD mirrors the visible questions and answers', async ({ page 
     item.querySelector('summary > span:first-child')!.textContent!.trim(),
     item.querySelector('[data-faq-answer]')!.textContent!.trim(),
   ]));
-  expect(visible).toHaveLength(6);
+  expect(visible).toHaveLength(8);
   expect(schema['@context']).toBe('https://schema.org');
   expect(schema['@type']).toBe('FAQPage');
   expect(schema.mainEntity.map((entry: { '@type': string; name: string; acceptedAnswer: { '@type': string; text: string } }) => {
@@ -575,17 +592,19 @@ test('FAQPage JSON-LD mirrors the visible questions and answers', async ({ page 
   })).toEqual(visible);
 });
 
-test('FAQ opening reveals existing answer characters without changing the answer text', async ({ page }) => {
+test('FAQ opening rotates the indicator and fades the answer in without changing its text', async ({ page }) => {
   await page.goto('/');
   const item = page.locator('section#duvidas details[name="faq"]').nth(1);
   const answer = item.locator('[data-faq-answer]');
-  const expectedAnswer = 'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.';
+  const indicator = item.locator('.faq__indicator');
+  const expectedAnswer =
+    'Não existe uma idade mínima nem um prazo para "esperar mais um pouco". Cada fase do desenvolvimento tem marcos próprios, e a avaliação considera isso desde bebês até a fase escolar. Quanto antes a dúvida for esclarecida, mais cedo a família fica tranquila — em qualquer direção que a resposta apontar.';
+  await expect(indicator).toHaveCSS('transform', 'none');
   await item.locator('summary').click();
   await expect(item).toHaveAttribute('open', '');
   await expect(answer).toHaveText(expectedAnswer);
-  await expect(answer.locator('[data-faq-character]').first()).toHaveCSS('transition-duration', '0.3s, 0.3s');
-  await expect(answer.locator('[data-faq-character]').nth(1)).toHaveCSS('transition-delay', '0.015s');
-  await expect(answer.locator('[data-faq-character]').first()).toHaveCSS('filter', 'blur(0px)');
+  await expect.poll(() => indicator.evaluate(element => getComputedStyle(element).transform)).toMatch(/matrix\(-1, 0, 0, -1, 0, 0\)/);
+  await expect.poll(() => answer.evaluate(element => getComputedStyle(element).opacity)).toBe('1');
 });
 
 test('FAQ answers remain readable without JavaScript and skip reveal motion when reduced', async ({ browser }) => {
@@ -593,9 +612,9 @@ test('FAQ answers remain readable without JavaScript and skip reveal motion when
   const noJavaScriptPage = await noJavaScript.newPage();
   await noJavaScriptPage.goto('/');
   const noJavaScriptFaq = noJavaScriptPage.locator('section#duvidas');
-  await expect(noJavaScriptFaq.locator('details[name="faq"]')).toHaveCount(6);
+  await expect(noJavaScriptFaq.locator('details[name="faq"]')).toHaveCount(8);
   await noJavaScriptFaq.locator('details[name="faq"]').nth(4).locator('summary').click();
-  await expect(noJavaScriptFaq.getByText('Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.', { exact: true })).toBeVisible();
+  await expect(noJavaScriptFaq.getByText('Não existe um prazo padrão: depende da idade da criança, da queixa e da resposta ao trabalho ao longo do caminho. Esse tempo é revisado periodicamente com a família, para que vocês sempre saibam em que ponto do processo estão.', { exact: true })).toBeVisible();
   await noJavaScript.close();
 
   const reduced = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
@@ -604,13 +623,18 @@ test('FAQ answers remain readable without JavaScript and skip reveal motion when
   const item = reducedPage.locator('section#duvidas details[name="faq"]').nth(1);
   const answer = item.locator('[data-faq-answer]');
   await item.locator('summary').click();
-  await expect(answer).toHaveText('A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
+  await expect(answer).toHaveText(
+    'Não existe uma idade mínima nem um prazo para "esperar mais um pouco". Cada fase do desenvolvimento tem marcos próprios, e a avaliação considera isso desde bebês até a fase escolar. Quanto antes a dúvida for esclarecida, mais cedo a família fica tranquila — em qualquer direção que a resposta apontar.',
+  );
   await expect(answer).toHaveCSS('filter', 'none');
-  await expect(answer).toHaveCSS('transition-duration', '0s');
+  expect(await answer.evaluate(element => parseFloat(getComputedStyle(element).animationDuration) <= 0.01)).toBe(true);
   await reduced.close();
 });
 
-test('contact CTA is a centered, photo-free conversion panel with the existing WhatsApp route', async ({ page }) => {
+// Iris 12.3 (A-11): the panel now carries the Dra.'s photo blended in via a CSS custom property (no
+// <img>, luminosity blend keeps the panel navy) plus ambient light — .contact__glow/.contact__portrait
+// were the old flat decoration this replaces, so their absence is now the expected state, not a bug.
+test('contact CTA is a centered conversion panel with ambient light and the existing WhatsApp route', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const section = page.locator('section#contato');
@@ -620,9 +644,9 @@ test('contact CTA is a centered, photo-free conversion panel with the existing W
   await expect(section.locator('.contact__panel')).toBeVisible();
   await expect(section.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para começar uma conversa.');
   await expect(section.getByText('Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
-  await expect(section.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /https:\/\/wa\.me\/5515992719708\?text=.+/);
-  await expect(section.locator('.contact__portrait')).toHaveCount(0);
-  await expect(section.locator('.contact__glow[aria-hidden="true"]')).toHaveCount(1);
+  await expect(section.getByRole('link', { name: 'Conversar sobre meu filho', exact: true })).toHaveAttribute('href', /https:\/\/wa\.me\/5515992719708\?text=.+/);
+  await expect(section.locator('.contact__portrait, img')).toHaveCount(0);
+  await expect(section).toHaveAttribute('style', /--ambient:/);
   await expect(page.locator('section#conversar')).toHaveCount(0);
 });
 
@@ -634,11 +658,13 @@ test('FAQ is centered while preserving its native accordion', async ({ page }) =
   const styles = await layout.evaluate(element => getComputedStyle(element));
   expect(styles.textAlign).toBe('center');
   expect(parseFloat(styles.maxWidth)).toBeLessThanOrEqual(820);
-  await expect(faq.locator('details[name="faq"]')).toHaveCount(6);
+  await expect(faq.locator('details[name="faq"]')).toHaveCount(8);
   await expect(faq.locator('details[name="faq"]').first()).toHaveAttribute('open', '');
 });
 
-test('last content section provides the three confirmed clinic maps in the requested order', async ({ page }) => {
+// Iris 11.b A-07: maps no longer load by default (each iframe pulled hundreds of KB of third-party JS
+// on arrival, for 3 clinics at once); "Como chegar" is a plain link and works with no JS or clicks.
+test('last content section provides the three confirmed clinics with no map loaded by default', async ({ page }) => {
   await page.goto('/');
   const locations = page.locator('section#localizacoes');
   const cards = locations.locator('.location-card');
@@ -646,41 +672,45 @@ test('last content section provides the three confirmed clinic maps in the reque
   await expect(locations.getByRole('heading', { level: 2 })).toHaveText('Onde encontrar o atendimento');
   await expect(cards).toHaveCount(3);
   await expect(cards.locator('.location-card__name')).toHaveText(['Clínica Senses', 'Clínica Sinapse', 'CliniPrev']);
-  await expect(cards.locator('iframe')).toHaveCount(3);
-  for (let index = 0; index < 3; index++) await expect(cards.locator('iframe').nth(index)).toHaveAttribute('loading', 'lazy');
+  await expect(locations.locator('iframe')).toHaveCount(0);
   await expect(cards.locator('a', { hasText: 'Como chegar' })).toHaveCount(3);
-  await expect(locations.locator('iframe').nth(1)).toHaveAttribute('src', /Cl%C3%ADnica%20Sinapse%20Itapeva/);
-  await expect(locations.locator('iframe').nth(2)).toHaveAttribute('src', /Rua%20Santos%20Dumont%2C%20221/);
+  await expect(cards.getByRole('button', { name: /^Ver mapa da/ })).toHaveCount(3);
 });
 
-// Catches maps being hidden at page load, which leaves the requested interactive locations unavailable without JavaScript.
-test('location cards expose all interactive maps on load and retain independent keyboard controls', async ({ page }) => {
+// Catches the map toggle failing to load a card's own map, or leaking into another card's state.
+test('location cards load their map on demand, independently of one another', async ({ page }) => {
   await page.goto('/');
   const locations = page.locator('section#localizacoes');
   const cards = locations.locator('.location-card');
   const senses = cards.nth(0);
   const sinapse = cards.nth(1);
-  const sensesToggle = senses.getByRole('button', { name: 'Ver mapa da Clínica Senses' });
+  // Located by the stable data attribute, not the accessible name: a successful load changes the
+  // button's aria-label (and text) to "Mapa carregado", which would stop a name-based locator matching.
+  const sensesToggle = senses.locator('[data-location-map-toggle]');
 
-  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(senses.locator('iframe')).toBeVisible();
-  await expect(locations.locator('iframe:visible')).toHaveCount(3);
+  await expect(sensesToggle).toHaveAccessibleName('Ver mapa da Clínica Senses');
+  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(senses.locator('iframe')).toHaveCount(0);
 
   await sensesToggle.focus();
   await page.keyboard.press('Enter');
 
-  await expect(sensesToggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(senses.locator('iframe')).not.toBeVisible();
-  await expect(sinapse.getByRole('button', { name: 'Ver mapa da Clínica Sinapse' })).toHaveAttribute('aria-expanded', 'true');
-  await expect(sinapse.locator('iframe')).toBeVisible();
-
-  await page.keyboard.press('Enter');
   await expect(sensesToggle).toHaveAttribute('aria-expanded', 'true');
   await expect(senses.locator('iframe')).toBeVisible();
+  await expect(senses.locator('iframe')).toHaveAttribute('loading', 'lazy');
+  await expect(senses.locator('iframe')).toHaveAttribute('src', /Cl%C3%ADnica%20Senses/);
+  await expect(sinapse.locator('iframe')).toHaveCount(0);
+
+  const sinapseToggle = sinapse.locator('[data-location-map-toggle]');
+  await expect(sinapseToggle).toHaveAccessibleName('Ver mapa da Clínica Sinapse');
+  await sinapseToggle.click();
+  await expect(sinapse.locator('iframe')).toBeVisible();
+  await expect(sinapse.locator('iframe')).toHaveAttribute('src', /Cl%C3%ADnica%20Sinapse%20Itapeva/);
+  await expect(senses.locator('iframe')).toHaveCount(1);
 });
 
 // Catches a missing practical contact route or unconfirmed operational data being published.
-test('unified contact conversion and footer provide safe practical information without unconfirmed credentials', async ({ page }) => {
+test('unified contact conversion and footer show the confirmed CRFa and hours without unconfirmed credentials', async ({ page }) => {
   await page.goto('/');
   const contact = page.locator('section#contato');
   const footer = page.getByRole('contentinfo');
@@ -688,15 +718,24 @@ test('unified contact conversion and footer provide safe practical information w
   await expect(contact).toHaveCount(1);
   await expect(contact.getByRole('heading', { level: 2 })).toHaveText('Você não precisa ter todas as respostas para começar uma conversa.');
   await expect(contact.getByText('Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.', { exact: true })).toBeVisible();
-  await expect(contact.getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+  await expect(contact.getByRole('link', { name: 'Conversar sobre meu filho', exact: true })).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
   await expect(contact.getByText('Fonoaudiologia infantil em Itapeva–SP • @fonomaisapalma', { exact: true })).toBeVisible();
-  await expect(contact.getByText(/CRFa|CNPJ|Endereço|Horários de atendimento/)).toHaveCount(0);
+  await expect(contact.getByText('CRFa 2-23944', { exact: true })).toBeVisible();
+  await expect(contact.getByText('Segunda a sexta, das 8h às 18h', { exact: true })).toBeVisible();
+  await expect(contact.getByText(/CNPJ|Endereço/)).toHaveCount(0);
 
   await expect(footer).toHaveCount(1);
   await expect(footer.getByRole('img', { name: 'Maisa Palma — Fonoaudióloga' })).toBeVisible();
   await expect(footer.getByText('Fonoaudiologia infantil em Itapeva–SP', { exact: true })).toBeVisible();
   await expect(footer.getByRole('link', { name: '@fonomaisapalma', exact: true })).toHaveAttribute('href', 'https://instagram.com/fonomaisapalma');
-  await expect(footer.getByText(/CRFa|CNPJ|Política de Privacidade/)).toHaveCount(0);
+  await expect(footer.getByText('CRFa 2-23944', { exact: true })).toBeVisible();
+  await expect(footer.getByText(/CNPJ|Política de Privacidade/)).toHaveCount(0);
+
+  // Iris 11.b A-15: footer carries hours and the 3 clinics (NAP consistent with the JSON-LD).
+  await expect(footer.getByText('Segunda a sexta, das 8h às 18h', { exact: true })).toBeVisible();
+  await expect(footer.getByRole('link', { name: 'Clínica Senses', exact: true })).toHaveAttribute('href', /goo\.gl|google/);
+  await expect(footer.getByRole('link', { name: 'Clínica Sinapse', exact: true })).toHaveAttribute('href', /goo\.gl|google/);
+  await expect(footer.getByRole('link', { name: 'CliniPrev', exact: true })).toHaveAttribute('href', /goo\.gl|google/);
 });
 
 // Catches stale fragment URLs, duplicate section ids, and anchors hidden under the sticky header.
@@ -767,7 +806,9 @@ for (const width of [1024, 1280, 1440, 1920]) {
     const photo = await portraitFrame.locator('img').evaluate(async (img: HTMLImageElement) => {
       img.loading = 'eager';
       await img.decode();
-      const frame = img.parentElement!.getBoundingClientRect();
+      // <Picture> wraps the img in a <picture> element, so the frame is the nearest .picture-frame, not the direct parent.
+      const frameElement = img.closest('.picture-frame')!;
+      const frame = frameElement.getBoundingClientRect();
       const box = img.getBoundingClientRect();
       const style = getComputedStyle(img);
       return {
@@ -775,7 +816,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
         // srcset density correction rounds natural sizes by a pixel, so compare the ratio to two decimals.
         sourceRatio: Math.round((img.naturalWidth / img.naturalHeight) * 100) / 100,
         fills: Math.abs(box.width - frame.width) <= 1 && Math.abs(box.height - frame.height) <= 1,
-        radius: getComputedStyle(img.parentElement!).borderTopLeftRadius,
+        radius: getComputedStyle(frameElement).borderTopLeftRadius,
       };
     });
     expect(photo).toEqual({ objectFit: 'cover', sourceRatio: 0.8, fills: true, radius: '24px' });
@@ -786,15 +827,17 @@ for (const width of [1024, 1280, 1440, 1920]) {
     const cards = list.locator(':scope > li.signal-item');
     await expect(cards).toHaveCount(6);
     await expect(list).toHaveCSS('border-top-width', '0px');
-    // Cards reuse the Areas card border, radius, white ground and shadow; title stays navy uppercase, description smaller graphite.
-    const areaCardShadow = await page.locator('#areas [data-area-card]').first().evaluate(element => getComputedStyle(element).boxShadow);
+    // Cards keep their own card border/radius/shadow (Areas dropped its card surface entirely in A-01,
+    // so it's no longer a shared reference); background is translucent white so the ambient light behind
+    // the section (Iris 12.3) shows through. Title stays navy, description smaller graphite.
+    const signalCardShadow = await cards.first().evaluate(element => getComputedStyle(element).boxShadow);
     for (const card of await cards.all()) {
       await expect(card).toHaveCSS('border-top-style', 'solid');
       await expect(card).toHaveCSS('border-top-width', '1px');
       await expect(card).toHaveCSS('border-top-left-radius', '24px');
-      await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+      await expect(card).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.78)');
       await expect(card).toHaveCSS('padding-top', '16px');
-      expect(await card.evaluate(element => getComputedStyle(element).boxShadow)).toBe(areaCardShadow);
+      expect(await card.evaluate(element => getComputedStyle(element).boxShadow)).toBe(signalCardShadow);
       await expect(card.locator('h3')).toHaveCSS('color', 'rgb(48, 86, 106)');
       await expect(card.locator('h3')).toHaveCSS('font-weight', '600');
       const description = card.locator('p');
@@ -826,7 +869,12 @@ for (const width of [1024, 1280, 1440, 1920]) {
         expect(bounds.width / bounds.height).toBeCloseTo(4 / 5, 2);
       }
       const cta = section.getByRole('link');
-      await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+      if (section === about) {
+        // About's CTA is a secondary internal link to the evaluation section, not a WhatsApp CTA.
+        await expect(cta).toHaveAttribute('href', '#avaliacao');
+      } else {
+        await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
+      }
     }
 
     const textBlocks = page.locator('.signals h2, .signal-item__title, .signal-item p, .about h2');
@@ -855,17 +903,16 @@ for (const width of [1024, 1280, 1440, 1920]) {
   });
 }
 
-// Catches a static CTA: the panel must translate/scale with scroll progress and the backdrop must parallax.
-test('contact CTA moves with scroll progress and settles centered at full scale', async ({ page }) => {
+// Catches a static CTA: the panel must translate/scale with scroll progress. The old cream-page blobs
+// and dot grid backdrop (Iris 11.b A-11) are gone — the panel's own ambient light (Iris 12.3) replaces
+// them, and that light is a static, non-parallaxing layer, so there's no separate backdrop to assert on.
+test('contact CTA moves with scroll progress and settles centered near its scale peak', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const section = page.locator('section#contato');
   const layout = section.locator('.contact__layout[data-cta]');
   await expect(section).toHaveAttribute('data-cta-scroll', '');
-  await expect(section.locator('.contact__backdrop[aria-hidden="true"]')).toHaveCount(1);
-  await expect(section.locator('.contact__blob--blue')).toHaveCount(1);
-  await expect(section.locator('.contact__blob--peach')).toHaveCount(1);
-  await expect(section.locator('.contact__dots')).toHaveCount(1);
+  await expect(section.locator('.contact__backdrop, .contact__blob, .contact__dots')).toHaveCount(0);
 
   const readProgress = () => section.evaluate(element => parseFloat(getComputedStyle(element).getPropertyValue('--cta-progress')));
   const readMatrix = () => layout.evaluate(element => getComputedStyle(element).transform);
@@ -888,10 +935,7 @@ test('contact CTA moves with scroll progress and settles centered at full scale'
   });
   await expect.poll(readProgress, { timeout: 3000 }).toBeGreaterThan(0.4);
   await expect.poll(readProgress, { timeout: 3000 }).toBeLessThan(0.6);
-  await expect.poll(async () => parseFloat((await readMatrix()).replace('matrix(', '').split(',')[0]!), { timeout: 3000 }).toBeGreaterThan(0.99);
-
-  const blobTransform = await section.locator('.contact__backdrop').evaluate(element => getComputedStyle(element).transform);
-  expect(blobTransform).not.toBe('none');
+  await expect.poll(async () => parseFloat((await readMatrix()).replace('matrix(', '').split(',')[0]!), { timeout: 3000 }).toBeGreaterThan(0.97);
 });
 
 test('contact CTA motion is inert with reduced motion and without JavaScript', async ({ browser }) => {
@@ -901,7 +945,6 @@ test('contact CTA motion is inert with reduced motion and without JavaScript', a
   const layout = reducedPage.locator('section#contato .contact__layout[data-cta]');
   await layout.scrollIntoViewIfNeeded();
   await expect(layout).toHaveCSS('transform', 'none');
-  await expect(reducedPage.locator('section#contato .contact__backdrop')).toHaveCSS('transform', 'none');
   await expect(reducedPage.locator('section#contato .section-heading')).toHaveCSS('opacity', '1');
   await reduced.close();
 
@@ -912,6 +955,6 @@ test('contact CTA motion is inert with reduced motion and without JavaScript', a
   await panel.scrollIntoViewIfNeeded();
   await expect(panel).toBeVisible();
   await expect(noJsPage.locator('section#contato .section-heading')).toHaveCSS('opacity', '1');
-  await expect(noJsPage.locator('section#contato').getByRole('link', { name: 'Conversar pelo WhatsApp', exact: true })).toBeVisible();
+  await expect(noJsPage.locator('section#contato').getByRole('link', { name: 'Conversar sobre meu filho', exact: true })).toBeVisible();
   await noJs.close();
 });

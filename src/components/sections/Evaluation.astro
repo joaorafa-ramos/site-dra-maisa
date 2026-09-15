@@ -4,20 +4,23 @@ import { getWhatsAppUrl } from '../../config/site';
 import { content, evaluationSteps } from '../../data/content';
 
 const whatsappUrl = getWhatsAppUrl();
+const [evaluationTitleBefore, evaluationTitleAfter] = content.evaluation.title.split(
+  content.evaluation.titleEmphasis
+);
 ---
 
 <section class="section evaluation" id="avaliacao" aria-labelledby="evaluation-title" data-reveal-group="evaluation">
   <div class="container">
-    <div class="evaluation__intro" data-reveal>
+    <div class="evaluation__intro" data-reveal="group">
       <p class="section-eyebrow">{content.evaluation.eyebrow}</p>
-      <h2 class="section-heading" id="evaluation-title">{content.evaluation.title}</h2>
+      <h2 class="section-heading" id="evaluation-title">{evaluationTitleBefore}<em>{content.evaluation.titleEmphasis}</em>{evaluationTitleAfter}</h2>
       <p class="section-description">{content.evaluation.description}</p>
     </div>
     <div class="evaluation__timeline">
       <span class="evaluation__line" aria-hidden="true"></span>
       <ol class="evaluation__steps" role="list" data-reveal-stagger>
-        {evaluationSteps.map(step => (
-          <li class="evaluation-step" data-reveal>
+        {evaluationSteps.map((step, index) => (
+          <li class="evaluation-step" data-reveal style={`--i:${index}`}>
             <span class="evaluation-step__number" aria-hidden="true">{step.step}</span>
             <h3>{step.title}</h3>
             <p>{step.description}</p>

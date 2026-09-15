@@ -1,6 +1,7 @@
 ---
 import { getWhatsAppUrl, siteConfig } from '../../config/site';
 import { content } from '../../data/content';
+import { locations } from '../../data/locations';
 
 const whatsappUrl = getWhatsAppUrl();
 ---
@@ -17,10 +18,26 @@ const whatsappUrl = getWhatsAppUrl();
         {content.footer.navigation.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
       </ul>
     </nav>
+    <div class="site-footer__hours">
+      <p class="site-footer__label">ATENDIMENTO</p>
+      {siteConfig.businessHours && <p>{siteConfig.businessHours}</p>}
+      <ul>
+        {locations.map(location => (
+          <li><a href={location.mapsUrl} target="_blank" rel="noopener noreferrer">{location.name}</a></li>
+        ))}
+      </ul>
+    </div>
     <div class="site-footer__contact">
       <p class="site-footer__label">{content.footer.contactLabel}</p>
-      <a href={whatsappUrl} target={whatsappUrl.startsWith('https://') ? '_blank' : undefined} rel={whatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}>WhatsApp</a>
-      <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer">{siteConfig.instagram}</a>
+      <a
+        href={whatsappUrl}
+        target={whatsappUrl.startsWith('https://') ? '_blank' : undefined}
+        rel={whatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}
+        data-whatsapp-cta
+        data-whatsapp-location="rodape"
+        data-whatsapp-label="WhatsApp"
+      >WhatsApp</a>
+      <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer" data-instagram-cta>{siteConfig.instagram}</a>
       {siteConfig.crfa && <p>CRFa {siteConfig.crfa}</p>}
       {siteConfig.cnpj && <p>CNPJ {siteConfig.cnpj}</p>}
     </div>

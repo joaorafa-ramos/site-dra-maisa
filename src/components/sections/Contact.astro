@@ -1,23 +1,24 @@
 ---
+import { getImage } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import { getWhatsAppUrl, siteConfig } from '../../config/site';
 import { content } from '../../data/content';
+import contactPortrait from '../../assets/dra-apresentacao.webp';
 
 const whatsappUrl = getWhatsAppUrl();
+const [contactTitleBefore, contactTitleAfter] = content.contact.title.split(
+  content.contact.titleEmphasis
+);
+// Iris 12.3 (A-11): the same portrait as Sobre, blended in luminosity mode so the panel stays navy.
+const ambient = await getImage({ src: contactPortrait, width: 64, format: 'webp', quality: 50 });
 ---
 
-<section class="section contact" id="contato" aria-labelledby="contact-title" data-cta-scroll>
-  <div class="contact__backdrop" aria-hidden="true">
-    <span class="contact__blob contact__blob--blue"></span>
-    <span class="contact__blob contact__blob--peach"></span>
-    <span class="contact__dots"></span>
-  </div>
+<section class="section contact" id="contato" aria-labelledby="contact-title" data-cta-scroll style={`--ambient: url(${ambient.src})`}>
   <div class="container contact__layout" data-cta>
     <div class="contact__panel" data-cta-panel>
-      <div class="contact__glow" aria-hidden="true"></div>
       <div class="contact__copy">
         <p class="section-eyebrow" data-cta-step style="--cta-delay: 100ms">{content.contact.eyebrow}</p>
-        <h2 class="section-heading" id="contact-title" data-cta-step style="--cta-delay: 200ms">{content.contact.title}</h2>
+        <h2 class="section-heading" id="contact-title" data-cta-step style="--cta-delay: 200ms">{contactTitleBefore}<em>{content.contact.titleEmphasis}</em>{contactTitleAfter}</h2>
         <p class="section-description" data-cta-step style="--cta-delay: 300ms">{content.contact.description}</p>
         <div class="contact__action" data-cta-step style="--cta-delay: 500ms">
           <Button href={whatsappUrl} label={content.contact.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="contato" />

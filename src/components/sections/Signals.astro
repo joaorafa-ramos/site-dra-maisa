@@ -1,33 +1,39 @@
 ---
+import { getImage } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import PictureFrame from '../ui/PictureFrame.astro';
 import SectionHeading from '../ui/SectionHeading.astro';
 import { getWhatsAppUrl } from '../../config/site';
 import { content, signals } from '../../data/content';
+import sinaisPortrait from '../../assets/sinais-maisa.webp';
 
 const whatsappUrl = getWhatsAppUrl();
+const [signalsTitleBefore, signalsTitleAfter] = content.signals.title.split(content.signals.titleEmphasis);
+// Iris 12.2: a 64px render is already naturally blurred and costs ~1-2KB; never the full-size asset.
+const ambient = await getImage({ src: sinaisPortrait, width: 64, format: 'webp', quality: 50 });
 ---
 
-<section class="section signals" id="sinais">
+<section class="section signals" id="sinais" style={`--ambient: url(${ambient.src})`}>
   <div class="container">
-    <div class="signals__intro">
+    <div class="signals__intro" data-reveal="group">
       <p class="section-eyebrow">{content.signals.eyebrow}</p>
-      <SectionHeading>{content.signals.title}</SectionHeading>
+      <SectionHeading>{signalsTitleBefore}<em>{content.signals.titleEmphasis}</em>{signalsTitleAfter}</SectionHeading>
       <p class="section-description">{content.signals.description}</p>
     </div>
     <div class="signals__layout">
       <PictureFrame
         class="signals__portrait"
-        src="/images/sinais-maisa.optimized.webp"
-        srcset="/images/sinais-maisa.640.webp 640w, /images/sinais-maisa.optimized.webp 720w, /images/sinais-maisa.webp 800w"
-        sizes="(max-width: 959px) 420px, 520px"
-        alt="Maisa Palma segurando um brinquedo de dinossauro no consultório."
+        reveal="image"
+        src={sinaisPortrait}
         width={800}
         height={1000}
+        widths={[420, 640, 800]}
+        sizes="(max-width: 959px) 420px, 520px"
+        alt="Maisa Palma segurando um brinquedo de dinossauro no consultório."
       />
       <ul class="signals__list" role="list" data-reveal-stagger>
-        {signals.map(signal => (
-          <li class="signal-item" data-motion-card data-reveal>
+        {signals.map((signal, index) => (
+          <li class="signal-item" data-motion-card data-reveal="card" style={`--i:${Math.min(index, 5)}`}>
             <h3 class="signal-item__title">{signal.title}</h3>
             <p>{signal.description}</p>
           </li>

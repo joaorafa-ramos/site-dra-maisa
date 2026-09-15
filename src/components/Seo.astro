@@ -1,6 +1,7 @@
 ---
-import { normalizePublicSiteUrl, siteConfig } from '../config/site';
-import { serializeJsonLd } from '../data/structured-data';
+import { formatPhoneE164, normalizePublicSiteUrl, siteConfig } from '../config/site';
+import { buildMedicalBusiness, buildPerson, serializeJsonLd } from '../data/structured-data';
+import { locations } from '../data/locations';
 
 interface Props {
   title: string;
@@ -10,29 +11,28 @@ interface Props {
 const { title, description } = Astro.props;
 
 const siteUrl = normalizePublicSiteUrl(siteConfig.publicSiteUrl);
+const ogImageUrl = siteUrl ? `${siteUrl.replace(/\/$/, '')}/og-maisa.jpg` : undefined;
+const phoneE164 = formatPhoneE164(siteConfig.whatsappNumber ?? '');
 
-const person: Record<string, unknown> = {
-  '@type': 'Person',
+const person = buildPerson({
   name: siteConfig.name,
-  jobTitle: 'Fonoaudióloga infantil',
-  sameAs: [siteConfig.instagramUrl],
-};
-const practice: Record<string, unknown> = {
-  '@type': 'ProfessionalService',
-  name: 'Maisa Palma — Fonoaudiologia infantil em Itapeva',
-  description,
-  areaServed: { '@type': 'City', name: 'Itapeva' },
-  sameAs: [siteConfig.instagramUrl],
-};
+  crfa: siteConfig.crfa,
+  instagramUrl: siteConfig.instagramUrl,
+  siteUrl,
+});
 
-if (siteUrl) {
-  person.url = siteUrl;
-  practice.url = siteUrl;
-}
+const medicalBusiness = buildMedicalBusiness({
+  name: siteConfig.name,
+  siteUrl,
+  ogImageUrl,
+  phoneE164,
+  businessHours: siteConfig.businessHours,
+  locations,
+});
 
 const structuredData = {
   '@context': 'https://schema.org',
-  '@graph': [person, practice],
+  '@graph': [person, medicalBusiness].filter(Boolean),
 };
 ---
 
@@ -43,9 +43,17 @@ const structuredData = {
 <meta property="og:locale" content="pt_BR" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 {siteUrl && <link rel="canonical" href={siteUrl} />}
 {siteUrl && <meta property="og:url" content={siteUrl} />}
+{ogImageUrl ? (
+  <>
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+  </>
+) : (
+  <meta name="twitter:card" content="summary" />
+)}
 <script is:inline type="application/ld+json" set:html={serializeJsonLd(structuredData)}></script>

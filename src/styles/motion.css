@@ -1,52 +1,157 @@
-/* Reveal states are opt-in: server-rendered content starts fully visible. */
+:root {
+  interpolate-size: allow-keywords;
+}
+
+/* Typed so the calc()/var() expression below resolves to a real <time> instead of staying an
+   unevaluated token stream — lets getComputedStyle read the per-card delay directly. */
+@property --reveal-delay {
+  syntax: '<time>';
+  inherits: true;
+  initial-value: 0s;
+}
+
+/* FAQ opens smoothly instead of snapping: Chromium animates ::details-content's block-size, other
+   engines still open instantly (graceful, not broken). The indicator rotation covers open/closed
+   state everywhere. */
+.faq__item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition: block-size var(--dur-base) var(--ease-in-out),
+              content-visibility var(--dur-base) allow-discrete;
+}
+
+.faq__item[open]::details-content {
+  block-size: auto;
+}
+
+.faq__item[open] .faq__answer {
+  --rise-y: 6px;
+  animation: rise 320ms var(--ease-out) 80ms both;
+}
+
+/* Reveal states are opt-in: server-rendered content starts fully visible.
+   --i (set inline per mapped item, capped at 5) drives the stagger; type modifiers below adjust
+   the offset/duration per kind of element (Iris, iris.md §10.C). */
 [data-reveal] {
-  --reveal-delay: 0ms;
+  --reveal-y: 12px;
+  --reveal-dur: var(--dur-reveal);
+  --reveal-delay: calc(var(--i, 0) * 80ms);
+}
+
+[data-reveal='title'] {
+  --reveal-y: 16px;
+  --reveal-dur: 720ms;
+}
+
+[data-reveal='card'] {
+  --reveal-y: 20px;
+  --reveal-delay: calc(var(--i, 0) * 60ms);
 }
 
 .reveal-pending {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(var(--reveal-y));
+}
+
+/* Iris 12.4.2: cards "unblur" into place instead of just fading/sliding — softer than the reference's
+   blur(14px), kept in step with the same reveal timing/delay so it never becomes a second animation. */
+[data-reveal='card'].reveal-pending {
+  filter: blur(6px);
+}
+
+[data-reveal='image'].reveal-pending {
+  transform: none;
+}
+
+[data-reveal='image'] img {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+[data-reveal='image'].reveal-pending img {
+  transform: scale(1.04);
 }
 
 .is-visible {
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 460ms var(--ease-calm), transform 460ms var(--ease-calm);
-  transition-delay: var(--reveal-delay);
+  transform: none;
+  filter: none;
+  transition: opacity var(--reveal-dur) var(--ease-out) var(--reveal-delay),
+              transform var(--reveal-dur) var(--ease-out) var(--reveal-delay),
+              filter var(--reveal-dur) var(--ease-out) var(--reveal-delay);
 }
 
-[data-reveal-stagger] > [data-reveal]:nth-child(3n + 1) {
-  --reveal-delay: 0ms;
+/* Intro groups (eyebrow/H2/description/CTA) rise child by child instead of as one block. The wrapper
+   itself stays put — only opts out of the shared .reveal-pending/.is-visible opacity so it never
+   double-hides — and each child gets its own staggered `rise` keyframe once the group is visible. */
+[data-reveal='group'].reveal-pending {
+  opacity: 1;
+  transform: none;
 }
 
-[data-reveal-stagger] > [data-reveal]:nth-child(3n + 2) {
-  --reveal-delay: 75ms;
-}
-
-[data-reveal-stagger] > [data-reveal]:nth-child(3n) {
-  --reveal-delay: 150ms;
-}
-
-/* Cards com movimento (Áreas e Sinais, marcados com data-motion-card): atraso crescente por card,
-   como na referência (0,05 s por card). */
-[data-reveal-stagger] > [data-motion-card]:nth-child(1) { --reveal-delay: 0ms; }
-[data-reveal-stagger] > [data-motion-card]:nth-child(2) { --reveal-delay: 50ms; }
-[data-reveal-stagger] > [data-motion-card]:nth-child(3) { --reveal-delay: 100ms; }
-[data-reveal-stagger] > [data-motion-card]:nth-child(4) { --reveal-delay: 150ms; }
-[data-reveal-stagger] > [data-motion-card]:nth-child(5) { --reveal-delay: 200ms; }
-[data-reveal-stagger] > [data-motion-card]:nth-child(6) { --reveal-delay: 250ms; }
-
-[data-reveal-stagger] > [data-motion-card].reveal-pending {
+[data-reveal='group'].reveal-pending > * {
   opacity: 0;
-  transform: translateY(20px);
 }
 
-/* Vence a regra genérica `.is-visible` (linha 11) por ter maior especificidade (três seletores de
+[data-reveal='group'].is-visible > * {
+  --rise-y: 12px;
+  opacity: 1;
+  animation: rise var(--dur-reveal) var(--ease-out) both;
+}
+
+[data-reveal='group'].is-visible > *:nth-child(1) { animation-delay: 0ms; }
+[data-reveal='group'].is-visible > *:nth-child(2) { animation-delay: 80ms; }
+[data-reveal='group'].is-visible > *:nth-child(3) { animation-delay: 160ms; }
+[data-reveal='group'].is-visible > *:nth-child(4) { animation-delay: 240ms; }
+[data-reveal='group'].is-visible > *:nth-child(5) { animation-delay: 320ms; }
+
+/* Vence a regra genérica `.is-visible` por ter maior especificidade (três seletores de
    classe/atributo contra um). Mais abaixo, `.is-settled` tem a MESMA especificidade que esta regra
    e vence apenas por vir depois no arquivo — ver comentário junto a `.is-settled`. */
 [data-reveal-stagger] > [data-motion-card].is-visible {
-  transition: opacity 600ms cubic-bezier(0.33, 1, 0.68, 1), transform 600ms cubic-bezier(0.33, 1, 0.68, 1);
-  transition-delay: var(--reveal-delay);
+  transition: opacity var(--reveal-dur) var(--ease-out) var(--reveal-delay),
+              transform var(--reveal-dur) var(--ease-out) var(--reveal-delay),
+              filter var(--reveal-dur) var(--ease-out) var(--reveal-delay);
+}
+
+/* Hero entrance runs on load, not through the IntersectionObserver: it is always in view on arrival,
+   and its image is the LCP candidate, so it never animates (Iris, iris.md §10.C). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise-y, 14px));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__content > * {
+    animation: rise 720ms var(--ease-out) both;
+  }
+
+  .hero__content > *:nth-child(1) { animation-delay: 120ms; }
+  .hero__content > *:nth-child(2) { animation-delay: 210ms; }
+  .hero__content > *:nth-child(3) { animation-delay: 300ms; }
+  .hero__content > *:nth-child(4) { animation-delay: 390ms; }
+  .hero__content > *:nth-child(5) { animation-delay: 480ms; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+    .hero {
+      overflow: hidden;
+    }
+
+    .hero__image {
+      animation: hero-drift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+
+    @keyframes hero-drift {
+      to {
+        transform: translateY(6%) scale(1.03);
+      }
+    }
+  }
 }
 
 .button {
@@ -67,6 +172,10 @@
 
 .button:active {
   transform: translateY(0);
+}
+
+.button:hover .button__icon {
+  transform: translateX(3px);
 }
 
 .site-header {
@@ -109,18 +218,13 @@
   }
 }
 
-.cta-pending [data-cta-step],
-.cta-pending .contact__glow {
+.cta-pending [data-cta-step] {
   opacity: 0;
 }
 
 .cta-animate [data-cta-step] {
   animation: cta-fade-up 500ms ease-out both;
   animation-delay: var(--cta-delay, 0ms);
-}
-
-.cta-animate .contact__glow {
-  animation: cta-scale-in 500ms ease-out 700ms both;
 }
 
 /* Cards com movimento: resposta de hover inspirada na referência (levantar, barra, ícone, preenchimento). */
@@ -141,17 +245,15 @@
   transition: opacity 300ms var(--ease-calm);
 }
 
-.area-card__icon,
-[data-motion-card] h3,
-[data-motion-card] h3 + p {
+.area-card__icon {
   transition: transform 400ms var(--ease-calm), color 300ms var(--ease-calm), background-color 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
 }
 
 [data-motion-card]:hover,
 [data-motion-card]:focus-within {
-  border-color: rgb(48 86 106 / 0.28);
-  box-shadow: 0 20px 30px rgb(48 86 106 / 0.12);
-  transform: translateY(-4px);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .area-card:hover .area-card__bar,
@@ -161,16 +263,7 @@
 
 .area-card:hover .area-card__icon,
 .area-card:focus-within .area-card__icon {
-  transform: scale(1.1);
-}
-
-[data-motion-card]:hover h3 {
-  transform: translateY(-3px);
-}
-
-/* The line right under the title (Áreas summary, Sinais description) rises a little less than the title. */
-[data-motion-card]:hover h3 + p {
-  transform: translateY(-2px);
+  transform: scale(1.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -183,26 +276,20 @@
     animation-iteration-count: 1 !important;
   }
 
-  .faq__answer,
-  .faq__answer [data-faq-character] {
-    filter: none !important;
-    transition: none !important;
-  }
-
   [data-reveal],
+  .hero__content > *,
+  .hero__image,
   .button,
+  .button__icon,
+  .whatsapp-float,
   .site-header,
   .cta-pending [data-cta-step],
-  .cta-pending .contact__glow,
   [data-motion-card],
-  .area-card__icon,
-  [data-motion-card] h3,
-  [data-motion-card] h3 + p {
+  .area-card__icon {
     transform: none !important;
   }
 
-  .contact__layout,
-  .contact__backdrop {
+  .contact__layout {
     transform: none !important;
   }
 }

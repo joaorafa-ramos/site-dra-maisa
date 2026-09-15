@@ -2,11 +2,14 @@
 import '@fontsource/figtree/400.css';
 import '@fontsource/figtree/500.css';
 import '@fontsource/figtree/600.css';
+import '@fontsource-variable/fraunces/soft.css';
+import '@fontsource-variable/fraunces/soft-italic.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import '../styles/components.css';
 import '../styles/motion.css';
 import Seo from '../components/Seo.astro';
+import fraunces from '@fontsource-variable/fraunces/files/fraunces-latin-soft-normal.woff2?url';
 
 interface Props {
   title?: string;
@@ -24,6 +27,7 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" as="font" type="font/woff2" href={fraunces} crossorigin />
     <!-- Runs before first paint so JavaScript-only styles (mobile menu, glass header) never flash or shift layout. -->
     <script is:inline>document.documentElement.classList.add('js');</script>
     <title>{title}</title>

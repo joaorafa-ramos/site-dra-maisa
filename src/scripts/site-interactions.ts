@@ -1,5 +1,33 @@
+import {
+  buildInstagramClickPayload,
+  buildMapDirectionsPayload,
+  buildWhatsAppClickPayload,
+  pushToDataLayer,
+} from './tracking';
+
 const faqDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('details[name="faq"]'));
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+document.addEventListener('click', event => {
+  const target = event.target as Element;
+
+  const whatsappLink = target.closest<HTMLElement>('[data-whatsapp-cta]');
+  if (whatsappLink) {
+    pushToDataLayer(buildWhatsAppClickPayload(whatsappLink.dataset.whatsappLocation ?? '', whatsappLink.dataset.whatsappLabel ?? ''));
+    return;
+  }
+
+  const directionsLink = target.closest<HTMLElement>('[data-map-directions]');
+  if (directionsLink) {
+    pushToDataLayer(buildMapDirectionsPayload(directionsLink.dataset.locationId ?? ''));
+    return;
+  }
+
+  const instagramLink = target.closest<HTMLElement>('[data-instagram-cta]');
+  if (instagramLink) {
+    pushToDataLayer(buildInstagramClickPayload());
+  }
+});
 
 const enableProgressiveReveals = () => {
   if (prefersReducedMotion.matches || !('IntersectionObserver' in window)) return;
@@ -21,47 +49,12 @@ const enableProgressiveReveals = () => {
       target.addEventListener('transitionend', settle);
       revealObserver.unobserve(target);
     });
-  }, { threshold: 0.12 });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.15 });
 
   revealTargets.forEach(target => revealObserver.observe(target));
 };
 
 enableProgressiveReveals();
-
-const revealFaqAnswer = (details: HTMLDetailsElement) => {
-  if (prefersReducedMotion.matches) return;
-
-  const answer = details.querySelector<HTMLElement>('[data-faq-answer]')!;
-  if (!answer.dataset.faqCharacters) {
-    const walker = document.createTreeWalker(answer, NodeFilter.SHOW_TEXT);
-    const textNodes: Text[] = [];
-    let node: Node | null;
-    while ((node = walker.nextNode())) textNodes.push(node as Text);
-
-    textNodes.forEach(textNode => {
-      const characters = Array.from(textNode.data);
-      const fragment = document.createDocumentFragment();
-      characters.forEach((character, index) => {
-        const span = document.createElement('span');
-        span.dataset.faqCharacter = '';
-        span.style.setProperty('--faq-character-index', String(index));
-        span.textContent = character;
-        fragment.append(span);
-      });
-      textNode.replaceWith(fragment);
-    });
-    answer.dataset.faqCharacters = 'true';
-  }
-
-  answer.classList.remove('is-revealed');
-  answer.classList.add('is-revealing');
-  void answer.offsetWidth;
-  requestAnimationFrame(() => {
-    if (!details.open) return;
-    answer.classList.remove('is-revealing');
-    answer.classList.add('is-revealed');
-  });
-};
 
 faqDetails.forEach(details => {
   details.addEventListener('toggle', () => {
@@ -69,63 +62,54 @@ faqDetails.forEach(details => {
     faqDetails.forEach(sibling => {
       if (sibling !== details) sibling.open = false;
     });
-    revealFaqAnswer(details);
   });
 });
 
-const reducedLocationMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-
-const setLocationExpanded = (card: HTMLElement, expanded: boolean) => {
-  const button = card.querySelector<HTMLButtonElement>('[data-location-toggle]')!;
-  const panel = card.querySelector<HTMLElement>('[data-location-panel]')!;
-  button.setAttribute('aria-expanded', String(expanded));
-  card.dataset.expanded = String(expanded);
-
-  if (expanded) {
-    panel.hidden = false;
-    void panel.offsetHeight;
-    card.classList.add('is-expanded');
-    return;
-  }
-
-  card.classList.remove('is-expanded');
-  if (reducedLocationMotion.matches) {
-    panel.hidden = true;
-    return;
-  }
-
-  window.setTimeout(() => {
-    if (card.dataset.expanded === 'false') panel.hidden = true;
-  }, 260);
-};
-
-document.querySelectorAll<HTMLElement>('[data-location-card]').forEach(card => {
-  const button = card.querySelector<HTMLButtonElement>('[data-location-toggle]')!;
-  setLocationExpanded(card, true);
-
+// Iris 11.b A-07: the map iframe is only requested once the visitor asks for it — "Como chegar" (a
+// plain link) is the no-JS fallback, so directions still work without this script running at all.
+document.querySelectorAll<HTMLButtonElement>('[data-location-map-toggle]').forEach(button => {
   button.addEventListener('click', () => {
-    setLocationExpanded(card, button.getAttribute('aria-expanded') !== 'true');
-  });
+    if (button.getAttribute('aria-expanded') === 'true') return;
 
-  card.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || button.getAttribute('aria-expanded') !== 'true') return;
-    event.preventDefault();
-    setLocationExpanded(card, false);
-    button.focus();
-  });
+    const card = button.closest<HTMLElement>('[data-location-card]')!;
+    const panel = card.querySelector<HTMLElement>('[data-location-map]')!;
+    const embedUrl = button.dataset.embedUrl ?? '';
+    const name = card.querySelector<HTMLElement>('.location-card__name')?.textContent ?? '';
 
-  card.addEventListener('pointermove', event => {
-    if (!finePointer.matches || reducedLocationMotion.matches) return;
-    const bounds = card.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    card.style.setProperty('--location-rotate-x', `${-y * 4}deg`);
-    card.style.setProperty('--location-rotate-y', `${x * 4}deg`);
-  });
+    const frame = document.createElement('div');
+    frame.className = 'location-card__map-frame';
+    frame.innerHTML = `<iframe src="${embedUrl}" title="Localização da ${name} em Itapeva" loading="lazy" width="100%" height="300" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+    panel.append(frame);
+    panel.hidden = false;
 
-  card.addEventListener('pointerleave', () => {
-    card.style.removeProperty('--location-rotate-x');
-    card.style.removeProperty('--location-rotate-y');
+    button.setAttribute('aria-expanded', 'true');
+    button.setAttribute('aria-label', `Mapa da ${name} carregado`);
+    button.textContent = 'Mapa carregado';
   });
 });
+
+const whatsappFloat = document.querySelector<HTMLElement>('[data-whatsapp-float]');
+const hero = document.querySelector<HTMLElement>('.hero');
+const contact = document.querySelector<HTMLElement>('#contato');
+const footer = document.querySelector<HTMLElement>('.site-footer');
+
+if (whatsappFloat && hero && contact && footer && 'IntersectionObserver' in window) {
+  const hidden = { hero: true, end: false };
+
+  const applyVisibility = () => {
+    whatsappFloat.dataset.visible = String(!hidden.hero && !hidden.end);
+  };
+
+  const heroObserver = new IntersectionObserver(([entry]) => {
+    hidden.hero = Boolean(entry?.isIntersecting);
+    applyVisibility();
+  });
+  heroObserver.observe(hero);
+
+  const endObserver = new IntersectionObserver(entries => {
+    hidden.end = entries.some(entry => entry.isIntersecting);
+    applyVisibility();
+  });
+  endObserver.observe(contact);
+  endObserver.observe(footer);
+}

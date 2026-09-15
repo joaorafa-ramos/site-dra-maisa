@@ -1,4 +1,5 @@
 import type { SignalIconName } from '../types/signals';
+import type { AreaIconName } from '../components/ui/AreaIcon.astro';
 
 export interface Signal {
   title: string;
@@ -19,7 +20,7 @@ export interface Benefit {
 
 export interface Area {
   slug: string;
-  category: string;
+  icon: AreaIconName;
   title: string;
   front: string;
   back: string;
@@ -117,7 +118,10 @@ export const benefits: Benefit[] = [
 export const areas: Area[] = [
   {
     slug: 'linguagem',
-    category: 'LINGUAGEM',
+    // No pictogram fits "linguagem" directly (the logo has eye/ear/mouth/nose/hand); hand is the closest
+    // left over once mouth (fala/fluência), ear (audição), eye (aprendizagem) and nose (orofacial) are
+    // taken — registered here per Iris's instruction to pick the closest and document it.
+    icon: 'hand',
     title: 'Desenvolvimento da fala e da linguagem',
     front:
       'Crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.',
@@ -126,7 +130,7 @@ export const areas: Area[] = [
   },
   {
     slug: 'fala',
-    category: 'FALA',
+    icon: 'mouth',
     title: 'Trocas e dificuldades nos sons da fala',
     front:
       'Avaliação e terapia para omissões, substituições ou produção imprecisa de sons que dificultam entender a fala.',
@@ -135,7 +139,7 @@ export const areas: Area[] = [
   },
   {
     slug: 'fluencia',
-    category: 'FLUÊNCIA',
+    icon: 'mouth',
     title: 'Gagueira e taquifemia',
     front:
       'Cuidado com repetições, bloqueios ou fala acelerada, favorecendo uma comunicação mais confortável e segura.',
@@ -144,7 +148,7 @@ export const areas: Area[] = [
   },
   {
     slug: 'aprendizagem',
-    category: 'APRENDIZAGEM',
+    icon: 'eye',
     title: 'Dificuldades de leitura e escrita',
     front:
       'Suporte para dificuldades na alfabetização, leitura, compreensão e escrita, incluindo sinais relacionados à dislexia.',
@@ -153,7 +157,7 @@ export const areas: Area[] = [
   },
   {
     slug: 'funcoes-orofaciais',
-    category: 'FUNÇÕES OROFACIAIS',
+    icon: 'nose',
     title: 'Motricidade orofacial',
     front:
       'Avaliação das estruturas e funções de lábios, língua e bochechas, além de mastigação, deglutição e respiração.',
@@ -162,7 +166,7 @@ export const areas: Area[] = [
   },
   {
     slug: 'audicao',
-    category: 'AUDIÇÃO',
+    icon: 'ear',
     title: 'Comunicação na deficiência auditiva',
     front:
       'Estimulação da fala e da linguagem para crianças que utilizam AASI (aparelho de amplificação sonora individual), implante coclear ou ambos.',
@@ -173,34 +177,44 @@ export const areas: Area[] = [
 
 export const faqItems: FaqItem[] = [
   {
-    question: 'Quando devo procurar uma fonoaudióloga para o meu filho?',
+    question: 'Pode ser só uma fase? Devo esperar?',
     answer:
-      'Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.',
+      'É natural pensar assim — muitas crianças realmente evoluem sozinhas. Mas esperar sem uma avaliação pode adiar um cuidado que faria diferença agora. A avaliação não obriga a nada: ela mostra se há motivo para acompanhar de perto ou se está tudo dentro do esperado.',
   },
   {
-    question: 'Existe uma idade certa para fazer uma avaliação fonoaudiológica?',
+    question: 'Existe idade certa para fazer a avaliação?',
     answer:
-      'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.',
+      'Não existe uma idade mínima nem um prazo para "esperar mais um pouco". Cada fase do desenvolvimento tem marcos próprios, e a avaliação considera isso desde bebês até a fase escolar. Quanto antes a dúvida for esclarecida, mais cedo a família fica tranquila — em qualquer direção que a resposta apontar.',
   },
   {
-    question: 'Como funciona a avaliação fonoaudiológica infantil?',
+    question: 'Como é a avaliação? Meu filho vai se sentir bem?',
     answer:
-      'A avaliação acontece com escuta, atividades lúdicas e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
+      'O encontro é conduzido como uma brincadeira, com atividades escolhidas para a idade da criança — sem provas cronometradas ou cobrança. A maioria das crianças nem percebe que está sendo avaliada. Você acompanha de perto o tempo todo.',
   },
   {
-    question: 'Meu filho necessariamente precisará fazer terapia?',
+    question: 'Meu filho vai precisar de terapia?',
     answer:
-      'Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.',
+      'Nem toda avaliação termina em indicação de terapia; às vezes o resultado mostra que está tudo dentro do esperado para a idade. Quando há indicação, ela vem com uma explicação clara do motivo e do que esperar do acompanhamento.',
   },
   {
     question: 'Quanto tempo dura o acompanhamento?',
     answer:
-      'Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.',
+      'Não existe um prazo padrão: depende da idade da criança, da queixa e da resposta ao trabalho ao longo do caminho. Esse tempo é revisado periodicamente com a família, para que vocês sempre saibam em que ponto do processo estão.',
   },
   {
     question: 'A família participa do processo?',
     answer:
-      'Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.',
+      'Sim — a família é parte do trabalho, não apenas espectadora. Você recebe orientações práticas para o dia a dia e é ouvida sobre o que tem funcionado em casa, porque o que acontece fora do consultório também importa.',
+  },
+  {
+    question: 'Como funciona o valor da avaliação?',
+    answer:
+      'O valor da avaliação é combinado diretamente pelo WhatsApp, de acordo com a necessidade de cada família.',
+  },
+  {
+    question: 'Quais os horários de atendimento?',
+    answer:
+      'O atendimento acontece de segunda a sexta, das 8h às 18h. Fale pelo WhatsApp para agendar um horário.',
   },
 ];
 
@@ -208,13 +222,15 @@ export const content = {
   hero: {
     eyebrow: 'FONOAUDIOLOGIA INFANTIL • ITAPEVA–SP',
     title: 'Cada pequena voz merece ser ouvida.',
+    titleEmphasis: 'merece ser ouvida',
     description:
       'Seu filho fala pouco, troca sons ou nem sempre é compreendido? A avaliação fonoaudiológica ajuda a entender suas necessidades e orientar os próximos passos.',
-    cta: 'Conversar pelo WhatsApp',
+    cta: 'Conversar sobre meu filho',
   },
   signals: {
     eyebrow: 'O QUE VOCÊ NOTA EM CASA?',
     title: 'Alguns sinais merecem ser ouvidos com cuidado.',
+    titleEmphasis: 'merecem ser ouvidos',
     description:
       'Cada criança se desenvolve de uma maneira. Ainda assim, algumas dificuldades podem indicar que é importante buscar orientação profissional.',
     reassurance:
@@ -224,20 +240,22 @@ export const content = {
   about: {
     eyebrow: 'QUEM VAI CUIDAR DO SEU FILHO',
     title: 'Antes de qualquer técnica, vem o cuidado de compreender cada criança.',
+    titleEmphasis: 'compreender cada criança',
     introduction:
       'Sou Maisa Palma, fonoaudióloga. Sei que, quando a fala não acontece como esperado, surgem dúvidas, comparações e muita preocupação.',
     description:
       'Por isso, cada acompanhamento começa com uma avaliação fonoaudiológica: uma escuta atenta à família e um olhar individual para a criança. Com atividades lúdicas, vínculo e objetivos terapêuticos claros, construímos um caminho para que ela possa se comunicar com mais segurança.',
-    cta: 'Conversar com a Dra. Maisa',
+    cta: 'Veja como é a avaliação',
   },
   evaluation: {
     eyebrow: 'COMO FUNCIONA A AVALIAÇÃO',
     title: 'Um primeiro passo leve, claro e pensado para o seu filho.',
+    titleEmphasis: 'leve, claro e pensado',
     description:
       'A avaliação fonoaudiológica acontece com escuta, atividades lúdicas e respeito ao ritmo da criança — para que ela se sinta segura e você saiba o que esperar.',
     reassurance:
       'Não há respostas certas ou erradas. A avaliação é conduzida com atenção, acolhimento e respeito ao modo de cada criança se comunicar.',
-    cta: 'Quero agendar uma avaliação',
+    cta: 'Conversar sobre meu filho',
     ctaDetail: 'A conversa é iniciada pelo WhatsApp.',
   },
   benefits: {
@@ -250,13 +268,15 @@ export const content = {
   areas: {
     eyebrow: 'COMO A FONOAUDIOLOGIA PODE AJUDAR',
     title: 'Diferentes dificuldades, um cuidado atento para cada criança.',
+    titleEmphasis: 'cuidado atento',
     description:
       'A Dra. Maisa atua em diferentes aspectos da comunicação e do desenvolvimento infantil. Conheça as principais situações que podem ser avaliadas e acompanhadas.',
-    cta: 'Conversar com a Dra. Maisa',
+    cta: 'Perguntar sobre o caso',
   },
   faq: {
     eyebrow: 'DÚVIDAS FREQUENTES',
     title: 'É natural ter dúvidas. Aqui estão algumas respostas para ajudar você.',
+    titleEmphasis: 'natural ter dúvidas',
     description:
       'Cada criança tem seu próprio ritmo. A avaliação fonoaudiológica ajuda a compreender o que está acontecendo e quais são os próximos passos.',
     cta: 'Conversar com a Dra. Maisa',
@@ -264,9 +284,10 @@ export const content = {
   contact: {
     eyebrow: 'UM PRIMEIRO PASSO, NO SEU TEMPO',
     title: 'Você não precisa ter todas as respostas para começar uma conversa.',
+    titleEmphasis: 'começar uma conversa',
     description:
       'Conte pelo WhatsApp o que você tem observado na comunicação do seu filho. Por lá, você pode conhecer o atendimento e consultar os horários disponíveis para avaliação.',
-    cta: 'Conversar pelo WhatsApp',
+    cta: 'Conversar sobre meu filho',
     detail: 'Fonoaudiologia infantil em Itapeva–SP • @fonomaisapalma',
   },
   footer: {

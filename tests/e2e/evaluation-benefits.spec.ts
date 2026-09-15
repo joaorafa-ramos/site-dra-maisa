@@ -22,9 +22,10 @@ test('evaluation provides the complete ordered journey and scheduling action wit
   }
   const reassurance = section.getByText('Não há respostas certas ou erradas. A avaliação é conduzida com atenção, acolhimento e respeito ao modo de cada criança se comunicar.', { exact: true });
   await expect(reassurance).toBeVisible();
-  const cta = page.getByRole('link', { name: 'Quero agendar uma avaliação', exact: true });
+  // Scoped to the section: the label is now shared with other primary WhatsApp CTAs on the page (A-03).
+  const cta = section.getByRole('link', { name: 'Conversar sobre meu filho', exact: true });
   await expect(cta).toHaveCount(1);
-  await expect(section.getByRole('link', { name: 'Quero agendar uma avaliação', exact: true })).toBeVisible();
+  await expect(cta).toBeVisible();
   await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
   await expect(section.getByText('A conversa é iniciada pelo WhatsApp.', { exact: true })).toBeVisible();
   const listBox = (await section.locator('ol').boundingBox())!;
@@ -74,10 +75,14 @@ for (const width of [1024, 1280, 1440, 1920]) {
         return {
           fontSize: parseFloat(getComputedStyle(element).fontSize),
           heading: element.tagName === 'H3',
+          // Iris 11.b A-01's own recipe sets the area summary to 15px (below the page's usual 16px body
+          // copy floor) once the card lost its box and sits closer to the eye as a compact list line.
+          isAreaSummary: element.classList.contains('area-card__summary'),
           fits: text.left >= box.left - 1 && text.right <= box.right + 1 && text.bottom <= box.bottom + 2 && element.scrollWidth <= element.clientWidth + 1,
         };
       });
-      expect(geometry.fontSize).toBeGreaterThanOrEqual(geometry.heading ? 20 : 16);
+      const minFontSize = geometry.heading ? 20 : geometry.isAreaSummary ? 15 : 16;
+      expect(geometry.fontSize).toBeGreaterThanOrEqual(minFontSize);
       expect(geometry.fits).toBe(true);
     }
     const pageWidth = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));

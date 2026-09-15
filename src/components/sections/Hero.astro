@@ -1,26 +1,39 @@
 ---
+import { Picture } from 'astro:assets';
 import Button from '../ui/Button.astro';
-import { getWhatsAppUrl } from '../../config/site';
+import { getWhatsAppUrl, siteConfig } from '../../config/site';
 import { content } from '../../data/content';
+import { locations } from '../../data/locations';
+import heroImage from '../../assets/hero.png';
 
 const whatsappUrl = getWhatsAppUrl();
+const [heroTitleBefore, heroTitleAfter] = content.hero.title.split(content.hero.titleEmphasis);
+const trustLine = [
+  siteConfig.crfa ? `CRFa ${siteConfig.crfa}` : null,
+  `Atendimento em ${locations.length} clínicas de Itapeva`,
+]
+  .filter(Boolean)
+  .join(' · ');
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <img
+  <Picture
     class="hero__image"
-    src="/images/HERO-extended.png"
+    src={heroImage}
     alt="Maisa Palma sentada à mesa em um consultório infantil."
-    width="1678"
-    height="937"
+    formats={['avif', 'webp']}
+    fallbackFormat="webp"
+    widths={[768, 1280, 1680]}
+    sizes="100vw"
     loading="eager"
     fetchpriority="high"
   />
   <div class="container hero__layout">
     <div class="hero__content">
       <p class="hero__eyebrow">{content.hero.eyebrow}</p>
-      <h1 id="hero-title" class="section-heading hero__title">{content.hero.title}</h1>
+      <h1 id="hero-title" class="section-heading hero__title">{heroTitleBefore}<em>{content.hero.titleEmphasis}</em>{heroTitleAfter}</h1>
       <p class="hero__description">{content.hero.description}</p>
+      <p class="hero__trust">{trustLine}</p>
       <Button href={whatsappUrl} label={content.hero.cta} external={whatsappUrl.startsWith('https://')} whatsappLocation="hero" />
     </div>
   </div>

@@ -1,24 +1,27 @@
 ---
 import { content, faqItems } from '../../data/content';
 import { buildFaqPage, serializeJsonLd } from '../../data/structured-data';
+
+const [faqTitleBefore, faqTitleAfter] = content.faq.title.split(content.faq.titleEmphasis);
 ---
 
 <section class="section faq" id="duvidas" aria-labelledby="faq-title">
   <div class="container faq__layout">
-    <div class="faq__intro">
+    <div class="faq__intro" data-reveal="group">
       <p class="section-eyebrow">{content.faq.eyebrow}</p>
-      <h2 class="section-heading" id="faq-title">{content.faq.title}</h2>
+      <h2 class="section-heading" id="faq-title">{faqTitleBefore}<em>{content.faq.titleEmphasis}</em>{faqTitleAfter}</h2>
       <p class="section-description">{content.faq.description}</p>
     </div>
 
-    <div class="faq__list">
+    <div class="faq__list" data-reveal-stagger>
       {faqItems.map((item, index) => (
-        <details name="faq" open={index === 0} class="faq__item">
+        <details name="faq" open={index === 0} class="faq__item" data-reveal="card" style={`--i:${Math.min(index, 5)}`}>
           <summary>
             <span>{item.question}</span>
             <span class="faq__indicator" aria-hidden="true">
-              <span class="faq__plus">+</span>
-              <span class="faq__minus">−</span>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6l4 4 4-4" />
+              </svg>
             </span>
           </summary>
           <p class="faq__answer" data-faq-answer>{item.answer}</p>

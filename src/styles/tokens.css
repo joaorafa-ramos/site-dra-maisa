@@ -7,13 +7,53 @@
   --color-peach: #d7a98d;
   --color-peach-soft: #f1e5dd;
   --color-button-text: #453f3b;
-  --font-display: 'Figtree', Arial, sans-serif;
+  --font-display: 'Fraunces Variable', 'Fraunces Fallback', Georgia, serif;
   --font-body: 'Figtree', Arial, sans-serif;
+
+  --text-display: clamp(2.5rem, 1.5rem + 3.4vw, 4rem);       /* H1 40 -> 64 px (Iris 11.b A-08: 2-line max) */
+  --text-h2:      clamp(2rem, 1.4rem + 2.4vw, 3.25rem);      /* H2 32 -> 52 px */
+  --text-h2-sm:   clamp(1.875rem, 1.5rem + 1.5vw, 2.75rem);  /* FAQ, Localizações 30 -> 44 px */
+  --text-stat:    clamp(2.5rem, 2rem + 2vw, 3.5rem);         /* números 40 -> 56 px */
+  --text-h3:      clamp(1.125rem, 1rem + .5vw, 1.3125rem);   /* 18 -> 21 px, Figtree 600 */
+  --text-lead:    clamp(1.0625rem, 1rem + .25vw, 1.1875rem); /* 17 -> 19 px */
+  --text-body:    1rem;
+  --text-small:   .875rem;
+  --text-eyebrow: .75rem;                                    /* mantém 600 + 0.09em */
+
   --container: 1120px;
   --radius-card: 24px;
+  --radius-inner: 16px;
   --radius-button: 999px;
+  --surface: color-mix(in srgb, var(--color-cream) 55%, white);
+  --line: rgb(48 86 106 / 0.12);
+  --line-strong: rgb(48 86 106 / 0.24);
+  --shadow-xs: 0 1px 2px rgb(48 86 106 / 0.04);
+  --shadow-sm: 0 8px 20px rgb(48 86 106 / 0.05);
+  --shadow-md: 0 18px 32px rgb(48 86 106 / 0.10);
   --shadow-soft: 0 16px 40px rgb(74 69 65 / 0.10);
   --section-space: clamp(96px, 9vw, 144px);
+  --intro-space: clamp(40px, 5vw, 72px);
   --header-height: 88px;
   --ease-calm: cubic-bezier(.2, .7, .2, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-reveal: 640ms;
+  --dur-slow: 900ms;
+
+  /* Iris 12.1: ambient light + grain tokens for the "living backgrounds" pass. */
+  --glow-peach: 215 169 141;
+  --glow-blue: 227 240 242;
+  --glow-cream: 247 242 238;
+  --grain-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .29 0 0 0 0 .27 0 0 0 0 .25 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+
+/* Metrics approximate the Fraunces Variable soft build so Georgia holds its layout box until the woff2 swaps in (reduces CLS). */
+@font-face {
+  font-family: 'Fraunces Fallback';
+  src: local('Georgia');
+  size-adjust: 104%;
+  ascent-override: 92%;
+  descent-override: 24%;
 }

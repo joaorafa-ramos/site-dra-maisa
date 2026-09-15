@@ -20,7 +20,7 @@ test('evaluation provides the complete ordered journey and scheduling action wit
     await expect(steps.nth(index).getByRole('heading', { level: 3 })).toHaveText(title!);
     await expect(steps.nth(index).getByText(description!, { exact: true })).toBeVisible();
   }
-  const reassurance = section.getByText('A criança não precisa “acertar” nada. A avaliação é um momento de observação, vínculo e compreensão.', { exact: true });
+  const reassurance = section.getByText('Não há respostas certas ou erradas. A avaliação é conduzida com atenção, acolhimento e respeito ao modo de cada criança se comunicar.', { exact: true });
   await expect(reassurance).toBeVisible();
   const cta = page.getByRole('link', { name: 'Quero agendar uma avaliação', exact: true });
   await expect(cta).toHaveCount(1);

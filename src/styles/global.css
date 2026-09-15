@@ -10,7 +10,6 @@ html {
 }
 
 body {
-  min-width: 1024px;
   margin: 0;
   background: var(--color-cream);
   color: var(--color-graphite);
@@ -35,7 +34,7 @@ a {
 }
 
 section[id] {
-  scroll-margin-top: 104px;
+  scroll-margin-top: calc(var(--header-height) + 16px);
 }
 
 .container {

@@ -24,6 +24,8 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Runs before first paint so JavaScript-only styles (mobile menu, glass header) never flash or shift layout. -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
     <title>{title}</title>
     <Seo title={title} description={description} />
   </head>

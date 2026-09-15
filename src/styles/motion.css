@@ -27,15 +27,16 @@
   --reveal-delay: 150ms;
 }
 
-/* Áreas: atraso crescente por card, como na referência (0,05 s por card). */
-.areas__grid > [data-area-card]:nth-child(1) { --reveal-delay: 0ms; }
-.areas__grid > [data-area-card]:nth-child(2) { --reveal-delay: 50ms; }
-.areas__grid > [data-area-card]:nth-child(3) { --reveal-delay: 100ms; }
-.areas__grid > [data-area-card]:nth-child(4) { --reveal-delay: 150ms; }
-.areas__grid > [data-area-card]:nth-child(5) { --reveal-delay: 200ms; }
-.areas__grid > [data-area-card]:nth-child(6) { --reveal-delay: 250ms; }
+/* Cards com movimento (Áreas e Sinais, marcados com data-motion-card): atraso crescente por card,
+   como na referência (0,05 s por card). */
+[data-reveal-stagger] > [data-motion-card]:nth-child(1) { --reveal-delay: 0ms; }
+[data-reveal-stagger] > [data-motion-card]:nth-child(2) { --reveal-delay: 50ms; }
+[data-reveal-stagger] > [data-motion-card]:nth-child(3) { --reveal-delay: 100ms; }
+[data-reveal-stagger] > [data-motion-card]:nth-child(4) { --reveal-delay: 150ms; }
+[data-reveal-stagger] > [data-motion-card]:nth-child(5) { --reveal-delay: 200ms; }
+[data-reveal-stagger] > [data-motion-card]:nth-child(6) { --reveal-delay: 250ms; }
 
-.areas__grid > [data-area-card].reveal-pending {
+[data-reveal-stagger] > [data-motion-card].reveal-pending {
   opacity: 0;
   transform: translateY(20px);
 }
@@ -43,7 +44,7 @@
 /* Vence a regra genérica `.is-visible` (linha 11) por ter maior especificidade (três seletores de
    classe/atributo contra um). Mais abaixo, `.is-settled` tem a MESMA especificidade que esta regra
    e vence apenas por vir depois no arquivo — ver comentário junto a `.is-settled`. */
-.areas__grid > [data-area-card].is-visible {
+[data-reveal-stagger] > [data-motion-card].is-visible {
   transition: opacity 600ms cubic-bezier(0.33, 1, 0.68, 1), transform 600ms cubic-bezier(0.33, 1, 0.68, 1);
   transition-delay: var(--reveal-delay);
 }
@@ -77,15 +78,11 @@
   transform: translateY(calc(-100% + 12px));
 }
 
-.signal-item,
-.signal-item summary,
-.signal-item__indicator {
-  transition: color 220ms var(--ease-calm), border-color 220ms var(--ease-calm), transform 220ms var(--ease-calm);
-}
-
-.signal-item summary:hover,
-.signal-item summary:focus-visible {
-  color: var(--color-peach);
+/* The hover rail needs a pointer that can hover; touch and narrow screens keep the header (and its menu) in view. */
+@media (max-width: 959px), (hover: none) {
+  .site-header[data-hidden='true'] {
+    transform: none;
+  }
 }
 
 @keyframes cta-fade-up {
@@ -126,16 +123,16 @@
   animation: cta-scale-in 500ms ease-out 700ms both;
 }
 
-/* Cards de áreas: resposta de hover inspirada na referência (levantar, barra, ícone, preenchimento). */
-.area-card {
+/* Cards com movimento: resposta de hover inspirada na referência (levantar, barra, ícone, preenchimento). */
+[data-motion-card] {
   transition: transform 300ms var(--ease-calm), box-shadow 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
 }
 
 /* Uma vez que a entrada escalonada termina (transitionend em site-interactions.ts), `.is-settled`
    assume uma transição curta e sem atraso para que o hover volte a responder normalmente. Ambas as
-   regras têm a mesma especificidade (.areas__grid > [data-area-card].is-visible/.is-settled); quem
+   regras têm a mesma especificidade ([data-reveal-stagger] > [data-motion-card].is-visible/.is-settled); quem
    vence é `.is-settled` por vir depois no arquivo, não por ser mais específica. */
-.areas__grid > [data-area-card].is-settled {
+[data-reveal-stagger] > [data-motion-card].is-settled {
   transition: transform 300ms var(--ease-calm), box-shadow 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
   transition-delay: 0ms;
 }
@@ -145,13 +142,13 @@
 }
 
 .area-card__icon,
-.area-card h3,
-.area-card__summary {
+[data-motion-card] h3,
+[data-motion-card] h3 + p {
   transition: transform 400ms var(--ease-calm), color 300ms var(--ease-calm), background-color 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
 }
 
-.area-card:hover,
-.area-card:focus-within {
+[data-motion-card]:hover,
+[data-motion-card]:focus-within {
   border-color: rgb(48 86 106 / 0.28);
   box-shadow: 0 20px 30px rgb(48 86 106 / 0.12);
   transform: translateY(-4px);
@@ -167,11 +164,12 @@
   transform: scale(1.1);
 }
 
-.area-card:hover h3 {
+[data-motion-card]:hover h3 {
   transform: translateY(-3px);
 }
 
-.area-card:hover .area-card__summary {
+/* The line right under the title (Áreas summary, Sinais description) rises a little less than the title. */
+[data-motion-card]:hover h3 + p {
   transform: translateY(-2px);
 }
 
@@ -194,15 +192,12 @@
   [data-reveal],
   .button,
   .site-header,
-  .signal-item,
-  .signal-item summary,
-  .signal-item__indicator,
   .cta-pending [data-cta-step],
   .cta-pending .contact__glow,
-  .area-card,
+  [data-motion-card],
   .area-card__icon,
-  .area-card h3,
-  .area-card__summary {
+  [data-motion-card] h3,
+  [data-motion-card] h3 + p {
     transform: none !important;
   }
 

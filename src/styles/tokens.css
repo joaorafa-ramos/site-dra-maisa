@@ -5,6 +5,7 @@
   --color-graphite: #4a4541;
   --color-olive: #8d805f;
   --color-peach: #d7a98d;
+  --color-peach-soft: #f1e5dd;
   --color-button-text: #453f3b;
   --font-display: 'Figtree', Arial, sans-serif;
   --font-body: 'Figtree', Arial, sans-serif;
@@ -13,5 +14,6 @@
   --radius-button: 999px;
   --shadow-soft: 0 16px 40px rgb(74 69 65 / 0.10);
   --section-space: clamp(96px, 9vw, 144px);
+  --header-height: 88px;
   --ease-calm: cubic-bezier(.2, .7, .2, 1);
 }

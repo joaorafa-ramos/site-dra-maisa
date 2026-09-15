@@ -120,7 +120,7 @@ export const areas: Area[] = [
     category: 'LINGUAGEM',
     title: 'Desenvolvimento da fala e da linguagem',
     front:
-      'Para crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.',
+      'Crianças que falam pouco, têm dificuldade para formar frases ou compreender e usar a linguagem.',
     back:
       'A avaliação fonoaudiológica ajuda a compreender o que está acontecendo e quais são os próximos passos.',
   },
@@ -165,7 +165,7 @@ export const areas: Area[] = [
     category: 'AUDIÇÃO',
     title: 'Comunicação na deficiência auditiva',
     front:
-      'Estimulação da fala e da linguagem para crianças com perda auditiva ou usuárias de dispositivos, como implante auditivo.',
+      'Estimulação da fala e da linguagem para crianças que utilizam AASI (aparelho de amplificação sonora individual), implante coclear ou ambos.',
     back:
       'Você recebe uma explicação clara sobre o que foi observado e os próximos passos.',
   },
@@ -185,7 +185,7 @@ export const faqItems: FaqItem[] = [
   {
     question: 'Como funciona a avaliação fonoaudiológica infantil?',
     answer:
-      'A avaliação acontece com escuta, brincadeiras e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
+      'A avaliação acontece com escuta, atividades lúdicas e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
   },
   {
     question: 'Meu filho necessariamente precisará fazer terapia?',
@@ -227,16 +227,16 @@ export const content = {
     introduction:
       'Sou Maisa Palma, fonoaudióloga. Sei que, quando a fala não acontece como esperado, surgem dúvidas, comparações e muita preocupação.',
     description:
-      'Por isso, cada acompanhamento começa com uma avaliação fonoaudiológica: uma escuta atenta à família e um olhar individual para a criança. Com brincadeiras, vínculo e objetivos terapêuticos claros, construímos um caminho para que ela possa se comunicar com mais segurança.',
+      'Por isso, cada acompanhamento começa com uma avaliação fonoaudiológica: uma escuta atenta à família e um olhar individual para a criança. Com atividades lúdicas, vínculo e objetivos terapêuticos claros, construímos um caminho para que ela possa se comunicar com mais segurança.',
     cta: 'Conversar com a Dra. Maisa',
   },
   evaluation: {
     eyebrow: 'COMO FUNCIONA A AVALIAÇÃO',
     title: 'Um primeiro passo leve, claro e pensado para o seu filho.',
     description:
-      'A avaliação fonoaudiológica acontece com escuta, brincadeiras e respeito ao ritmo da criança — para que ela se sinta segura e você saiba o que esperar.',
+      'A avaliação fonoaudiológica acontece com escuta, atividades lúdicas e respeito ao ritmo da criança — para que ela se sinta segura e você saiba o que esperar.',
     reassurance:
-      'A criança não precisa “acertar” nada. A avaliação é um momento de observação, vínculo e compreensão.',
+      'Não há respostas certas ou erradas. A avaliação é conduzida com atenção, acolhimento e respeito ao modo de cada criança se comunicar.',
     cta: 'Quero agendar uma avaliação',
     ctaDetail: 'A conversa é iniciada pelo WhatsApp.',
   },

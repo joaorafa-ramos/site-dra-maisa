@@ -1,5 +1,6 @@
 ---
 import { content, faqItems } from '../../data/content';
+import { buildFaqPage, serializeJsonLd } from '../../data/structured-data';
 ---
 
 <section class="section faq" id="duvidas" aria-labelledby="faq-title">
@@ -25,4 +26,5 @@ import { content, faqItems } from '../../data/content';
       ))}
     </div>
   </div>
+  <script is:inline type="application/ld+json" set:html={serializeJsonLd(buildFaqPage(faqItems))}></script>
 </section>

@@ -64,7 +64,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 88px;
+  height: var(--header-height);
   border-bottom: 1px solid transparent;
   background: rgb(247 242 238 / 0.15);
   backdrop-filter: blur(12px);
@@ -103,11 +103,21 @@
   height: auto;
 }
 
+.site-header__panel {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-left: auto;
+}
+
+.site-header__menu-toggle {
+  display: none;
+}
+
 .site-header__nav {
   display: flex;
   align-items: center;
   gap: clamp(24px, 2.3vw, 36px);
-  margin-left: auto;
 }
 
 .site-header__nav a {
@@ -130,10 +140,27 @@
   flex-shrink: 0;
 }
 
+.site-header[data-over-hero='false'] {
+  background: rgb(247 242 238 / 0.94);
+}
+
+.site-header[data-over-hero='false'] .site-header__nav a {
+  color: var(--color-navy);
+}
+
+/* Without the script there is no over-hero tracking, so keep the light, always-legible header. */
+html:not(.js) .site-header {
+  background: rgb(247 242 238 / 0.94);
+}
+
+html:not(.js) .site-header__nav a {
+  color: var(--color-navy);
+}
+
 .hero {
   --hero-position-x: 50%;
   position: relative;
-  margin-top: -88px;
+  margin-top: calc(-1 * var(--header-height));
   isolation: isolate;
   height: 820px;
   background: var(--color-graphite);
@@ -177,11 +204,9 @@
 
 .hero__eyebrow {
   margin: 0 0 24px;
-  color: var(--color-cream);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.09em;
-  line-height: 1.6;
 }
 
 .hero__title {
@@ -206,12 +231,28 @@
 }
 
 .section-eyebrow {
-  margin: 0 0 20px;
-  color: var(--color-navy);
+  margin: 0 0 24px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  line-height: 1.6;
+}
+
+/* Eyebrow chip (Iris, section 9): outlined pill whose text and border share one ink per section background.
+   inline-flex keeps it following the parent's text-align. */
+.section-eyebrow,
+.hero__eyebrow {
+  --eyebrow-ink: var(--color-navy);
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border: 1px solid var(--eyebrow-ink);
+  border-radius: var(--radius-button);
+  color: var(--eyebrow-ink);
+  line-height: 1;
+}
+
+.hero__eyebrow {
+  --eyebrow-ink: var(--color-cream);
 }
 
 .section-description {
@@ -220,21 +261,39 @@
   line-height: 1.7;
 }
 
+.signals__intro {
+  max-width: 800px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+
+.signals__intro .section-heading {
+  margin-inline: auto;
+}
+
+.signals__intro .section-description {
+  margin-bottom: 0;
+  color: var(--color-navy);
+}
+
+/* Every signal is an always-open card; on desktop the portrait column stretches to the full height of the card stack. */
 .signals__layout {
   display: grid;
-  grid-template-columns: minmax(300px, 45fr) minmax(0, 55fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
+  max-width: 920px;
+  align-items: start;
   gap: 48px;
+  margin-inline: auto;
 }
 
-.signals__copy,
+/* Desktop shows the list left and the portrait right; the DOM (and the stacked mobile order) keeps the portrait first. */
+.signals__portrait {
+  grid-row: 1;
+  grid-column: 2;
+}
+
 .about__copy {
   min-width: 0;
-}
-
-.signals__copy .section-description,
-.signals__copy .signals__reassurance {
-  color: var(--color-navy);
 }
 
 .signals__reassurance {
@@ -253,59 +312,54 @@
   box-shadow: var(--shadow-soft);
 }
 
-.signals__portrait {
-  max-width: 480px;
-  justify-self: start;
-}
-
 .signals__list {
-  margin-top: 24px;
-  border-top: 1px solid rgb(48 86 106 / 0.18);
-}
-
-.signal-item {
-  border-bottom: 1px solid rgb(48 86 106 / 0.18);
-}
-
-.signal-item summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 24px;
-  align-items: center;
-  gap: 20px;
   min-width: 0;
-  min-height: 66px;
-  padding: 12px 0;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Card border, radius, background and shadow match the Areas cards. */
+.signal-item {
+  padding: 16px;
+  border: 1px solid rgb(48 86 106 / 0.12);
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: 0 8px 20px rgb(48 86 106 / 0.05);
+}
+
+.signal-item__title {
+  margin: 0 0 4px;
   color: var(--color-navy);
-  cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.04em;
   line-height: 1.4;
-  list-style: none;
   text-transform: uppercase;
-}
-
-.signal-item summary::-webkit-details-marker {
-  display: none;
-}
-
-.signal-item__indicator {
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg) translate(-2px, -2px);
-}
-
-.signal-item[open] .signal-item__indicator {
-  transform: rotate(225deg) translate(-2px, -2px);
 }
 
 .signal-item p {
   margin: 0;
-  padding: 0 44px 20px 0;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+@media (min-width: 960px) {
+  /* The frame fills the stretched column; the photo is taken out of flow so it never adds height to the row,
+     and object-fit: cover crops it without distortion. !important overrides PictureFrame's inline 4:5 ratio. */
+  .signals__portrait {
+    position: relative;
+    align-self: stretch;
+    aspect-ratio: auto !important;
+  }
+
+  .signals__portrait img {
+    position: absolute;
+    inset: 0;
+    object-position: 50% 20%;
+  }
 }
 
 .signals__action {
@@ -367,7 +421,6 @@
   max-width: 800px;
 }
 
-.evaluation__intro .section-eyebrow,
 .evaluation__intro .section-heading,
 .evaluation__intro .section-description {
   color: var(--color-navy);
@@ -511,11 +564,18 @@
 }
 
 .areas {
-  background: var(--color-pale-blue);
+  background: var(--color-peach-soft);
 }
 
 .areas__intro {
   max-width: 800px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.areas__intro .section-heading,
+.faq .section-heading {
+  margin-inline: auto;
 }
 
 .areas__grid {
@@ -637,6 +697,7 @@
 .faq__item summary {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) 28px;
+  column-gap: 12px;
   min-height: 80px;
   align-items: center;
   padding: 20px 0;
@@ -787,6 +848,10 @@
   margin-inline: auto;
   color: var(--color-cream);
   font-size: clamp(44px, 3.6vw, 52px);
+}
+
+.contact__copy .section-eyebrow {
+  --eyebrow-ink: rgb(247 242 238 / 0.84);
 }
 
 .contact__copy .section-description {
@@ -1087,27 +1152,306 @@
 }
 
 @media (max-width: 1199px) {
-  .signals__layout {
-    grid-template-columns: minmax(260px, 40fr) minmax(0, 60fr);
-    gap: 40px;
-  }
-
-  .signals__portrait {
-    max-width: none;
-  }
-
   .site-footer__main {
     gap: 40px;
   }
 }
 
+/* Tablet and phone: the desktop identity above stays untouched from 960px up. */
 @media (max-width: 959px) {
-  .signals__layout {
+  :root {
+    --header-height: 72px;
+  }
+
+  .site-header__inner {
+    gap: 16px;
+  }
+
+  .site-header__brand {
+    flex-basis: 120px;
+  }
+
+  .site-header__brand img {
+    width: 120px;
+  }
+
+  .js .site-header .site-header__menu-toggle {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    padding: 0 20px;
+    border: 1px solid rgb(48 86 106 / 0.16);
+    border-radius: var(--radius-button);
+    background: var(--color-cream);
+    color: var(--color-navy);
+    cursor: pointer;
+    font: 600 14px / 1 var(--font-body);
+  }
+
+  .site-header__menu-icon,
+  .site-header__menu-icon::before,
+  .site-header__menu-icon::after {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  .site-header__menu-icon {
+    position: relative;
+  }
+
+  .site-header__menu-icon::before,
+  .site-header__menu-icon::after {
+    position: absolute;
+    left: 0;
+    content: '';
+  }
+
+  .site-header__menu-icon::before {
+    top: -6px;
+  }
+
+  .site-header__menu-icon::after {
+    top: 6px;
+  }
+
+  .site-header[data-menu-open='true'] .site-header__menu-icon {
+    background: transparent;
+  }
+
+  .site-header[data-menu-open='true'] .site-header__menu-icon::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  .site-header[data-menu-open='true'] .site-header__menu-icon::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  .js .site-header .site-header__panel {
+    display: none;
+  }
+
+  .site-header[data-menu-open='true'] .site-header__panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 16px;
+    left: 16px;
+    display: grid;
+    gap: 16px;
+    padding: 12px 24px 24px;
+    border: 1px solid rgb(48 86 106 / 0.12);
+    border-radius: var(--radius-card);
+    background: var(--color-cream);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .js .site-header .site-header__nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .js .site-header .site-header__nav a {
+    border-bottom: 1px solid rgb(48 86 106 / 0.12);
+    color: var(--color-navy);
+    font-size: 16px;
+  }
+
+  /* Without JavaScript the navigation stays reachable: the header grows, wraps and scrolls away instead of covering content. */
+  html:not(.js) .site-header {
+    position: relative;
+    height: auto;
+  }
+
+  html:not(.js) .hero {
+    margin-top: 0;
+  }
+
+  html:not(.js) .site-header .site-header__inner,
+  html:not(.js) .site-header .site-header__panel,
+  html:not(.js) .site-header .site-header__nav {
+    flex-wrap: wrap;
+  }
+
+  html:not(.js) .site-header .site-header__inner {
+    padding-block: 12px;
+  }
+
+  .hero {
+    height: auto;
+    min-height: 680px;
+  }
+
+  .hero::after {
+    background: linear-gradient(180deg, rgb(69 63 59 / 0.08) 20%, rgb(69 63 59 / 0.6) 48%, rgb(69 63 59 / 0.94) 72%);
+  }
+
+  .hero__image {
+    object-position: 30% 30%;
+  }
+
+  .hero__layout {
+    min-height: inherit;
     grid-template-columns: minmax(0, 1fr);
+    align-items: end;
+  }
+
+  .hero__content {
+    grid-column: 1;
+    max-width: 600px;
+    padding-block: calc(var(--header-height) + 240px) 56px;
+  }
+
+  .hero__title {
+    font-size: clamp(38px, 8vw, 56px);
+  }
+
+  .section .section-heading {
+    font-size: clamp(32px, 6vw, 44px);
+  }
+
+  .signals__intro {
+    margin-bottom: 40px;
+  }
+
+  .signals__layout,
+  .about__layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 600px;
+    gap: 40px;
+    margin-inline: auto;
+  }
+
+  .signals__portrait,
+  .about__portrait {
+    max-width: 420px;
+    justify-self: center;
   }
 
   .signals__portrait {
-    max-width: 420px;
+    grid-row: auto;
+    grid-column: auto;
+  }
+
+  .evaluation__closing {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .evaluation__action {
+    width: min(100%, 420px);
     justify-self: center;
+  }
+
+  .areas__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .locations__grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  .site-footer__main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-footer__identity {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --section-space: clamp(56px, 12vw, 96px);
+  }
+
+  .evaluation__timeline {
+    margin-top: 48px;
+  }
+
+  .evaluation__line {
+    display: none;
+  }
+
+  .evaluation__steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+    text-align: center;
+  }
+
+  .evaluation-step__number {
+    margin-bottom: 20px;
+  }
+
+  .evaluation__closing {
+    margin-top: 48px;
+  }
+
+  .faq__layout {
+    gap: 32px;
+  }
+
+  .faq__item summary {
+    font-size: 17px;
+  }
+
+  .faq__answer {
+    padding-inline: 28px;
+  }
+
+  .contact__panel {
+    padding: 56px 24px;
+  }
+}
+
+@media (max-width: 599px) {
+  .container {
+    width: calc(100% - 40px);
+  }
+
+  .site-header[data-menu-open='true'] .site-header__panel {
+    right: 12px;
+    left: 12px;
+  }
+
+  .hero__content {
+    padding-top: calc(var(--header-height) + 200px);
+  }
+
+  .hero .button {
+    width: 100%;
+  }
+
+  .areas__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .area-card {
+    padding: 28px 20px 24px;
+  }
+
+  .area-card h3 {
+    font-size: 24px;
+  }
+
+  .evaluation__reassurance {
+    padding: 24px;
+  }
+
+  .faq__answer {
+    padding-inline: 0;
+  }
+
+  .site-footer__main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
   }
 }

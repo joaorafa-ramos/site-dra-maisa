@@ -1,6 +1,8 @@
 ---
 interface Props {
   src?: string;
+  srcset?: string;
+  sizes?: string;
   alt: string;
   width: number;
   height: number;
@@ -8,12 +10,12 @@ interface Props {
   class?: string;
 }
 
-const { src, alt, width, height, eager = false, class: className } = Astro.props;
+const { src, srcset, sizes, alt, width, height, eager = false, class: className } = Astro.props;
 ---
 
 <div class:list={['picture-frame', className]} style={`aspect-ratio: ${width} / ${height};`}>
   {src ? (
-    <img src={src} alt={alt} width={width} height={height} loading={eager ? 'eager' : 'lazy'} />
+    <img src={src} srcset={srcset} sizes={sizes} alt={alt} width={width} height={height} loading={eager ? 'eager' : 'lazy'} />
   ) : (
     <div class="picture-frame__slot" role="img" aria-label={alt}></div>
   )}

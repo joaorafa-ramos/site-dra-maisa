@@ -11,15 +11,22 @@ const navigation = [
 ];
 ---
 
-<header class="site-header" data-scrolled="false" data-hidden="false" data-hovered="false" data-focused="false">
+<header class="site-header" data-scrolled="false" data-hidden="false" data-hovered="false" data-focused="false" data-over-hero="true" data-menu-open="false">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="#conteudo" aria-label="Maisa Palma — início">
       <img src="/images/logo-maisa.webp" alt="Maisa Palma — Fonoaudióloga" width="280" height="134" />
     </a>
-    <nav class="site-header__nav" aria-label="Navegação principal">
-      {navigation.map(({ href, label }) => <a href={href}>{label}</a>)}
-    </nav>
-    <Button href={whatsappUrl} label="Agendar avaliação" external={whatsappUrl.startsWith('https://')} whatsappLocation="cabecalho" />
+    <!-- Shown only on narrow screens once the script below is ready; without JavaScript the panel stays open. -->
+    <button class="site-header__menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+      <span class="site-header__menu-icon" aria-hidden="true"></span>
+      Menu
+    </button>
+    <div class="site-header__panel" id="site-menu">
+      <nav class="site-header__nav" aria-label="Navegação principal">
+        {navigation.map(({ href, label }) => <a href={href}>{label}</a>)}
+      </nav>
+      <Button href={whatsappUrl} label="Agendar avaliação" external={whatsappUrl.startsWith('https://')} whatsappLocation="cabecalho" />
+    </div>
   </div>
 </header>
 
@@ -35,10 +42,14 @@ const navigation = [
     header.dataset.hidden = String(isPastTop && !isHovered && !isFocused);
   };
 
+  const hero = document.querySelector<HTMLElement>('.hero');
+
   const updateHeader = () => {
     if (!header) return;
     const currentScrollY = window.scrollY;
     header.dataset.scrolled = String(currentScrollY > 24);
+    // Cream links only read on the dark photo; past it the header switches to a light, navy-text treatment.
+    header.dataset.overHero = String(Boolean(hero) && currentScrollY < hero!.offsetHeight - header.offsetHeight);
 
     if (currentScrollY <= 24) {
       header.dataset.hidden = 'false';
@@ -75,4 +86,34 @@ const navigation = [
       }
     });
   });
+
+  const menuToggle = header?.querySelector<HTMLButtonElement>('.site-header__menu-toggle');
+
+  if (header && menuToggle) {
+    const setMenuOpen = (open: boolean) => {
+      header.dataset.menuOpen = String(open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+    };
+
+    const isOpen = () => header.dataset.menuOpen === 'true';
+
+    menuToggle.addEventListener('click', () => setMenuOpen(!isOpen()));
+    // Disclosure pattern: Escape anywhere, a tap/click outside, or tabbing out of the header closes the panel.
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !isOpen()) return;
+      setMenuOpen(false);
+      menuToggle.focus();
+    });
+    document.addEventListener('pointerdown', event => {
+      if (isOpen() && !header.contains(event.target as Node)) setMenuOpen(false);
+    });
+    header.addEventListener('focusout', event => {
+      const next = event.relatedTarget as Node | null;
+      if (isOpen() && next && !header.contains(next)) setMenuOpen(false);
+    });
+    header.querySelectorAll('#site-menu a').forEach(link => link.addEventListener('click', () => setMenuOpen(false)));
+    window.matchMedia('(min-width: 960px)').addEventListener('change', event => {
+      if (event.matches) setMenuOpen(false);
+    });
+  }
 </script>

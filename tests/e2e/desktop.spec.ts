@@ -1,6 +1,25 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 
 test.use({ viewport: { width: 1440, height: 900 } });
+
+// Waits until the element has no running animation. A transition replaced mid-flight (for example when a reveal
+// class lands during a hover) rejects its `finished` promise, so keep waiting on whatever is still running instead.
+const settled = (locator: Locator) =>
+  locator.evaluate(async element => {
+    const running = () => element.getAnimations().filter(animation => animation.playState !== 'finished');
+    for (let animations = running(); animations.length > 0; animations = running()) {
+      await Promise.all(animations.map(animation => animation.finished.catch(() => undefined)));
+    }
+  });
+
+// Document-relative box, so clicks that scroll the page do not change the comparison.
+const pageBox = (locator: Locator) =>
+  locator.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    return { x: box.x, y: box.y + window.scrollY, width: box.width, height: box.height };
+  });
+
+const toMilliseconds = (value: string) => Math.round(parseFloat(value) * (value.trim().endsWith('ms') ? 1 : 1000));
 
 test('publishes complete, truthful SEO metadata and accessible optimized images', async ({ page }) => {
   await page.goto('/');
@@ -17,7 +36,7 @@ test('publishes complete, truthful SEO metadata and accessible optimized images'
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Fonoaudióloga infantil em Itapeva | Maisa Palma');
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
 
-  const jsonLd = await page.locator('script[type="application/ld+json"]').textContent();
+  const jsonLd = await page.locator('head script[type="application/ld+json"]').textContent();
   const schema = JSON.parse(jsonLd!);
   expect(schema['@context']).toBe('https://schema.org');
   expect(schema['@graph'].map((item: { '@type': string }) => item['@type'])).toEqual(['Person', 'ProfessionalService']);
@@ -159,6 +178,88 @@ test('area cards use the centered reference format and lift with a top bar on ho
   await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
 });
 
+// Catches the signal cards drifting from the Areas card motion: same staggered entrance, same hover, same timing.
+test('signal cards reuse the Areas staggered entrance and hover motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const list = page.locator('.signals__list');
+  const cards = list.locator(':scope > li.signal-item[data-motion-card][data-reveal]');
+  await expect(list).toHaveAttribute('data-reveal-stagger', '');
+  await expect(cards).toHaveCount(6);
+  await expect(page.locator('#areas .areas__grid > li[data-motion-card][data-reveal]')).toHaveCount(6);
+
+  // Before entering the viewport: hidden and offset exactly like a pending Areas card, with the same per-card delays.
+  const readPending = (locator: Locator) => locator.evaluateAll(elements => elements.map(element => {
+    const computed = getComputedStyle(element);
+    return { opacity: computed.opacity, transform: computed.transform, delay: computed.getPropertyValue('--reveal-delay').trim() };
+  }));
+  // The pending offset itself eases in through the cards' base transform transition, so read it once settled.
+  await expect(cards.first()).toHaveClass(/reveal-pending/);
+  for (const card of await page.locator('[data-motion-card]').all()) await settled(card);
+  const signalPending = await readPending(cards);
+  const areaPending = await readPending(page.locator('#areas [data-motion-card]'));
+  expect(signalPending.map(card => [card.opacity, card.transform])).toEqual(Array(6).fill(['0', 'matrix(1, 0, 0, 1, 0, 20)']));
+  expect(signalPending).toEqual(areaPending);
+  expect(signalPending.map(card => toMilliseconds(card.delay))).toEqual([0, 50, 100, 150, 200, 250]);
+
+  // Record when each card starts to appear: later cards must start later (the stagger), and all end fully visible.
+  await page.evaluate(() => {
+    const items = Array.from(document.querySelectorAll('.signals__list > [data-motion-card]'));
+    const started: (number | null)[] = items.map(() => null);
+    (window as unknown as { signalRevealStarts: (number | null)[] }).signalRevealStarts = started;
+    const sample = (time: number) => {
+      items.forEach((item, index) => {
+        if (started[index] === null && parseFloat(getComputedStyle(item).opacity) > 0.02) started[index] = time;
+      });
+      if (started.includes(null)) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await list.evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'center' }));
+  await expect(cards).toHaveClass(Array(6).fill(/is-visible/));
+  await expect.poll(() => page.evaluate(() => (window as unknown as { signalRevealStarts: (number | null)[] }).signalRevealStarts.every(time => time !== null))).toBe(true);
+  const starts = await page.evaluate(() => (window as unknown as { signalRevealStarts: number[] }).signalRevealStarts);
+  for (let index = 1; index < starts.length; index += 1) expect(starts[index]!).toBeGreaterThanOrEqual(starts[index - 1]!);
+  expect(starts[5]! - starts[0]!).toBeGreaterThanOrEqual(150);
+  for (const card of await cards.all()) {
+    await settled(card);
+    await expect(card).toHaveCSS('opacity', '1');
+    await expect(card).toHaveClass(/is-settled/);
+  }
+
+  // Hover: same lift, border and shadow as Areas, title and description rise like the Areas title and summary.
+  const card = cards.first();
+  const restingShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+  await card.hover();
+  await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -4)');
+  await expect.poll(() => card.locator('h3').evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -3)');
+  await expect.poll(() => card.locator('p').evaluate(element => getComputedStyle(element).transform)).toBe('matrix(1, 0, 0, 1, 0, -2)');
+  await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
+  await expect(card).toHaveCSS('border-top-color', 'rgba(48, 86, 106, 0.28)');
+  await expect(card).toHaveCSS('transition-duration', '0.3s, 0.3s, 0.3s');
+});
+
+// Catches signal card motion ignoring the reduced-motion preference.
+test('signal card entrance and hover motion are inert with reduced motion', async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto('/');
+  const cards = page.locator('.signals__list > [data-motion-card]');
+  await expect(cards).toHaveCount(6);
+  for (const card of await cards.all()) {
+    await expect(card).not.toHaveClass(/reveal-pending/);
+    await expect(card).toHaveCSS('opacity', '1');
+    await expect(card).toHaveCSS('transform', 'none');
+  }
+  const card = cards.first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveCSS('transform', 'none');
+  await expect(card.locator('h3')).toHaveCSS('transform', 'none');
+  await expect(card.locator('p')).toHaveCSS('transform', 'none');
+  await context.close();
+});
+
 test('renders the desktop page without horizontal overflow', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('main#conteudo')).toBeVisible();
@@ -169,13 +270,13 @@ test('renders the desktop page without horizontal overflow', async ({ page }) =>
   expect(sizes.content).toBe(sizes.viewport);
 });
 
-test('signals uses an exclusive accordion beside the preserved portrait and a centered peach CTA', async ({ page }) => {
+test('signals lists every sign open beside the preserved portrait with a centered peach CTA', async ({ page }) => {
   await page.goto('/');
 
   const signals = page.locator('section.signals');
   const layout = signals.locator('.signals__layout');
   const portrait = signals.locator('.signals__portrait img');
-  const items = signals.locator('details[name="signals"]');
+  const items = signals.locator('.signals__list > li.signal-item');
   const reassurance = signals.locator('.signals__reassurance');
   const cta = signals.locator('.signals__action .button');
 
@@ -186,7 +287,7 @@ test('signals uses an exclusive accordion beside the preserved portrait and a ce
     'Maisa Palma segurando um brinquedo de dinossauro no consultório.',
   );
   await expect(items).toHaveCount(6);
-  await expect(items.locator('summary')).toHaveText([
+  await expect(items.getByRole('heading', { level: 3 })).toHaveText([
     'Fala pouco',
     'Troca ou omite sons',
     'Nem sempre é compreendida',
@@ -202,45 +303,43 @@ test('signals uses an exclusive accordion beside the preserved portrait and a ce
     'Parece compreender, porém encontra dificuldade para organizar a fala.',
     'Você percebe que a criança se incomoda ou deixa de participar quando precisa falar.',
   ]);
-  await expect(signals.locator('[data-signal-icon], .signal-card__number')).toHaveCount(0);
-  await expect(signals.locator('details[name="signals"][open]')).toHaveCount(0);
-
-  await items.nth(0).locator('summary').click();
-  await expect(items.nth(0)).toHaveAttribute('open', '');
-  await items.nth(1).locator('summary').click();
-  await expect(items.nth(0)).not.toHaveAttribute('open', '');
-  await expect(items.nth(1)).toHaveAttribute('open', '');
+  // Always open: no accordion, indicator, icon or number, and every description is visible without interaction.
+  await expect(signals.locator('[data-signal-icon], .signal-card__number, details, summary, .signal-item__indicator')).toHaveCount(0);
+  for (const description of await items.locator('p').all()) await expect(description).toBeVisible();
 
   await expect(reassurance).toHaveText('Um sinal isolado não define um diagnóstico. A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.');
   await expect(reassurance).toHaveCSS('background-color', 'rgb(227, 240, 242)');
-  await expect(items.first().locator('summary')).toHaveCSS('text-transform', 'uppercase');
+  await expect(items.first().getByRole('heading', { level: 3 })).toHaveCSS('text-transform', 'uppercase');
   await expect(cta).toHaveClass(/button--peach/);
   await expect(cta).toHaveCSS('background-image', /gradient/);
 });
 
-test('evaluation intro and signal accordions use a calm filled visual language with a light hover response', async ({ page }) => {
+test('evaluation intro and signal titles use the calm navy language and signals add no extra tab stops', async ({ page }) => {
   await page.goto('/');
   const evaluationIntro = page.locator('#avaliacao .evaluation__intro');
   await expect(evaluationIntro.locator('.section-eyebrow')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-heading')).toHaveCSS('color', 'rgb(48, 86, 106)');
   await expect(evaluationIntro.locator('.section-description')).toHaveCSS('color', 'rgb(48, 86, 106)');
 
-  const firstItem = page.locator('details[name="signals"]').first();
-  await expect(firstItem).not.toHaveCSS('transition-duration', '0s');
-  await firstItem.locator('summary').hover();
-  await expect(firstItem.locator('summary')).toHaveCSS('color', 'rgb(48, 86, 106)');
+  // Read after any running transition finishes, so a mid-transition value cannot pass or fail by timing.
+  const titles = page.locator('.signals__list .signal-item__title');
+  await expect(titles).toHaveCount(6);
+  await titles.first().hover();
+  await settled(titles.first());
+  for (const title of await titles.all()) await expect(title).toHaveCSS('color', 'rgb(48, 86, 106)');
+  await expect(page.locator('.signals__list').locator('a, button, summary, [tabindex]')).toHaveCount(0);
 });
 
 test('signals stacks the portrait above the accordion before the two-column layout becomes cramped', async ({ page }) => {
   await page.setViewportSize({ width: 900, height: 900 });
   await page.goto('/');
 
-  const portrait = page.locator('.signals__portrait');
-  const copy = page.locator('.signals__copy');
-  const portraitBox = await portrait.boundingBox();
-  const copyBox = await copy.boundingBox();
+  const intro = (await page.locator('.signals__intro').boundingBox())!;
+  const portrait = (await page.locator('.signals__portrait').boundingBox())!;
+  const list = (await page.locator('.signals__list').boundingBox())!;
 
-  expect(copyBox!.y).toBeGreaterThanOrEqual(portraitBox!.y + portraitBox!.height + 32);
+  expect(portrait.y).toBeGreaterThanOrEqual(intro.y + intro.height + 32);
+  expect(list.y).toBeGreaterThanOrEqual(portrait.y + portrait.height + 32);
 });
 
 test('uses Figtree throughout the Maisa type scale and keeps accessible desktop CTA size', async ({ page }) => {
@@ -387,7 +486,8 @@ test('progressive reveals keep content visible by default and reveal area rows i
   await expect(cards).toHaveCount(6);
   await expect(cards.first()).toHaveClass(/reveal-pending/);
   const delays = await cards.evaluateAll(elements => elements.map(element => getComputedStyle(element).getPropertyValue('--reveal-delay').trim()));
-  expect(delays).toEqual(['0ms', '50ms', '100ms', '150ms', '200ms', '250ms']);
+  // The production minifier rewrites `100ms` as `.1s`; compare durations, not spellings.
+  expect(delays.map(toMilliseconds)).toEqual([0, 50, 100, 150, 200, 250]);
 
   await cards.first().scrollIntoViewIfNeeded();
   await expect(cards.first()).toHaveClass(/is-visible/);
@@ -432,7 +532,7 @@ test('FAQ publishes all answers with one native accordion item open and keyboard
   const answers = [
     'Quando algo na fala, na compreensão ou na forma como a criança se comunica chama sua atenção. Você não precisa esperar ter certeza de que existe uma dificuldade para buscar orientação.',
     'A avaliação considera a idade, o desenvolvimento e a realidade de cada criança.',
-    'A avaliação acontece com escuta, brincadeiras e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
+    'A avaliação acontece com escuta, atividades lúdicas e respeito ao ritmo da criança, para que ela se sinta segura e você saiba o que esperar.',
     'Você recebe uma explicação clara sobre o que foi observado e, quando indicado, uma proposta de acompanhamento individualizado.',
     'Cada etapa é construída de forma individualizada, considerando a idade, as necessidades e o ritmo do seu filho.',
     'Começamos ouvindo você: a rotina, o histórico do desenvolvimento e as situações que mais preocupam a família.',
@@ -455,6 +555,24 @@ test('FAQ publishes all answers with one native accordion item open and keyboard
   await page.keyboard.press('Enter');
   await expect(items.nth(2)).toHaveAttribute('open', '');
   expect(await items.evaluateAll(elements => elements.filter(item => item.hasAttribute('open')).length)).toBe(1);
+});
+
+// Catches structured data drifting from the visible FAQ copy.
+test('FAQPage JSON-LD mirrors the visible questions and answers', async ({ page }) => {
+  await page.goto('/');
+  const faq = page.locator('section#duvidas');
+  const schema = JSON.parse((await faq.locator('script[type="application/ld+json"]').textContent())!);
+  const visible = await faq.locator('details[name="faq"]').evaluateAll(items => items.map(item => [
+    item.querySelector('summary > span:first-child')!.textContent!.trim(),
+    item.querySelector('[data-faq-answer]')!.textContent!.trim(),
+  ]));
+  expect(visible).toHaveLength(6);
+  expect(schema['@context']).toBe('https://schema.org');
+  expect(schema['@type']).toBe('FAQPage');
+  expect(schema.mainEntity.map((entry: { '@type': string; name: string; acceptedAnswer: { '@type': string; text: string } }) => {
+    expect([entry['@type'], entry.acceptedAnswer['@type']]).toEqual(['Question', 'Answer']);
+    return [entry.name, entry.acceptedAnswer.text];
+  })).toEqual(visible);
 });
 
 test('FAQ opening reveals existing answer characters without changing the answer text', async ({ page }) => {
@@ -615,8 +733,77 @@ for (const width of [1024, 1280, 1440, 1920]) {
     await expect(about).toBeVisible();
     await expect(page.locator('#sobre')).toHaveCount(1);
 
-    const cards = signals.locator('details.signal-item');
+    // Let the staggered card entrance finish so its transforms cannot offset the geometry below.
+    const revealCards = signals.locator('.signals__list > [data-reveal]');
+    await signals.locator('.signals__list').scrollIntoViewIfNeeded();
+    await expect(revealCards).toHaveClass(Array(6).fill(/is-visible/));
+    for (const card of await revealCards.all()) await settled(card);
+
+    // Intro is centered above; the portrait column right of the card stack spans exactly from the first card's top to the last card's bottom.
+    const intro = signals.locator('.signals__intro');
+    const introCenter = await intro.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      return box.left + box.width / 2;
+    });
+    for (const part of await intro.locator('.section-eyebrow, h2, .section-description').all()) {
+      const box = (await part.boundingBox())!;
+      expect(Math.abs(box.x + box.width / 2 - introCenter)).toBeLessThanOrEqual(1);
+    }
+    const portraitFrame = signals.locator('.signals__portrait');
+    const list = signals.locator('.signals__list');
+    const portraitBox = await pageBox(portraitFrame);
+    const listBox = await pageBox(list);
+    const introBox = await pageBox(intro);
+    expect(portraitBox.y).toBeGreaterThanOrEqual(introBox.y + introBox.height);
+    expect(listBox.x + listBox.width).toBeLessThan(portraitBox.x);
+    expect(portraitBox.width).toBeGreaterThanOrEqual(320);
+    expect(portraitBox.width).toBeLessThan(listBox.width);
+    const firstCard = await pageBox(list.locator(':scope > li.signal-item').first());
+    const lastCard = await pageBox(list.locator(':scope > li.signal-item').last());
+    expect(Math.abs(portraitBox.y - firstCard.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(portraitBox.y + portraitBox.height - (lastCard.y + lastCard.height))).toBeLessThanOrEqual(1);
+
+    // The photo fills the frame with object-fit: cover (cropped, never stretched) from a 4:5 source.
+    const photo = await portraitFrame.locator('img').evaluate(async (img: HTMLImageElement) => {
+      img.loading = 'eager';
+      await img.decode();
+      const frame = img.parentElement!.getBoundingClientRect();
+      const box = img.getBoundingClientRect();
+      const style = getComputedStyle(img);
+      return {
+        objectFit: style.objectFit,
+        // srcset density correction rounds natural sizes by a pixel, so compare the ratio to two decimals.
+        sourceRatio: Math.round((img.naturalWidth / img.naturalHeight) * 100) / 100,
+        fills: Math.abs(box.width - frame.width) <= 1 && Math.abs(box.height - frame.height) <= 1,
+        radius: getComputedStyle(img.parentElement!).borderTopLeftRadius,
+      };
+    });
+    expect(photo).toEqual({ objectFit: 'cover', sourceRatio: 0.8, fills: true, radius: '24px' });
+    expect(await list.evaluate(element => element.scrollHeight <= element.clientHeight + 1)).toBe(true);
+    const action = await pageBox(signals.locator('.signals__action'));
+    expect(action.y).toBeGreaterThanOrEqual(listBox.y + listBox.height);
+
+    const cards = list.locator(':scope > li.signal-item');
     await expect(cards).toHaveCount(6);
+    await expect(list).toHaveCSS('border-top-width', '0px');
+    // Cards reuse the Areas card border, radius, white ground and shadow; title stays navy uppercase, description smaller graphite.
+    const areaCardShadow = await page.locator('#areas [data-area-card]').first().evaluate(element => getComputedStyle(element).boxShadow);
+    for (const card of await cards.all()) {
+      await expect(card).toHaveCSS('border-top-style', 'solid');
+      await expect(card).toHaveCSS('border-top-width', '1px');
+      await expect(card).toHaveCSS('border-top-left-radius', '24px');
+      await expect(card).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+      await expect(card).toHaveCSS('padding-top', '16px');
+      expect(await card.evaluate(element => getComputedStyle(element).boxShadow)).toBe(areaCardShadow);
+      await expect(card.locator('h3')).toHaveCSS('color', 'rgb(48, 86, 106)');
+      await expect(card.locator('h3')).toHaveCSS('font-weight', '600');
+      const description = card.locator('p');
+      await expect(description).toBeVisible();
+      await expect(description).toHaveCSS('font-size', '14px');
+      await expect(description).toHaveCSS('color', 'rgb(74, 69, 65)');
+      expect(await description.evaluate(element => element.scrollHeight <= element.clientHeight + 1)).toBe(true);
+    }
+
     const boxes = await cards.evaluateAll(elements => elements.map(element => {
       const box = element.getBoundingClientRect();
       return { x: box.x, y: box.y, width: box.width, height: box.height, bottom: box.bottom };
@@ -624,8 +811,7 @@ for (const width of [1024, 1280, 1440, 1920]) {
     for (let index = 0; index < boxes.length; index += 1) {
       expect(Math.abs(boxes[index]!.x - boxes[0]!.x)).toBeLessThan(1);
       expect(Math.abs(boxes[index]!.width - boxes[0]!.width)).toBeLessThan(1);
-      expect(boxes[index]!.height).toBeLessThanOrEqual(96);
-      if (index > 0) expect(boxes[index]!.y).toBeGreaterThanOrEqual(boxes[index - 1]!.bottom);
+      if (index > 0) expect(Math.abs(boxes[index]!.y - boxes[index - 1]!.bottom - 12)).toBeLessThanOrEqual(1);
     }
 
     for (const section of [signals, about]) {
@@ -634,14 +820,16 @@ for (const width of [1024, 1280, 1440, 1920]) {
       await expect(portrait).toBeVisible();
       await expect(portrait).toHaveCSS('object-fit', 'cover');
       await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
-      const bounds = (await portrait.boundingBox())!;
-      expect(bounds.width / bounds.height).toBeCloseTo(4 / 5, 2);
+      // The About portrait keeps its 4:5 box; the Signals frame is stretched to the card stack (checked above).
+      if (section === about) {
+        const bounds = (await portrait.boundingBox())!;
+        expect(bounds.width / bounds.height).toBeCloseTo(4 / 5, 2);
+      }
       const cta = section.getByRole('link');
       await expect(cta).toHaveAttribute('href', /^(#contato|https:\/\/wa\.me\/\d+\?text=.+)$/);
     }
 
-    await cards.first().locator('summary').click();
-    const textBlocks = page.locator('.signals h2, .signal-item summary, .signal-item[open] p, .about h2');
+    const textBlocks = page.locator('.signals h2, .signal-item__title, .signal-item p, .about h2');
     for (const block of await textBlocks.all()) {
       await expect(block).toBeVisible();
       const geometry = await block.evaluate(element => {

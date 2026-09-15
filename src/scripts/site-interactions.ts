@@ -1,29 +1,3 @@
-const setAreaExpanded = (card: HTMLElement, expanded: boolean) => {
-  const details = card.querySelector<HTMLElement>('.area-card__details')!;
-  const button = card.querySelector<HTMLButtonElement>('.card-toggle')!;
-  card.classList.toggle('is-expanded', expanded);
-  button.setAttribute('aria-expanded', String(expanded));
-  button.setAttribute('aria-label', `${expanded ? 'Voltar para' : 'Saiba mais sobre'} ${card.dataset.area}`);
-  details.hidden = !expanded;
-};
-
-document.querySelectorAll<HTMLElement>('[data-area-card]').forEach(card => {
-  const button = card.querySelector<HTMLButtonElement>('.card-toggle')!;
-  button.addEventListener('click', () => {
-    setAreaExpanded(card, button.getAttribute('aria-expanded') !== 'true');
-  });
-  card.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
-      event.preventDefault();
-      setAreaExpanded(card, false);
-      button.focus();
-    }
-  });
-  // Sem JS o verso fica visível; com JS ele nasce recolhido e o botão aparece.
-  setAreaExpanded(card, false);
-  button.hidden = false;
-});
-
 const faqDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('details[name="faq"]'));
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 

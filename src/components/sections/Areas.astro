@@ -26,22 +26,6 @@ const whatsappUrl = getWhatsAppUrl();
           <p class="area-card__category">{area.category}</p>
           <h3>{area.title}</h3>
           <p class="area-card__summary">{area.front}</p>
-          <div class="area-card__details" id={`area-${area.slug}-details`}>
-            <p class="area-card__category">NA AVALIAÇÃO</p>
-            <p>{area.back}</p>
-          </div>
-          <button
-            class="card-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls={`area-${area.slug}-details`}
-            aria-label={`Saiba mais sobre ${area.title}`}
-            hidden
-          >
-            <span class="card-toggle__open">Saiba mais</span>
-            <span class="card-toggle__close">Voltar</span>
-            <span aria-hidden="true">↗</span>
-          </button>
         </li>
       ))}
     </ul>

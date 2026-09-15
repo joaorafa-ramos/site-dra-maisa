@@ -58,43 +58,22 @@ test('WhatsApp CTAs dispatch the vendor-neutral conversion event with their orig
   expect(event).toEqual({ cta_location: 'hero', cta_label: 'Conversar pelo WhatsApp' });
 });
 
-test('area cards expand their evaluation note inline and support Enter, click and Escape', async ({ page }) => {
+test('area cards show only icon, category, title and summary with no expand affordance', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('#areas [data-area-card]');
   await expect(cards).toHaveCount(6);
-  await expect(page.locator('#areas [data-flip-card], #areas .card-front, #areas .card-back')).toHaveCount(0);
+  await expect(page.locator('#areas [data-flip-card], #areas .card-front, #areas .card-back, #areas .card-toggle, #areas .area-card__details')).toHaveCount(0);
   for (const card of await cards.all()) {
     const area = (await card.getAttribute('data-area'))!;
-    const button = card.getByRole('button');
-    const details = card.locator('.area-card__details');
-    const backCopy = (await details.locator('p').last().innerText()).trim();
     await expect(card.locator('.area-card__icon svg')).toHaveCount(1);
     await expect(card.locator('h3')).toHaveText(area);
-    await expect(button).toHaveAccessibleName(`Saiba mais sobre ${area}`);
-    await expect(button).toHaveAttribute('aria-expanded', 'false');
-    await expect(details).toBeHidden();
-    expect(await card.ariaSnapshot()).not.toContain(backCopy);
-    await button.focus();
-    await page.keyboard.press('Enter');
-    await expect(button).toHaveAttribute('aria-expanded', 'true');
-    await expect(button).toHaveAccessibleName(`Voltar para ${area}`);
-    await expect(details).toBeVisible();
-    await expect(details.getByText('NA AVALIAÇÃO', { exact: true })).toBeVisible();
-    expect(await card.ariaSnapshot()).toContain(backCopy);
-    await page.keyboard.press('Escape');
-    await expect(button).toHaveAttribute('aria-expanded', 'false');
-    await expect(button).toBeFocused();
-    await expect(details).toBeHidden();
-    await button.click();
-    await expect(button).toHaveAttribute('aria-expanded', 'true');
-    await button.click();
-    await expect(button).toHaveAttribute('aria-expanded', 'false');
-    await card.hover();
-    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await expect(card.locator('.area-card__summary')).toBeVisible();
+    await expect(card.getByRole('button')).toHaveCount(0);
+    await expect(card.getByText('NA AVALIAÇÃO')).toHaveCount(0);
   }
 });
 
-test('area cards never rotate and keep both texts readable without JavaScript', async ({ browser }) => {
+test('area cards render identically without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto('/');
@@ -102,8 +81,6 @@ test('area cards never rotate and keep both texts readable without JavaScript', 
   await expect(cards).toHaveCount(6);
   for (const card of await cards.all()) {
     await expect(card.locator('.area-card__summary')).toBeVisible();
-    await expect(card.locator('.area-card__details')).toBeVisible();
-    await expect(card.locator('.area-card__details p').last()).toBeVisible();
     await expect(card.getByRole('button')).toHaveCount(0);
     await expect(card).toHaveCSS('transform', 'none');
   }
@@ -143,20 +120,18 @@ for (const width of [1024, 1440, 1920]) {
     }
     expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.bottom);
     for (const card of await cards.all()) {
-      expect((await card.getByRole('button').boundingBox())!.height).toBeGreaterThanOrEqual(48);
       expect(await card.locator('.area-card__summary').evaluate(element => element.scrollHeight <= element.clientHeight + 1 && element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   });
 }
 
-// Catches a regression back to flip visuals or a hover without the reference's lift/bar/fill response.
-test('area cards use the centered reference format and lift with a top bar and filled button on hover', async ({ page }) => {
+// Catches a regression back to flip visuals or a hover without the reference's lift/bar response.
+test('area cards use the centered reference format and lift with a top bar on hover', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const card = page.locator('#areas [data-area-card]').first();
   const bar = card.locator('.area-card__bar');
-  const button = card.getByRole('button');
   // The page uses `scroll-behavior: smooth` (global.css) and the reveal system animates each card's
   // entrance transform over 460ms; either one still running when hover() fires can shift the card
   // out from under the cursor and immediately drop :hover. Emulate reduced motion (which the site's
@@ -176,17 +151,12 @@ test('area cards use the centered reference format and lift with a top bar and f
   await expect(card.locator('h3')).toHaveCSS('font-size', '28px');
   await expect(card.locator('.area-card__summary')).toHaveCSS('font-size', '16px');
   await expect(bar).toHaveCSS('opacity', '0');
-  await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect(button).toHaveCSS('border-top-left-radius', '999px');
   const restingShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
 
   await card.hover();
   await expect(bar).toHaveCSS('opacity', '1');
   await expect.poll(() => card.evaluate(element => getComputedStyle(element).transform)).toMatch(/matrix\(1, 0, 0, 1, 0, -[3-6]\)/);
   await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(restingShadow);
-  await button.hover();
-  await expect(button).toHaveCSS('background-color', 'rgb(48, 86, 106)');
-  await expect(button).toHaveCSS('color', 'rgb(247, 242, 238)');
 });
 
 test('renders the desktop page without horizontal overflow', async ({ page }) => {

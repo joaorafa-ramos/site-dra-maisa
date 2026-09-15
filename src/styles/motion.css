@@ -146,13 +146,8 @@
 
 .area-card__icon,
 .area-card h3,
-.area-card__summary,
-.card-toggle {
+.area-card__summary {
   transition: transform 400ms var(--ease-calm), color 300ms var(--ease-calm), background-color 300ms var(--ease-calm), border-color 300ms var(--ease-calm);
-}
-
-.card-toggle::before {
-  transition: width 300ms var(--ease-calm);
 }
 
 .area-card:hover,
@@ -178,17 +173,6 @@
 
 .area-card:hover .area-card__summary {
   transform: translateY(-2px);
-}
-
-.card-toggle:hover,
-.card-toggle:focus-visible {
-  background-color: var(--color-navy);
-  color: var(--color-cream);
-}
-
-.card-toggle:hover::before,
-.card-toggle:focus-visible::before {
-  width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,8 +202,7 @@
   .area-card,
   .area-card__icon,
   .area-card h3,
-  .area-card__summary,
-  .card-toggle {
+  .area-card__summary {
     transform: none !important;
   }
 
